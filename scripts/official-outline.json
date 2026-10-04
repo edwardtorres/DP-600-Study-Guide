@@ -1,0 +1,250 @@
+{
+  "source": "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/dp-600",
+  "exam": "DP-600: Implementing Analytics Solutions Using Microsoft Fabric",
+  "certification": "Microsoft Certified: Fabric Analytics Engineer Associate",
+  "version": "Skills measured as of October 19, 2026",
+  "pageLastUpdated": "2026-09-18",
+  "retrievedOn": "2026-10-04",
+  "note": "Recorded verbatim from the study guide. Domain order matches the page. Do not edit by hand except to re-sync with the live page.",
+  "domains": [
+    {
+      "id": "MAINTAIN",
+      "title": "Maintain a data analytics solution",
+      "weightText": "25–30%",
+      "weight": {
+        "min": 25,
+        "max": 30
+      },
+      "sections": [
+        {
+          "id": "M1",
+          "title": "Implement security and governance",
+          "bullets": [
+            {
+              "id": "M1.1",
+              "text": "Implement workspace-level access controls"
+            },
+            {
+              "id": "M1.2",
+              "text": "Implement item-level access controls"
+            },
+            {
+              "id": "M1.3",
+              "text": "Implement row-level, column-level, object-level, and file-level access control"
+            },
+            {
+              "id": "M1.4",
+              "text": "Apply sensitivity labels to items"
+            },
+            {
+              "id": "M1.5",
+              "text": "Endorse items"
+            }
+          ]
+        },
+        {
+          "id": "M2",
+          "title": "Maintain the analytics development lifecycle",
+          "bullets": [
+            {
+              "id": "M2.1",
+              "text": "Configure version control for a workspace"
+            },
+            {
+              "id": "M2.2",
+              "text": "Create and manage a Power BI Desktop project (.pbip)"
+            },
+            {
+              "id": "M2.3",
+              "text": "Create and configure deployment pipelines"
+            },
+            {
+              "id": "M2.4",
+              "text": "Perform impact analysis of downstream dependencies from lakehouses, warehouses, dataflows, and semantic models"
+            },
+            {
+              "id": "M2.5",
+              "text": "Deploy and manage semantic models by using the XMLA endpoint"
+            },
+            {
+              "id": "M2.6",
+              "text": "Create and update reusable assets, including Power BI template (.pbit) files, Power BI data source (.pbids) files, and shared semantic models"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PREPARE",
+      "title": "Prepare data",
+      "weightText": "45–50%",
+      "weight": {
+        "min": 45,
+        "max": 50
+      },
+      "sections": [
+        {
+          "id": "P1",
+          "title": "Get data",
+          "bullets": [
+            {
+              "id": "P1.1",
+              "text": "Create a data connection"
+            },
+            {
+              "id": "P1.2",
+              "text": "Discover data by using OneLake catalog and Real-Time hub"
+            },
+            {
+              "id": "P1.3",
+              "text": "Ingest or access data as needed"
+            },
+            {
+              "id": "P1.4",
+              "text": "Choose between different data stores"
+            },
+            {
+              "id": "P1.5",
+              "text": "Implement OneLake integration for Eventhouse and semantic models"
+            }
+          ]
+        },
+        {
+          "id": "P2",
+          "title": "Transform data",
+          "bullets": [
+            {
+              "id": "P2.1",
+              "text": "Create views, functions, and stored procedures"
+            },
+            {
+              "id": "P2.2",
+              "text": "Enrich data by adding new columns or tables"
+            },
+            {
+              "id": "P2.3",
+              "text": "Implement a star schema for a lakehouse or warehouse"
+            },
+            {
+              "id": "P2.4",
+              "text": "Denormalize data"
+            },
+            {
+              "id": "P2.5",
+              "text": "Aggregate data"
+            },
+            {
+              "id": "P2.6",
+              "text": "Merge or join data"
+            },
+            {
+              "id": "P2.7",
+              "text": "Identify and resolve duplicate data, missing data, or null values"
+            },
+            {
+              "id": "P2.8",
+              "text": "Convert column data types"
+            },
+            {
+              "id": "P2.9",
+              "text": "Filter data"
+            }
+          ]
+        },
+        {
+          "id": "P3",
+          "title": "Query and analyze data",
+          "bullets": [
+            {
+              "id": "P3.1",
+              "text": "Select, filter, and aggregate data by using the Visual query editor"
+            },
+            {
+              "id": "P3.2",
+              "text": "Select, filter, and aggregate data by using SQL"
+            },
+            {
+              "id": "P3.3",
+              "text": "Select, filter, and aggregate data by using KQL"
+            },
+            {
+              "id": "P3.4",
+              "text": "Select, filter, and aggregate data by using DAX"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "SEMANTIC",
+      "title": "Implement and manage semantic models",
+      "weightText": "25–30%",
+      "weight": {
+        "min": 25,
+        "max": 30
+      },
+      "sections": [
+        {
+          "id": "S1",
+          "title": "Design and build semantic models",
+          "bullets": [
+            {
+              "id": "S1.1",
+              "text": "Choose a storage mode"
+            },
+            {
+              "id": "S1.2",
+              "text": "Implement a star schema for a semantic model"
+            },
+            {
+              "id": "S1.3",
+              "text": "Implement relationships, such as bridge tables and many-to-many relationships"
+            },
+            {
+              "id": "S1.4",
+              "text": "Write calculations that use DAX variables and functions, such as iterators, table filtering, windowing, and information functions"
+            },
+            {
+              "id": "S1.5",
+              "text": "Implement calculation groups, dynamic format strings, and field parameters"
+            },
+            {
+              "id": "S1.6",
+              "text": "Identify use cases for and configure large semantic model storage format"
+            },
+            {
+              "id": "S1.7",
+              "text": "Design and build composite models"
+            }
+          ]
+        },
+        {
+          "id": "S2",
+          "title": "Optimize enterprise-scale semantic models",
+          "bullets": [
+            {
+              "id": "S2.1",
+              "text": "Implement performance improvements in queries and report visuals"
+            },
+            {
+              "id": "S2.2",
+              "text": "Improve DAX performance"
+            },
+            {
+              "id": "S2.3",
+              "text": "Configure Direct Lake, including default fallback and refresh behavior"
+            },
+            {
+              "id": "S2.4",
+              "text": "Choose between Direct Lake on OneLake and Direct Lake on SQL analytics endpoint"
+            },
+            {
+              "id": "S2.5",
+              "text": "Implement incremental refresh for semantic models"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
