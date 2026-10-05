@@ -219,7 +219,7 @@ export const caseQuestions: Question[] = [
     sources: [S.pipelinesProcess, S.pipelinesRules],
     statements: [
       { id: 's1', text: 'Add a datasource rule in the Sales-Prod stage that points the model to the Prod gold warehouse, then deploy again.', answer: true, explain: 'Yes. Direct Lake models don’t autobind to the target stage’s items; datasource rules fix the binding.' },
-      { id: 's2', text: 'Refresh the semantic model in Sales-Prod.', answer: false, explain: 'No. Refresh reframes against the lakehouse the model is bound to, which is still Test.' },
+      { id: 's2', text: 'Refresh the semantic model in Sales-Prod.', answer: false, explain: 'No. Refresh reframes against the source the model is bound to, which is still in Test.' },
       { id: 's3', text: 'Redeploy only the reports to Sales-Prod.', answer: false, explain: 'No. Reports autobind to the Prod model; the model itself is still bound to Test.' },
     ],
   },
