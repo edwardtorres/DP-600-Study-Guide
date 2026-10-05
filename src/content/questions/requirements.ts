@@ -8,7 +8,7 @@ export const MAX_LONGEST_CORRECT_SHARE = 0.4
 export const NEAR_DUPLICATE_JACCARD = 0.8
 
 /** Floors whose questions aren't written yet. Must be empty when Step 3 ends. */
-export const QUESTIONS_PENDING: FloorId[] = ['prepare', 'semantic', 'maintain']
+export const QUESTIONS_PENDING: FloorId[] = ['semantic', 'maintain']
 /** Case studies are written last; while true, the domain-share rule is skipped. */
 export const CASES_PENDING = true
 

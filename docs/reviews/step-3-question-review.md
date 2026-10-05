@@ -33,3 +33,36 @@ Reviewer flags (keys unchanged):
 | FO-11 s1 | **Learn contradicts itself.** The trial page says F4 or F64; the licenses page lists the trial only as 64 CUs. | Statement replaced with a different, unambiguous trial fact. The contradiction is added to Mill Lease's needs-verification list (Step 8). |
 
 **Dropped: none.**
+
+## Spinning Floor & Dye House (161 questions)
+
+**Blind pass: 161/161 match.**
+
+Reviewer flags from the blind pass (keys unchanged):
+
+| Question | Flag | Resolution |
+|---|---|---|
+| KT-13 | The stem said "August 1 to 30 inclusive", but `datetime(2007-08-30)` stops at midnight. | Stem and option now use Learn's exact range: `datetime(2007-08-01 00:00:00) .. datetime(2007-08-30 23:59:59)`. |
+| TI-13 s1 | Tables shortcuts are top-level only, but in a schema-enabled lakehouse a shortcut can point at a schema. | Stem now says the lakehouse doesn't use schemas. |
+| CM-20 | Distractor `TOP (1) WITH TIES` ordered by `ROW_NUMBER()` could also return one row per color. | Replaced with `GROUP BY Color, Product`. |
+| KT-12 | `dcount()` returns an estimate, not an exact `COUNT(DISTINCT)`. | Stem now says an estimate is acceptable. The dcount reference page was added as a source ("Calculates an estimate"). |
+| TF-11 | The tutorial uses a temporary view with GROUP BY, then `CREATE OR REPLACE TABLE … AS SELECT`. | Option text now describes both steps. |
+| DV-09 | Questioned the `` delta.`Tables/...` `` path syntax. | No syntax change: it is the tutorial's exact syntax. The stem now says the lakehouse has schemas enabled. |
+| KT-10 s2 | "Aggregations ignore nulls" was too broad, because `count()` counts nulls. | Statement now names sum() and avg(). The explanation notes that count() is the exception. |
+| BC-05, SS-06, TF-04, VS-07 | The correct option was noticeably the longest. | Distractors lengthened. |
+| BC-04, TF-06, CM-17, BC-06 | Unsure of the source. | Confirmed in the source pass (below). |
+
+**Source pass: 158 supported, 3 partly supported, 0 not supported, 0 unreachable** (58 pages fetched).
+
+| Question | Finding | Resolution |
+|---|---|---|
+| TI-11 | A distractor's explanation claimed "COPY INTO is recommended for new ingestion code", which isn't on the page. Learn says BULK INSERT maps to COPY INTO behavior, so it is arguably high-throughput too. | BULK INSERT distractor replaced with "Batches of INSERT … VALUES statements". |
+| SS-06 | A distractor's explanation described the database-level option, but the stem is about a table. | Explanation now quotes Learn: "Turning on at the table level makes only that table and its data available in OneLake." |
+| WP-12 | "NOT NULL dimension keys" is on the fact-tables page, not the cited load-tables page. | Fact-tables page added as a source. |
+
+**Found while writing (not reviewer items):**
+
+- The DAX best-practice page "Avoid converting BLANKs to values" (`dax/best-practices/dax-avoid-converting-blank-values`) returns 404. No question cites it, and the Loom Hall draft that relied on it was replaced.
+- The SQL analytics endpoint page now says "Scalar UDFs are supported when inlineable". The Fabric `CREATE FUNCTION` page says "Scalar UDFs … are preview features". This bears on needs-verification item 5 (Recipe Book). The item stays queued for Step 8, and no question uses scalar UDFs.
+
+**Dropped: none.**
