@@ -6,7 +6,9 @@ import { Header } from './components/Header'
 import { Legend } from './components/Legend'
 import { MachineDetail } from './components/MachineDetail'
 import { MillMap } from './components/MillMap'
+import { PuzzlePanel } from './components/puzzles/PuzzlePanel'
 import { Settings } from './components/Settings'
+import { allPuzzles, puzzleById, puzzlesFor } from './content/puzzles'
 import { allQuestions } from './content/questions'
 import type { Question } from './content/questions/types'
 import { edges } from './data/edges'
@@ -15,13 +17,23 @@ import { millGraph } from './data/mill'
 import { outline } from './data/outline'
 import { drawFor, machinePool, placementPool } from './game/draw'
 import { badges as computeBadges, levelFor, readiness as computeReadiness, streak as computeStreak, totalXp } from './game/progress'
+import { recordPuzzle } from './game/puzzles'
 import { makeRandom } from './game/random'
 import { newAttemptSeed, shuffleForAttempt } from './game/shuffle'
 import { allStates, beginPlacement, canAttempt, isPlaced, openNotes, recordAttempt } from './game/state'
+import { shuffleForPlay } from './puzzles/play'
+import type { PuzzleInstance } from './puzzles/types'
 import { newSave, type AttemptKind, type Save } from './save/schema'
 import { backupSave, loadSave, writeSave, type LoadResult } from './save/storage'
 
 const questionsById = new Map(allQuestions.map((q) => [q.id, q]))
+/** Everything the answer log can refer to: questions and puzzles (both carry difficulty and bullets). */
+const scorables = new Map<string, { difficulty: 1 | 2 | 3; bulletIds: string[] }>([...questionsById, ...allPuzzles.map((p) => [p.meta.id, p.meta] as const)])
+
+interface Play {
+  key: number
+  instance: PuzzleInstance
+}
 
 interface Attempt {
   key: number
@@ -39,6 +51,7 @@ export default function App() {
   const [focusPairId, setFocusPairId] = useState<string | null>(null)
   const [dialog, setDialog] = useState<'glossary' | 'settings' | 'badges' | null>(null)
   const [attempt, setAttempt] = useState<Attempt | null>(null)
+  const [play, setPlay] = useState<Play | null>(null)
   const [notice, setNotice] = useState(
     initial.status === 'recovered' ? 'Your saved progress could not be read, so a new mill was opened. The old save was kept as a backup.' : null,
   )
@@ -57,19 +70,19 @@ export default function App() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== 'Escape' || attempt) return
+      if (e.key !== 'Escape' || attempt || play) return
       if (dialog) setDialog(null)
       else select(null)
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [dialog, attempt, select])
+  }, [dialog, attempt, play, select])
 
   const states = useMemo(() => allStates(millGraph, save), [save])
   const placedIds = useMemo(() => new Set(machines.filter((m) => isPlaced(save, m.id)).map((m) => m.id)), [save])
-  const level = useMemo(() => levelFor(totalXp(save.answers, questionsById)), [save.answers])
+  const level = useMemo(() => levelFor(totalXp(save.answers, scorables)), [save.answers])
   const streak = useMemo(() => computeStreak(save.answers), [save.answers])
-  const readiness = useMemo(() => computeReadiness(save.answers, questionsById, outline), [save.answers])
+  const readiness = useMemo(() => computeReadiness(save.answers, scorables, outline), [save.answers])
   const badgeList = useMemo(() => computeBadges(save, machines, millGraph), [save])
 
   const startAttempt = useCallback(
@@ -106,6 +119,25 @@ export default function App() {
     },
     [attempt],
   )
+
+  const startPuzzle = useCallback(
+    (puzzleId: string) => {
+      const puzzle = puzzleById.get(puzzleId)
+      if (!puzzle) return
+      const seed = rand === Math.random ? newAttemptSeed() : Math.floor(rand() * 0xffffffff)
+      setPlay((p) => ({ key: (p?.key ?? 0) + 1, instance: shuffleForPlay(puzzle.build(seed), seed) }))
+    },
+    [rand],
+  )
+
+  const bench = useMemo(() => {
+    if (!selectedId) return []
+    return puzzlesFor(selectedId).map((p) => {
+      const plays = save.answers.filter(([id, , , code]) => id === p.meta.id && code === 'z')
+      const last = plays.at(-1)
+      return { meta: p.meta, plays: plays.length, ...(last ? { last: last[1] === 1 } : {}) }
+    })
+  }, [selectedId, save.answers])
 
   const selected = selectedId ? machineById.get(selectedId) : undefined
   const attemptMachine = attempt ? machineById.get(attempt.machineId) : undefined
@@ -157,6 +189,10 @@ export default function App() {
           }}
           poolSizes={{ inspection: machinePool(selected.id, allQuestions).length, placement: placementPool(selected.id, allQuestions).length }}
           focusPairId={focusPairId}
+          bench={bench}
+          onPuzzle={(id) => {
+            if ((states.get(selected.id) ?? 'locked') !== 'locked') startPuzzle(id)
+          }}
           onAttempt={(kind) => startAttempt(selected.id, kind)}
           onSelect={(id) => select(id)}
           onClose={() => select(null)}
@@ -177,6 +213,23 @@ export default function App() {
           onClose={() => setAttempt(null)}
           onOpenPair={(machineId, pairId) => {
             setAttempt(null)
+            select(machineId, pairId)
+          }}
+        />
+      )}
+      {play && (
+        <PuzzlePanel
+          key={play.key}
+          instance={play.instance}
+          onSubmit={(correct) => {
+            const next = recordPuzzle(saveRef.current, play.instance.meta.id, correct)
+            saveRef.current = next
+            setSave(next)
+          }}
+          onReplay={() => startPuzzle(play.instance.meta.id)}
+          onClose={() => setPlay(null)}
+          onOpenPair={(machineId, pairId) => {
+            setPlay(null)
             select(machineId, pairId)
           }}
         />

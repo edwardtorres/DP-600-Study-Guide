@@ -9,6 +9,7 @@ import { CloseIcon } from './icons'
 import { stateBadge, stateLabel } from './stateStyles'
 import { NotesView } from './NotesView'
 import { Tags } from './Tags'
+import { PuzzleBench, type BenchItem } from './puzzles/PuzzleBench'
 
 interface Props {
   machine: Machine
@@ -22,6 +23,9 @@ interface Props {
   /** Lowest-level counts used in the action text. */
   poolSizes: { inspection: number; placement: number }
   focusPairId?: string | null
+  /** Puzzles on this machine's bench. */
+  bench?: BenchItem[]
+  onPuzzle?: (puzzleId: string) => void
   onAttempt: (kind: AttemptKind) => void
   onSelect: (id: string) => void
   onClose: () => void
@@ -42,7 +46,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   )
 }
 
-export function MachineDetail({ machine, state, graph, edges, machinesById, states, placed, availability, poolSizes, focusPairId, onAttempt, onSelect, onClose }: Props) {
+export function MachineDetail({ machine, state, graph, edges, machinesById, states, placed, availability, poolSizes, focusPairId, bench = [], onPuzzle, onAttempt, onSelect, onClose }: Props) {
   const heading = useRef<HTMLHeadingElement>(null)
   const panel = useRef<HTMLElement>(null)
   useEffect(() => {
@@ -150,6 +154,8 @@ export function MachineDetail({ machine, state, graph, edges, machinesById, stat
           </>
         )}
       </div>
+
+      <PuzzleBench items={bench} open={state !== 'locked'} onPlay={(id) => onPuzzle?.(id)} />
 
       {machine.bulletIds.length > 0 ? (
         <Section title="Exam skills (official outline)">
