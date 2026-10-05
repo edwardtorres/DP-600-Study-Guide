@@ -32,7 +32,7 @@ export const CODE_REQUIRED = [
 ]
 
 /**
- * Floors whose notes are not written yet. Step 2 writes one floor per commit
- * and shrinks this list; it must be empty when Step 2 ends.
+ * Floors whose notes are not written yet. Kept (empty) so a future re-sync of
+ * the outline can stage new notes floor by floor; a test asserts it is empty.
  */
-export const NOTES_PENDING: FloorId[] = ['maintain']
+export const NOTES_PENDING: FloorId[] = []

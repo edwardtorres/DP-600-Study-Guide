@@ -73,3 +73,8 @@ describe('notes', () => {
     expect(Object.keys(REQUIRED_PAIRS)).toHaveLength(9)
   })
 })
+
+it('has no floors pending: every machine has notes (strict mode)', () => {
+  expect(NOTES_PENDING).toEqual([])
+  expect(allNotes).toHaveLength(machines.length)
+})
