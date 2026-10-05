@@ -66,3 +66,30 @@ Reviewer flags from the blind pass (keys unchanged):
 - The SQL analytics endpoint page now says "Scalar UDFs are supported when inlineable". The Fabric `CREATE FUNCTION` page says "Scalar UDFs … are preview features". This bears on needs-verification item 5 (Recipe Book). The item stays queued for Step 8, and no question uses scalar UDFs.
 
 **Dropped: none.**
+
+## Loom Hall (94 written, 93 kept)
+
+**Blind pass: 94/94 match.**
+
+Reviewer flags from the blind pass:
+
+| Question | Flag | Resolution |
+|---|---|---|
+| DLS-05 | **Learn contradicts itself.** How Direct Lake works says one table over a guardrail "prevents Direct Lake mode for the entire model". The overview says the other guardrails "are evaluated per query". | **Dropped.** The key depends on an unresolved conflict. |
+| DLS-13 | The Snowflake option rests only on the creation-experience support table, so the key is fragile. | Replaced with "Use a SQL view in the SQL analytics endpoint as a model table" (only on SQL can read SQL views by falling back). |
+| BW-10 | The key said to convert "the parameters", which contradicted the stem's "must stay Date/Time". | Key reworded: convert their values in the filter step. |
+| WB-05 | The key needed to make clear the Pro workspace isn't on Reserved Capacity for Pro Workspaces. | Key now states it. |
+| WF-08 | "Hide the bridging table" could happen at any point. | Step removed; the order now has 3 steps. |
+| PC-09 s3 | Awkward wording about EARLIER. | Reworded to Learn's point: variables remove the need for EARLIER/EARLIEST. |
+
+**Source pass: 88 supported, 5 partly supported, 0 not supported, 0 unreachable** (35 pages fetched).
+
+| Question | Finding | Resolution |
+|---|---|---|
+| SG-11 | No source says "compare timings" in step i3. | Step reworded to "run the query to check it". |
+| PC-08 | The filter-functions page also lists OFFSET, so the "filter function" label fit two prompts. | Labels now use the outline's own terms: "Windowing" and "Table filtering (CALCULATE filter modifier)". |
+| DL-03 | Neither cited page uses the term "hybrid table". | The storage-modes page ("The easiest way to create a hybrid table…") added as a source. Also added to BW-06. |
+| DLS-12 | The "recommended for new models" sentence is on How Direct Lake works, not the overview. | How Direct Lake works added as a source. |
+| BW-02 | A distractor explanation ("keeps no rows") was wrong. | Rewritten: it drops the start boundary and loads rows after RangeEnd. |
+
+**Dropped: DLS-05** (Learn contradiction, see above).
