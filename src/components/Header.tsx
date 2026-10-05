@@ -11,6 +11,7 @@ interface Props {
   readiness: Readiness
   badgesEarned: number
   onOpenGlossary: () => void
+  onOpenLabs: () => void
   onOpenBadges: () => void
   onOpenSettings: () => void
 }
@@ -64,13 +65,20 @@ function Stats({ level, streak, readiness, badgesEarned, onOpenBadges }: Pick<Pr
   )
 }
 
-export function Header({ machines, states, level, streak, readiness, badgesEarned, onOpenGlossary, onOpenBadges, onOpenSettings }: Props) {
+export function Header({ machines, states, level, streak, readiness, badgesEarned, onOpenGlossary, onOpenLabs, onOpenBadges, onOpenSettings }: Props) {
   return (
     <header className="mb-5">
       <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brass-400">DP-600 · Fabric Analytics Engineer</p>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <h1 className="font-display text-3xl font-bold text-mill-50 sm:text-4xl">Fabric Mill</h1>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={onOpenLabs}
+            className="rounded-lg border border-indigo-thread/70 px-3 py-1.5 text-sm font-medium text-indigo-200 hover:bg-indigo-thread/15"
+          >
+            Labs
+          </button>
           <button
             type="button"
             onClick={onOpenGlossary}

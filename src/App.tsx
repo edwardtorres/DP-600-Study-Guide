@@ -7,6 +7,10 @@ import { Legend } from './components/Legend'
 import { MachineDetail } from './components/MachineDetail'
 import { MillMap } from './components/MillMap'
 import { PuzzlePanel } from './components/puzzles/PuzzlePanel'
+import { LabsPage } from './components/labs/LabsPage'
+import { allLabs, labById, labsForMachine } from './content/labs'
+import { completeLab, drawDebrief, exportLabNotes, labXp, recordDebrief, setProblem, setStepDone, setTrialStart } from './game/labs'
+import { dayKey } from './game/time'
 import { Settings } from './components/Settings'
 import { allPuzzles, puzzleById, puzzlesFor } from './content/puzzles'
 import { allQuestions } from './content/questions'
@@ -35,6 +39,12 @@ interface Play {
   instance: PuzzleInstance
 }
 
+interface Debrief {
+  key: number
+  labId: string
+  questions: Question[]
+}
+
 interface Attempt {
   key: number
   machineId: string
@@ -49,7 +59,10 @@ export default function App() {
   const [rand] = useState(() => makeRandom())
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [focusPairId, setFocusPairId] = useState<string | null>(null)
-  const [dialog, setDialog] = useState<'glossary' | 'settings' | 'badges' | null>(null)
+  const [dialog, setDialog] = useState<'glossary' | 'settings' | 'badges' | 'labs' | null>(null)
+  const [labId, setLabId] = useState<string | null>(null)
+  const [today, setToday] = useState(() => dayKey(new Date()))
+  const [debrief, setDebrief] = useState<Debrief | null>(null)
   const [attempt, setAttempt] = useState<Attempt | null>(null)
   const [play, setPlay] = useState<Play | null>(null)
   const [notice, setNotice] = useState(
@@ -70,17 +83,18 @@ export default function App() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== 'Escape' || attempt || play) return
+      if (e.key !== 'Escape' || attempt || play || debrief) return
       if (dialog) setDialog(null)
       else select(null)
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [dialog, attempt, play, select])
+  }, [dialog, attempt, play, debrief, select])
 
   const states = useMemo(() => allStates(millGraph, save), [save])
   const placedIds = useMemo(() => new Set(machines.filter((m) => isPlaced(save, m.id)).map((m) => m.id)), [save])
-  const level = useMemo(() => levelFor(totalXp(save.answers, scorables)), [save.answers])
+  // Lab completions add a fixed amount of XP each (self-reported, never certifying).
+  const level = useMemo(() => levelFor(totalXp(save.answers, scorables) + labXp(save)), [save])
   const streak = useMemo(() => computeStreak(save.answers), [save.answers])
   const readiness = useMemo(() => computeReadiness(save.answers, scorables, outline), [save.answers])
   const badgeList = useMemo(() => computeBadges(save, machines, millGraph), [save])
@@ -139,8 +153,45 @@ export default function App() {
     })
   }, [selectedId, save.answers])
 
+  const update = useCallback((change: (s: Save) => Save) => {
+    const next = change(saveRef.current)
+    saveRef.current = next
+    setSave(next)
+  }, [])
+
+  const openLab = useCallback((id: string | null) => {
+    setToday(dayKey(new Date()))
+    setLabId(id)
+    setDialog('labs')
+  }, [])
+
+  const startDebrief = useCallback(
+    (id: string) => {
+      const lab = labById.get(id)
+      if (!lab || !saveRef.current.labs[id]?.completedAt) return
+      const seed = rand === Math.random ? newAttemptSeed() : Math.floor(rand() * 0xffffffff)
+      const drawn = drawDebrief(lab, allQuestions, rand)
+      setDebrief((d) => ({ key: (d?.key ?? 0) + 1, labId: id, questions: drawn.map((q) => shuffleForAttempt(q, seed)) }))
+    },
+    [rand],
+  )
+
+  const exportNotes = useCallback(() => {
+    const now = new Date()
+    const blob = new Blob([exportLabNotes(saveRef.current, allLabs, now)], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `fabric-mill-lab-notes-${dayKey(now)}.txt`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    setTimeout(() => URL.revokeObjectURL(url), 1000)
+  }, [])
+
   const selected = selectedId ? machineById.get(selectedId) : undefined
   const attemptMachine = attempt ? machineById.get(attempt.machineId) : undefined
+  const debriefLab = debrief ? labById.get(debrief.labId) : undefined
 
   return (
     <div className={`min-h-screen px-4 py-6 sm:px-8 ${selected ? 'md:pr-[472px] lg:pr-[592px]' : ''}`}>
@@ -160,6 +211,7 @@ export default function App() {
         readiness={readiness}
         badgesEarned={badgeList.filter((b) => b.earnedAt).length}
         onOpenGlossary={() => setDialog('glossary')}
+        onOpenLabs={() => openLab(null)}
         onOpenBadges={() => setDialog('badges')}
         onOpenSettings={() => setDialog('settings')}
       />
@@ -193,6 +245,9 @@ export default function App() {
           onPuzzle={(id) => {
             if ((states.get(selected.id) ?? 'locked') !== 'locked') startPuzzle(id)
           }}
+          labs={labsForMachine(selected.id)}
+          labProgress={save.labs}
+          onOpenLab={(id) => openLab(id)}
           onAttempt={(kind) => startAttempt(selected.id, kind)}
           onSelect={(id) => select(id)}
           onClose={() => select(null)}
@@ -230,6 +285,55 @@ export default function App() {
           onClose={() => setPlay(null)}
           onOpenPair={(machineId, pairId) => {
             setPlay(null)
+            select(machineId, pairId)
+          }}
+        />
+      )}
+      {dialog === 'labs' && (
+        <LabsPage
+          labs={allLabs}
+          save={save}
+          today={today}
+          machinesById={machineById}
+          labId={labId}
+          onOpenLab={setLabId}
+          onTrialStart={(day) => update((s) => setTrialStart(s, day))}
+          onToggleStep={(lab, step, done) => update((s) => setStepDone(s, lab, step, done))}
+          onProblem={(lab, step, text) => update((s) => setProblem(s, lab, step, text))}
+          onComplete={(id) => {
+            const lab = labById.get(id)
+            if (!lab) return
+            const r = completeLab(saveRef.current, lab)
+            if (r.ok) update(() => r.save)
+          }}
+          onDebrief={startDebrief}
+          onExport={exportNotes}
+          onOpenPair={(machineId, pairId) => {
+            setDialog(null)
+            select(machineId, pairId)
+          }}
+          onOpenMachine={(id) => {
+            setDialog(null)
+            select(id)
+          }}
+          onClose={() => setDialog(null)}
+        />
+      )}
+      {debrief && debriefLab && (
+        <AttemptPanel
+          key={`debrief-${debrief.key}`}
+          machine={machineById.get(debriefLab.machineIds[0]!)!}
+          kind="debrief"
+          heading={`Lab ${debriefLab.order}: ${debriefLab.title}`}
+          questions={debrief.questions}
+          onSubmit={(correct) => {
+            update((s) => recordDebrief(s, debrief.questions.map((q) => q.id), correct))
+            return correct.every(Boolean) ? 'passed' : 'failed'
+          }}
+          onClose={() => setDebrief(null)}
+          onOpenPair={(machineId, pairId) => {
+            setDebrief(null)
+            setDialog(null)
             select(machineId, pairId)
           }}
         />

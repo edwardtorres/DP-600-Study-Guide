@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import type { Graph } from '../data/graph'
 import { notesByMachine } from '../content/notes'
 import { findBullet } from '../data/outline'
@@ -10,6 +10,9 @@ import { stateBadge, stateLabel } from './stateStyles'
 import { NotesView } from './NotesView'
 import { Tags } from './Tags'
 import { PuzzleBench, type BenchItem } from './puzzles/PuzzleBench'
+import type { Lab } from '../content/labs/types'
+import type { LabProgress } from '../save/schema'
+import { Workshop } from './labs/Workshop'
 
 interface Props {
   machine: Machine
@@ -26,6 +29,10 @@ interface Props {
   /** Puzzles on this machine's bench. */
   bench?: BenchItem[]
   onPuzzle?: (puzzleId: string) => void
+  /** Hands-on labs that list this machine (Workshop tab). */
+  labs?: Lab[]
+  labProgress?: Record<string, LabProgress>
+  onOpenLab?: (labId: string) => void
   onAttempt: (kind: AttemptKind) => void
   onSelect: (id: string) => void
   onClose: () => void
@@ -46,8 +53,13 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   )
 }
 
-export function MachineDetail({ machine, state, graph, edges, machinesById, states, placed, availability, poolSizes, focusPairId, bench = [], onPuzzle, onAttempt, onSelect, onClose }: Props) {
+export function MachineDetail({ machine, state, graph, edges, machinesById, states, placed, availability, poolSizes, focusPairId, bench = [], onPuzzle, labs = [], labProgress = {}, onOpenLab, onAttempt, onSelect, onClose }: Props) {
   const heading = useRef<HTMLHeadingElement>(null)
+  // The tab resets to Machine whenever another machine (or a notes pair) is opened.
+  const tabKey = `${machine.id}|${focusPairId ?? ''}`
+  const [tabState, setTabState] = useState<{ key: string; tab: 'machine' | 'workshop' }>({ key: tabKey, tab: 'machine' })
+  const tab = tabState.key === tabKey ? tabState.tab : 'machine'
+  const setTab = (t: 'machine' | 'workshop') => setTabState({ key: tabKey, tab: t })
   const panel = useRef<HTMLElement>(null)
   useEffect(() => {
     if (focusPairId) return
@@ -101,142 +113,171 @@ export function MachineDetail({ machine, state, graph, edges, machinesById, stat
         </button>
       </div>
 
-      <div className="my-4 flex flex-col gap-2" data-testid="machine-actions">
-        {state === 'locked' && <p className="text-sm text-mill-400">Certify every prerequisite below to unlock this machine.</p>}
-        {state === 'idle' && (
-          <>
-            <button
-              type="button"
-              onClick={() => onAttempt('startup')}
-              disabled={!availability.startup.ok}
-              className="rounded-lg bg-brass-400 px-4 py-2 font-semibold text-mill-950 hover:bg-brass-300 disabled:opacity-40"
-            >
-              Start-up check (2 questions)
-            </button>
-            <p className="text-xs text-mill-400">Read the notes below, then get both start-up questions right to start the machine.</p>
-          </>
-        )}
-        {state === 'running' && (
-          <>
-            <button
-              type="button"
-              onClick={() => onAttempt('inspection')}
-              disabled={!availability.inspection.ok}
-              className="rounded-lg bg-indigo-thread px-4 py-2 font-semibold text-mill-950 hover:bg-indigo-200 disabled:opacity-40"
-            >
-              Take the inspection (5 questions, 4 to pass)
-            </button>
-            <p className="text-xs text-mill-400" data-testid="inspection-note">
-              {availability.inspection.ok
-                ? `Drawn from ${poolSizes.inspection} questions on this machine; every exam skill on it is covered.`
-                : availability.inspection.reason}
-            </p>
-          </>
-        )}
-        {state === 'certified' && (
-          <p className="text-sm text-brass-300">{placed ? 'Placed out with a perfect placement check.' : 'Certified by inspection.'}</p>
-        )}
-        {machine.pl300 && state !== 'certified' && (
-          <>
-            <button
-              type="button"
-              onClick={() => onAttempt('placement')}
-              disabled={!availability.placement.ok}
-              className="rounded-lg border border-weld/70 px-4 py-2 text-sm font-semibold text-weld hover:bg-weld/10 disabled:opacity-40"
-            >
-              PL-300 placement check (5 questions, all 5 to pass)
-            </button>
-            <p className="text-xs text-mill-400">
-              {availability.placement.ok
-                ? `Tests what DP-600 adds beyond PL-300 (${poolSizes.placement} questions in the pool). One attempt per day (it counts once you start), available even while locked.`
-                : availability.placement.reason}
-            </p>
-          </>
-        )}
+      <div role="tablist" aria-label="Machine panel" className="mt-4 flex gap-1 border-b border-mill-700">
+        {(
+          [
+            ['machine', 'Machine'],
+            ['workshop', `Workshop (${labs.length})`],
+          ] as const
+        ).map(([id, label]) => (
+          <button
+            key={id}
+            type="button"
+            role="tab"
+            id={`tab-${id}`}
+            aria-selected={tab === id}
+            aria-controls={`tabpanel-${id}`}
+            onClick={() => setTab(id)}
+            className={`-mb-px rounded-t-lg border px-3 py-1.5 text-sm ${tab === id ? 'border-mill-700 border-b-mill-900 bg-mill-900 font-semibold text-mill-50' : 'border-transparent text-mill-400 hover:text-mill-50'}`}
+          >
+            {label}
+          </button>
+        ))}
       </div>
-
-      <PuzzleBench items={bench} open={state !== 'locked'} onPlay={(id) => onPuzzle?.(id)} />
-
-      {machine.bulletIds.length > 0 ? (
-        <Section title="Exam skills (official outline)">
-          <ul className="space-y-2">
-            {machine.bulletIds.map((id) => {
-              const found = findBullet(id)
-              return (
-                <li key={id} className="text-sm text-mill-200">
-                  <span className="mr-2 font-mono text-xs text-mill-400">{id}</span>
-                  {found?.bullet.text}
-                  <span className="block text-xs text-mill-400">{found?.domain.title} ({found?.domain.weightText})</span>
-                </li>
-              )
-            })}
-          </ul>
-        </Section>
+      {tab === 'workshop' ? (
+        <div role="tabpanel" id="tabpanel-workshop" aria-labelledby="tab-workshop">
+          <Workshop labs={labs} progress={labProgress} onOpenLab={(id) => onOpenLab?.(id)} />
+        </div>
       ) : (
-        <Section title="Orientation">
-          <p className="text-sm text-mill-200">Background the DP-600 outline assumes. It is not an exam bullet itself.</p>
-        </Section>
-      )}
+        <div role="tabpanel" id="tabpanel-machine" aria-labelledby="tab-machine">
+        <div className="my-4 flex flex-col gap-2" data-testid="machine-actions">
+          {state === 'locked' && <p className="text-sm text-mill-400">Certify every prerequisite below to unlock this machine.</p>}
+          {state === 'idle' && (
+            <>
+              <button
+                type="button"
+                onClick={() => onAttempt('startup')}
+                disabled={!availability.startup.ok}
+                className="rounded-lg bg-brass-400 px-4 py-2 font-semibold text-mill-950 hover:bg-brass-300 disabled:opacity-40"
+              >
+                Start-up check (2 questions)
+              </button>
+              <p className="text-xs text-mill-400">Read the notes below, then get both start-up questions right to start the machine.</p>
+            </>
+          )}
+          {state === 'running' && (
+            <>
+              <button
+                type="button"
+                onClick={() => onAttempt('inspection')}
+                disabled={!availability.inspection.ok}
+                className="rounded-lg bg-indigo-thread px-4 py-2 font-semibold text-mill-950 hover:bg-indigo-200 disabled:opacity-40"
+              >
+                Take the inspection (5 questions, 4 to pass)
+              </button>
+              <p className="text-xs text-mill-400" data-testid="inspection-note">
+                {availability.inspection.ok
+                  ? `Drawn from ${poolSizes.inspection} questions on this machine; every exam skill on it is covered.`
+                  : availability.inspection.reason}
+              </p>
+            </>
+          )}
+          {state === 'certified' && (
+            <p className="text-sm text-brass-300">{placed ? 'Placed out with a perfect placement check.' : 'Certified by inspection.'}</p>
+          )}
+          {machine.pl300 && state !== 'certified' && (
+            <>
+              <button
+                type="button"
+                onClick={() => onAttempt('placement')}
+                disabled={!availability.placement.ok}
+                className="rounded-lg border border-weld/70 px-4 py-2 text-sm font-semibold text-weld hover:bg-weld/10 disabled:opacity-40"
+              >
+                PL-300 placement check (5 questions, all 5 to pass)
+              </button>
+              <p className="text-xs text-mill-400">
+                {availability.placement.ok
+                  ? `Tests what DP-600 adds beyond PL-300 (${poolSizes.placement} questions in the pool). One attempt per day (it counts once you start), available even while locked.`
+                  : availability.placement.reason}
+              </p>
+            </>
+          )}
+        </div>
 
-      {notesByMachine.get(machine.id) ? (
-        <NotesView notes={notesByMachine.get(machine.id)!} />
-      ) : (
-        <Section title="Notes">
-          <p className="text-sm italic text-mill-400">Notes for this floor are still being written.</p>
-        </Section>
-      )}
+        <PuzzleBench items={bench} open={state !== 'locked'} onPlay={(id) => onPuzzle?.(id)} />
 
-      {machine.pl300 && (
-        <Section title="PL-300 carryover">
-          <p className="mb-2 text-sm text-mill-200">Overlaps these PL-300 skills. Notes here will focus on what DP-600 adds.</p>
-          <ul className="list-disc space-y-1 pl-5 text-sm text-mill-200">
-            {machine.pl300.overlaps.map((o) => (
-              <li key={o}>{o}</li>
-            ))}
-          </ul>
-          {machine.pl300.caveat && <p className="mt-2 text-xs text-weld">{machine.pl300.caveat}</p>}
-        </Section>
-      )}
-
-      <Section title="Prerequisite threads">
-        {prereqs.length === 0 ? (
-          <p className="text-sm text-mill-400">None. This is where the mill starts.</p>
+        {machine.bulletIds.length > 0 ? (
+          <Section title="Exam skills (official outline)">
+            <ul className="space-y-2">
+              {machine.bulletIds.map((id) => {
+                const found = findBullet(id)
+                return (
+                  <li key={id} className="text-sm text-mill-200">
+                    <span className="mr-2 font-mono text-xs text-mill-400">{id}</span>
+                    {found?.bullet.text}
+                    <span className="block text-xs text-mill-400">{found?.domain.title} ({found?.domain.weightText})</span>
+                  </li>
+                )
+              })}
+            </ul>
+          </Section>
         ) : (
-          <ul className="space-y-3">
-            {prereqs.map((p) => (
-              <li key={p}>
-                {link(p)}
-                <p className="mt-0.5 text-xs text-mill-400">{reasonFor(p, machine.id)?.reason}</p>
-                {reasonFor(p, machine.id)?.verified && (
-                  <a
-                    href={reasonFor(p, machine.id)!.verified!.source}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-[11px] text-brass-300 hover:underline"
-                  >
-                    ✓ verified on Microsoft Learn
-                  </a>
-                )}
-              </li>
-            ))}
-          </ul>
+          <Section title="Orientation">
+            <p className="text-sm text-mill-200">Background the DP-600 outline assumes. It is not an exam bullet itself.</p>
+          </Section>
         )}
-      </Section>
 
-      {unlocks.length > 0 && (
-        <Section title="Feeds into">
-          <ul className="space-y-2">
-            {unlocks.map((u) => (
-              <li key={u}>{link(u)}</li>
-            ))}
-          </ul>
+        {notesByMachine.get(machine.id) ? (
+          <NotesView notes={notesByMachine.get(machine.id)!} />
+        ) : (
+          <Section title="Notes">
+            <p className="text-sm italic text-mill-400">Notes for this floor are still being written.</p>
+          </Section>
+        )}
+
+        {machine.pl300 && (
+          <Section title="PL-300 carryover">
+            <p className="mb-2 text-sm text-mill-200">Overlaps these PL-300 skills. Notes here will focus on what DP-600 adds.</p>
+            <ul className="list-disc space-y-1 pl-5 text-sm text-mill-200">
+              {machine.pl300.overlaps.map((o) => (
+                <li key={o}>{o}</li>
+              ))}
+            </ul>
+            {machine.pl300.caveat && <p className="mt-2 text-xs text-weld">{machine.pl300.caveat}</p>}
+          </Section>
+        )}
+
+        <Section title="Prerequisite threads">
+          {prereqs.length === 0 ? (
+            <p className="text-sm text-mill-400">None. This is where the mill starts.</p>
+          ) : (
+            <ul className="space-y-3">
+              {prereqs.map((p) => (
+                <li key={p}>
+                  {link(p)}
+                  <p className="mt-0.5 text-xs text-mill-400">{reasonFor(p, machine.id)?.reason}</p>
+                  {reasonFor(p, machine.id)?.verified && (
+                    <a
+                      href={reasonFor(p, machine.id)!.verified!.source}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-[11px] text-brass-300 hover:underline"
+                    >
+                      ✓ verified on Microsoft Learn
+                    </a>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
         </Section>
-      )}
 
-      <Section title="Hands-on lab platform">
-        <p className="text-sm text-mill-200">{platformText[machine.labPlatform]}</p>
-        {machine.labNote && <p className="mt-1 text-xs text-mill-400">{machine.labNote}</p>}
-      </Section>
+        {unlocks.length > 0 && (
+          <Section title="Feeds into">
+            <ul className="space-y-2">
+              {unlocks.map((u) => (
+                <li key={u}>{link(u)}</li>
+              ))}
+            </ul>
+          </Section>
+        )}
+
+        <Section title="Hands-on lab platform">
+          <p className="text-sm text-mill-200">{platformText[machine.labPlatform]}</p>
+          {machine.labNote && <p className="mt-1 text-xs text-mill-400">{machine.labNote}</p>}
+        </Section>
+        </div>
+      )}
     </aside>
   )
 }

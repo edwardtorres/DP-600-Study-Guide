@@ -8,13 +8,18 @@ import { CloseIcon } from './icons'
 import { QuestionInput } from './questions/QuestionInput'
 import { QuestionResult } from './questions/QuestionResult'
 
-const attemptTitle: Record<AttemptKind, string> = {
+/** A lab debrief reuses this panel: 3 bank questions, logged for readiness, never certifying. */
+export type PanelKind = AttemptKind | 'debrief'
+
+const attemptTitle: Record<PanelKind, string> = {
+  debrief: 'Lab debrief',
   startup: 'Start-up check',
   inspection: 'Inspection',
   placement: 'Placement check',
 }
 
-const rule: Record<AttemptKind, string> = {
+const rule: Record<PanelKind, string> = {
+  debrief: '3 questions from the bank on this lab’s exam skills. They count toward readiness like an inspection; nothing is certified.',
   startup: '2 questions. Get both right to start the machine.',
   inspection: '5 questions. Get at least 4 right (80%) to certify the machine.',
   placement: '5 questions from what DP-600 adds beyond PL-300. Get all 5 right to certify the machine as placed. One attempt per day, used as soon as you start.',
@@ -22,7 +27,9 @@ const rule: Record<AttemptKind, string> = {
 
 interface Props {
   machine: Machine
-  kind: AttemptKind
+  kind: PanelKind
+  /** Overrides the machine name in the title (a lab debrief shows the lab). */
+  heading?: string
   /** Already drawn and shuffled for this attempt. */
   questions: Question[]
   onSubmit: (correct: boolean[]) => AttemptOutcome
@@ -33,7 +40,7 @@ interface Props {
   onOpenPair: (machineId: string, pairId: string) => void
 }
 
-export function AttemptPanel({ machine, kind, questions, onSubmit, onRetry, retryBlocked, onClose, onOpenPair }: Props) {
+export function AttemptPanel({ machine, kind, heading, questions, onSubmit, onRetry, retryBlocked, onClose, onOpenPair }: Props) {
   const [responses, setResponses] = useState<Response[]>(() => questions.map(emptyResponse))
   const [index, setIndex] = useState(0)
   const [result, setResult] = useState<{ correct: boolean[]; outcome: AttemptOutcome; blocked: string | null } | null>(null)
@@ -52,12 +59,14 @@ export function AttemptPanel({ machine, kind, questions, onSubmit, onRetry, retr
   }
 
   const right = result ? result.correct.filter(Boolean).length : 0
-  const passedText: Record<AttemptKind, string> = {
+  const passedText: Record<PanelKind, string> = {
+    debrief: 'All right. Logged toward readiness. A lab debrief never certifies a machine.',
     startup: `Start-up check passed. ${machine.themedName} is running. Study the notes, then take the inspection.`,
     inspection: `Inspection passed. ${machine.themedName} is certified, and any machine it feeds may now unlock.`,
     placement: `Placement passed. ${machine.themedName} is certified as placed, and the machines it feeds may now unlock.`,
   }
-  const failedText: Record<AttemptKind, string> = {
+  const failedText: Record<PanelKind, string> = {
+    debrief: 'Logged toward readiness. Review the explanations below; a lab debrief never certifies a machine.',
     startup: 'Not passed. Both answers must be right. Review the notes and try again with a new draw.',
     inspection: 'Not passed. You need at least 4 of 5. Review the explanations and notes, then try again with a new draw.',
     placement: 'Not passed. Placement needs all 5 right. You can try again tomorrow, or work through the machine normally.',
@@ -70,7 +79,7 @@ export function AttemptPanel({ machine, kind, questions, onSubmit, onRetry, retr
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-wider text-brass-400">{attemptTitle[kind]}</p>
             <h2 id="attempt-title" className="truncate font-display text-xl font-bold text-mill-50">
-              {machine.themedName}
+              {heading ?? machine.themedName}
             </h2>
             <p className="text-xs text-mill-400">{rule[kind]}</p>
           </div>
