@@ -16,6 +16,8 @@ import { questionStats, validateQuestions } from '../src/content/questions/valid
 import { allPuzzles, oracleTemplates } from '../src/content/puzzles/index.ts'
 import { puzzleStats, validatePuzzles } from '../src/content/puzzles/validate.ts'
 import { puzzleTypeName } from '../src/puzzles/types.ts'
+import { allLabs, LABS_PARTIAL, LABS_UNCOVERED, labMinutes } from '../src/content/labs/index.ts'
+import { validateLabs } from '../src/content/labs/validate.ts'
 
 const decode = (s: string) =>
   s
@@ -108,12 +110,24 @@ function printPuzzleSummary() {
   console.log(`  By machine: ${[...st.byMachine].sort().map(([k, v]) => `${k} ${v}`).join(', ')}`)
 }
 
+function printLabSummary() {
+  const hours = (labMinutes / 60).toFixed(1)
+  const byPlatform = new Map<string, number>()
+  for (const l of allLabs) byPlatform.set(l.platform, (byPlatform.get(l.platform) ?? 0) + 1)
+  const steps = allLabs.reduce((n, l) => n + l.steps.length + l.cleanup.length, 0)
+  console.log(`Labs: ${allLabs.length} (${steps} steps incl. cleanup), about ${hours} h; ${[...byPlatform].map(([k, v]) => `${k} ${v}`).join(', ')}`)
+  const uncovered = Object.entries(LABS_UNCOVERED)
+  console.log(`  Bullets with no lab: ${uncovered.length ? uncovered.map(([b, why]) => `${b} (${why})`).join('; ') : 'none'}`)
+  for (const [b, why] of Object.entries(LABS_PARTIAL)) console.log(`  Partial: ${b}: ${why}`)
+}
+
 async function main() {
   const errors = [
     ...validateAll(outline, machines, edges),
     ...validateNotes(machines, allNotes),
     ...validateQuestions(outline, machines, allNotes, allQuestions, caseStudies),
     ...validatePuzzles(outline, machines, allPuzzles, oracleTemplates, allQuestions.map((q) => q.id)),
+    ...validateLabs(outline, machines, allLabs, allQuestions, LABS_UNCOVERED),
   ]
 
   if (process.argv.includes('--live')) {
@@ -139,6 +153,7 @@ async function main() {
   printNotesSummary()
   printQuestionSummary()
   printPuzzleSummary()
+  printLabSummary()
   const bullets = machines.reduce((n, m) => n + m.bulletIds.length, 0)
   console.log(
     `Content check passed: ${outline.domains.length} domains, ` +

@@ -10,7 +10,8 @@ export const PREPARE_CARRYOVER_CAVEAT =
  * pl300.overlaps quotes the PL-300 study guide (skills measured as of
  * April 20, 2026) verbatim, so the carryover tag is sourced, not guessed.
  *
- * labPlatform is preliminary; Step 6 verifies each lab on Microsoft Learn.
+ * labPlatform is the platform of the machine's Step 6 labs (src/content/labs);
+ * a test keeps the two in sync.
  */
 export const machines: Machine[] = [
   // ── Front Office (Orientation) ────────────────────────────────────────
@@ -90,7 +91,7 @@ export const machines: Machine[] = [
     themedName: 'Shared Spool',
     skillName: 'OneLake integration for Eventhouse and semantic models',
     bulletIds: ['P1.5'],
-    labPlatform: 'browser',
+    labPlatform: 'mixed',
     notes: null,
   },
   {
@@ -185,7 +186,7 @@ export const machines: Machine[] = [
         'Identify poorly performing measures, relationships, and visuals by using Performance Analyzer and DAX query view',
       ],
     },
-    labPlatform: 'browser',
+    labPlatform: 'mixed',
     notes: null,
   },
 
@@ -197,7 +198,7 @@ export const machines: Machine[] = [
     skillName: 'Choose a storage mode',
     bulletIds: ['S1.1'],
     pl300: { overlaps: ['Choose between DirectLake, DirectQuery, and Import'] },
-    labPlatform: 'tbd',
+    labPlatform: 'browser',
     notes: null,
   },
   {
@@ -214,7 +215,7 @@ export const machines: Machine[] = [
         'Implement role-playing dimensions',
       ],
     },
-    labPlatform: 'tbd',
+    labPlatform: 'browser',
     notes: null,
   },
   {
@@ -230,7 +231,7 @@ export const machines: Machine[] = [
         'Create semi-additive measures',
       ],
     },
-    labPlatform: 'tbd',
+    labPlatform: 'mixed',
     notes: null,
   },
   {
@@ -243,7 +244,7 @@ export const machines: Machine[] = [
       overlaps: ['Create calculation groups'],
       caveat: 'PL-300 covers calculation groups only; dynamic format strings and field parameters are new.',
     },
-    labPlatform: 'tbd',
+    labPlatform: 'mixed',
     notes: null,
   },
   {
@@ -252,7 +253,7 @@ export const machines: Machine[] = [
     themedName: 'Wide Beam',
     skillName: 'Large semantic model storage format',
     bulletIds: ['S1.6'],
-    labPlatform: 'browser',
+    labPlatform: 'windows',
     notes: null,
   },
   {
@@ -261,7 +262,7 @@ export const machines: Machine[] = [
     themedName: 'Double Loom',
     skillName: 'Composite models',
     bulletIds: ['S1.7'],
-    labPlatform: 'tbd',
+    labPlatform: 'browser',
     notes: null,
   },
   {
@@ -277,7 +278,7 @@ export const machines: Machine[] = [
         'Improve performance by reducing granularity',
       ],
     },
-    labPlatform: 'tbd',
+    labPlatform: 'mixed',
     notes: null,
   },
   {
@@ -300,7 +301,7 @@ export const machines: Machine[] = [
       caveat:
         'Tagged at your request. Incremental refresh itself is not a bullet in the current PL-300 outline; the closest one is scheduled refresh.',
     },
-    labPlatform: 'tbd',
+    labPlatform: 'windows',
     notes: null,
   },
 
@@ -338,7 +339,7 @@ export const machines: Machine[] = [
       ],
       caveat: 'PL-300 covers RLS only; column-, object-, and file-level security are new.',
     },
-    labPlatform: 'tbd',
+    labPlatform: 'browser',
     notes: null,
   },
   {

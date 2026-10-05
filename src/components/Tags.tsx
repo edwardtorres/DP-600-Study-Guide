@@ -10,6 +10,7 @@ export function Tags({ machine }: { machine: Machine }) {
         <span className={`${chip} bg-weld/20 text-weld`}>{machine.pl300.caveat ? 'PL-300 · partial' : 'PL-300'}</span>
       )}
       {machine.labPlatform === 'windows' && <span className={`${chip} bg-indigo-thread/20 text-indigo-200`}>Windows lab</span>}
+      {machine.labPlatform === 'mixed' && <span className={`${chip} bg-indigo-thread/20 text-indigo-200`}>Lab · part Windows</span>}
     </>
   )
 }

@@ -236,7 +236,7 @@ export function domainWeights(outline: Outline): Map<DomainId, number> {
 }
 
 /**
- * Readiness is accuracy, never XP. Only inspection, placement, and puzzle answers
+ * Readiness is accuracy, never XP. Only inspection, placement, puzzle, and lab-debrief answers
  * count (READINESS_CODES); start-up checks don't. For each domain: accuracy over
  * the most recent 40 counted answers in that domain, multiplied by coverage
  * (distinct bullets answered ÷ bullets in the domain, capped at 1). Overall is the

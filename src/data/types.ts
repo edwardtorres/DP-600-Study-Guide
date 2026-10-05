@@ -35,7 +35,8 @@ export type FloorId = 'orientation' | 'prepare' | 'semantic' | 'maintain'
 export type MachineState = 'locked' | 'idle' | 'running' | 'certified'
 
 /** Where a future hands-on lab can run. Preliminary until Step 6 verifies on Learn. */
-export type LabPlatform = 'browser' | 'windows' | 'tbd'
+/** browser: every lab step runs in a browser. windows: needs Power BI Desktop or SSMS. mixed: some steps need Windows. */
+export type LabPlatform = 'browser' | 'windows' | 'mixed'
 
 export interface Pl300Overlap {
   /** Verbatim bullets from the PL-300 study guide (skills measured as of April 20, 2026). */

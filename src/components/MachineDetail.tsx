@@ -33,8 +33,8 @@ interface Props {
 
 const platformText = {
   browser: 'Browser (Windows or Mac)',
-  windows: 'Windows only (Power BI Desktop)',
-  tbd: 'To be confirmed in Step 6',
+  windows: 'Windows only (Power BI Desktop or SSMS)',
+  mixed: 'Browser, plus some steps that need Power BI Desktop (Windows)',
 } as const
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
