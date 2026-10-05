@@ -13,6 +13,9 @@ import { notesSources, notesWordCount, validateNotes } from '../src/content/vali
 import { allQuestions, caseStudies } from '../src/content/questions/index.ts'
 import { QUESTIONS_PENDING, CASES_PENDING } from '../src/content/questions/requirements.ts'
 import { questionStats, validateQuestions } from '../src/content/questions/validate.ts'
+import { allPuzzles, oracleTemplates } from '../src/content/puzzles/index.ts'
+import { puzzleStats, validatePuzzles } from '../src/content/puzzles/validate.ts'
+import { puzzleTypeName } from '../src/puzzles/types.ts'
 
 const decode = (s: string) =>
   s
@@ -96,11 +99,21 @@ function printQuestionSummary() {
   }
 }
 
+function printPuzzleSummary() {
+  const st = puzzleStats(outline, allPuzzles, oracleTemplates)
+  console.log(`Puzzles: ${st.total} (${st.decisions} scored decisions)`)
+  console.log(`  By type: ${[...st.byType].map(([k, v]) => `${puzzleTypeName[k]} ${v}`).join(', ')}`)
+  console.log(`  Query Oracle templates: ${[...st.oracleByLanguage].map(([k, v]) => `${k} ${v}`).join(', ')}; Gearbox decks: ${[...st.gearboxByDeck].map(([k, v]) => `${k} ${v}`).join(', ')}`)
+  console.log(`  By domain: ${outline.domains.map((d) => `${d.title} ${st.byDomain.get(d.id) ?? 0}`).join(', ')}`)
+  console.log(`  By machine: ${[...st.byMachine].sort().map(([k, v]) => `${k} ${v}`).join(', ')}`)
+}
+
 async function main() {
   const errors = [
     ...validateAll(outline, machines, edges),
     ...validateNotes(machines, allNotes),
     ...validateQuestions(outline, machines, allNotes, allQuestions, caseStudies),
+    ...validatePuzzles(outline, machines, allPuzzles, oracleTemplates, allQuestions.map((q) => q.id)),
   ]
 
   if (process.argv.includes('--live')) {
@@ -125,6 +138,7 @@ async function main() {
   }
   printNotesSummary()
   printQuestionSummary()
+  printPuzzleSummary()
   const bullets = machines.reduce((n, m) => n + m.bulletIds.length, 0)
   console.log(
     `Content check passed: ${outline.domains.length} domains, ` +
