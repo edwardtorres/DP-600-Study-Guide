@@ -4,6 +4,9 @@ import type { MachineNotes } from '../types'
 import {
   BANNED_TERMS,
   CASES_PENDING,
+  CASE_STUDY_COUNT,
+  MAX_CASE_QUESTIONS,
+  MIN_CASE_QUESTIONS,
   MAX_LONGEST_CORRECT_SHARE,
   MAX_POSITION_SHARE,
   MAX_PREVIEW_SHARE,
@@ -285,6 +288,18 @@ export function validateQuestions(
   }
   if (stats.total >= 20 && stats.preview / stats.total > MAX_PREVIEW_SHARE) {
     errors.push(`Preview questions are ${stats.preview}/${stats.total} (max 5%)`)
+  }
+
+  for (const c of cases) {
+    const qs = questions.filter((q) => q.caseStudyId === c.id)
+    if (qs.length < MIN_CASE_QUESTIONS || qs.length > MAX_CASE_QUESTIONS) {
+      errors.push(`Case study ${c.id} has ${qs.length} questions; needs ${MIN_CASE_QUESTIONS}–${MAX_CASE_QUESTIONS}`)
+    }
+    const domains = new Set(qs.map((q) => questionDomain(q, outline)).filter(Boolean))
+    if (domains.size < outline.domains.length) errors.push(`Case study ${c.id} must span all ${outline.domains.length} domains`)
+  }
+  if (!casesPending && cases.length !== CASE_STUDY_COUNT) {
+    errors.push(`Expected ${CASE_STUDY_COUNT} case studies, found ${cases.length}`)
   }
 
   if (pending.size === 0 && !casesPending) {

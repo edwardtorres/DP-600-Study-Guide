@@ -6,11 +6,14 @@ export const MAX_PREVIEW_SHARE = 0.05
 export const MAX_POSITION_SHARE = 0.35
 export const MAX_LONGEST_CORRECT_SHARE = 0.4
 export const NEAR_DUPLICATE_JACCARD = 0.8
+export const CASE_STUDY_COUNT = 4
+export const MIN_CASE_QUESTIONS = 6
+export const MAX_CASE_QUESTIONS = 8
 
 /** Floors whose questions aren't written yet. Must be empty when Step 3 ends. */
-export const QUESTIONS_PENDING: FloorId[] = ['maintain']
+export const QUESTIONS_PENDING: FloorId[] = []
 /** Case studies are written last; while true, the domain-share rule is skipped. */
-export const CASES_PENDING = true
+export const CASES_PENDING = false
 
 /**
  * Phrases tied to open needs-verification items (Step 8 queue). Questions must

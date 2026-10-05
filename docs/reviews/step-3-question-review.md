@@ -122,3 +122,37 @@ Reviewer flags from the blind pass:
 | SL-09 | No cited page says endorsement doesn't change access; the key was an inference. | **Dropped.** |
 
 **Dropped: SL-09** (key not stated on Learn).
+
+## Case studies (4 cases, 30 questions)
+
+**Blind pass: 30/30 match.**
+
+Reviewer flags from the blind pass:
+
+| Question | Flag | Resolution |
+|---|---|---|
+| Company names | "Tidewater" is a real company (Tidewater Inc.), and "Brightwell" may resemble real firms. | All four renamed to invented names: Fernhollow Outfitters, Quillmere Health, Saltmarsh Haulage, Lumenvale Utilities. |
+| CS1-04 | Without "Direct Lake" in the stem, Import was defensible. | Stem names Direct Lake. Import and DirectQuery options replaced with Direct Lake on SQL variants. |
+| CS1-06 | Muddled option wording. | Fixed: "A security policy in the gold warehouse". |
+| CS2-05 | The case says researchers have no role, yet the stem had them querying the warehouse. | Stem now says the warehouse is shared with them (Read All with SQL analytics endpoint). |
+| CS3-02 | "What does Learn suggest" sounded like a giveaway. | Reworded. |
+| CS3-04 | "Meets both needs" overclaimed the XMLA link. | Stem asks for the setting required beyond 10 GB and recommended for XMLA writes, which is exactly Learn's wording. |
+| CS3-07 | Asked to confirm the XMLA default. | Confirmed: "By default, read-only connectivity using the endpoint is enabled." |
+
+**Source pass: 27 supported, 3 partly supported, 0 not supported, 0 unreachable** (40 pages fetched).
+
+| Question | Finding | Resolution |
+|---|---|---|
+| CS1-07 | s1 said "Prod lakehouse", but this case's gold layer is a warehouse. | Changed to "the Prod gold warehouse". |
+| CS2-04 | Dual needs Import and DirectQuery tables from the same source; the stem didn't say so. | Stem now says admissions, Ward, and Date come from the same Azure SQL database. |
+| CS2-06 | Option c's explanation was wrong: Viewers don't get ReadAll. | Explanation rewritten. |
+| CS3-03, CS2-01 | Minor explanation wording. | Aligned with Learn. |
+| CS3-06 | The lineage-view explanation relied on an uncited page. | Lineage page added as a source. |
+
+**Dropped: none.**
+
+## Totals
+
+- Questions written: 384. Dropped: 2 (DLS-05, SL-09). Kept: **382**.
+- Blind-pass agreement before fixes: 384/384.
+- Source passes: 0 keys unsupported. Every partly supported item was fixed or dropped as listed above.

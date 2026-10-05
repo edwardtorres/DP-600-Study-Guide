@@ -114,7 +114,7 @@ export function ReviewPage() {
   )
   const casesShown = new Set(shown.map((q) => q.caseStudyId).filter(Boolean))
 
-  const select = 'rounded-md border border-mill-600 bg-mill-900 px-2 py-1.5 text-sm text-mill-50'
+  const select = 'max-w-full min-w-0 rounded-md border border-mill-600 bg-mill-900 px-2 py-1.5 text-sm text-mill-50'
   return (
     <div className="mx-auto min-h-screen max-w-4xl px-4 py-6 text-mill-50">
       <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brass-400">Fabric Mill · hidden</p>
