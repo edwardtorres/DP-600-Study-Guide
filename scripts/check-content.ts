@@ -85,6 +85,10 @@ function printQuestionSummary() {
   console.log(`  Answer position (4-option single): ${st.positions.map((n, i) => `${i + 1}=${n} (${pct(n, four)})`).join(', ')}`)
   console.log(`  Correct option is longest: ${st.longestCorrect.count}/${st.longestCorrect.of} (${pct(st.longestCorrect.count, st.longestCorrect.of)})`)
   console.log(`  Preview: ${st.preview}/${st.total} (${pct(st.preview, st.total)})`)
+  for (const [n, m] of st.multiPositions) {
+    console.log(`  Multi-select (${n} options, ${m.questions} questions) correct by position: ${m.correct.map((c, i) => `${i + 1}=${c} (${pct(c, m.questions)})`).join(', ')}`)
+  }
+  console.log(`  Yes/No statements answered Yes: ${st.yesNo.yes}/${st.yesNo.of} (${pct(st.yesNo.yes, st.yesNo.of)})`)
   const low = machines.filter((m) => !QUESTIONS_PENDING.includes(m.floor)).flatMap((m) => m.bulletIds).filter((b) => (st.perBullet.get(b) ?? 0) < 6)
   if (low.length) console.log(`  Bullets under 6: ${low.join(', ')}`)
   if (QUESTIONS_PENDING.length || CASES_PENDING) {

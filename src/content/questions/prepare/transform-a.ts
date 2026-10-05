@@ -139,12 +139,12 @@ export const transformAQuestions: Question[] = [
     stem: 'A DataFrame in a Fabric notebook has empty cells in the Discount column. Using Data Wrangler, which two operations can deal with the missing values? Choose two.',
     sources: [S.dataWrangler],
     options: [
-      { id: 'a', text: 'Drop missing values', explain: 'Correct. It removes rows that have missing values.' },
-      { id: 'b', text: 'Fill missing values', explain: 'Correct. It replaces missing cells with a value you choose.' },
-      { id: 'c', text: 'One-hot encode', explain: 'One-hot encoding creates indicator columns per category; it doesn’t handle missing values.' },
+      { id: 'a', text: 'One-hot encode', explain: 'One-hot encoding creates indicator columns per category; it doesn’t handle missing values.' },
+      { id: 'b', text: 'Drop missing values', explain: 'Correct. It removes rows that have missing values.' },
+      { id: 'c', text: 'Fill missing values', explain: 'Correct. It replaces missing cells with a value you choose.' },
       { id: 'd', text: 'Scale min/max values', explain: 'Scaling rescales numeric values; it doesn’t fill or remove missing ones.' },
     ],
-    answers: ['a', 'b'],
+    answers: ['b', 'c'],
   },
   {
     id: 'CM-08',

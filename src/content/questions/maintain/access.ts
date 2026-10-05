@@ -167,11 +167,11 @@ export const accessQuestions: Question[] = [
     sources: [S.roles],
     options: [
       { id: 'a', text: 'Share an item with another user', explain: 'Correct. Members can share items; Contributors can’t.' },
-      { id: 'b', text: 'Add a user to the workspace as a Contributor', explain: 'Correct. Members can add people with Member or lower roles.' },
-      { id: 'c', text: 'Create a new warehouse', explain: 'Contributors can create warehouses too.' },
+      { id: 'b', text: 'Create a new warehouse', explain: 'Contributors can create warehouses too.' },
+      { id: 'c', text: 'Add a user to the workspace as a Contributor', explain: 'Correct. Members can add people with Member or lower roles.' },
       { id: 'd', text: 'Delete the workspace', explain: 'Only Admins can delete the workspace.' },
     ],
-    answers: ['a', 'b'],
+    answers: ['a', 'c'],
   },
 
   // ── Item Locks: M1.2 item-level access ──────────────────────────────
@@ -268,12 +268,12 @@ export const accessQuestions: Question[] = [
     stem: 'You share a warehouse with a colleague. Which two permissions can you add on top of the default Read permission? Choose two.',
     sources: [S.shareItems],
     options: [
-      { id: 'a', text: 'Share, so they can reshare the item', explain: 'Correct. Share lets them reshare up to their own permissions.' },
-      { id: 'b', text: 'Read All with SQL analytics endpoint', explain: 'Correct. ReadData lets them read data with T-SQL.' },
-      { id: 'c', text: 'Workspace Member', explain: 'Workspace roles aren’t granted through item sharing.' },
-      { id: 'd', text: 'Capacity Contributor', explain: 'Capacity permissions aren’t set by sharing an item.' },
+      { id: 'a', text: 'Workspace Member', explain: 'Workspace roles aren’t granted through item sharing.' },
+      { id: 'b', text: 'Share, so they can reshare the item', explain: 'Correct. Share lets them reshare up to their own permissions.' },
+      { id: 'c', text: 'Capacity Contributor', explain: 'Capacity permissions aren’t set by sharing an item.' },
+      { id: 'd', text: 'Read All with SQL analytics endpoint', explain: 'Correct. ReadData lets them read data with T-SQL.' },
     ],
-    answers: ['a', 'b'],
+    answers: ['b', 'd'],
   },
   {
     id: 'IL-07',
@@ -745,10 +745,10 @@ export const accessQuestions: Question[] = [
     sources: [S.endorsement, S.infoProtection],
     options: [
       { id: 'a', text: 'Endorsement helps people find trustworthy items; labels classify how sensitive data is', explain: 'Correct. They answer different questions.' },
-      { id: 'b', text: 'Labels come from Microsoft Purview and can propagate downstream', explain: 'Correct. Labels are Purview classifications with downstream inheritance.' },
-      { id: 'c', text: 'Endorsement encrypts exported files', explain: 'Encryption on export comes from labels with publishing policies.' },
-      { id: 'd', text: 'Labels can only be applied to semantic models', explain: 'Manual labeling is supported for all Fabric items.' },
+      { id: 'b', text: 'Endorsement encrypts exported files', explain: 'Encryption on export comes from labels with publishing policies.' },
+      { id: 'c', text: 'Labels can only be applied to semantic models', explain: 'Manual labeling is supported for all Fabric items.' },
+      { id: 'd', text: 'Labels come from Microsoft Purview and can propagate downstream', explain: 'Correct. Labels are Purview classifications with downstream inheritance.' },
     ],
-    answers: ['a', 'b'],
+    answers: ['a', 'd'],
   },
 ]

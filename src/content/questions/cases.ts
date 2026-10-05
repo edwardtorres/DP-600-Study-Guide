@@ -577,12 +577,12 @@ export const caseQuestions: Question[] = [
     stem: 'Lumenvale needs YTD, prior-year, and YoY% versions of 40 measures, and amounts in each country’s currency format while charts keep plotting numbers. Which two features should you implement? Choose two.',
     sources: [S.calcGroups, S.dynamicFormat],
     options: [
-      { id: 'a', text: 'A calculation group for the time intelligence variants', explain: 'Correct. Calculation items apply YTD, PY, and YoY% to any measure.' },
-      { id: 'b', text: 'Dynamic format strings for the currency formats', explain: 'Correct. Measures stay numeric while the format changes by context.' },
-      { id: 'c', text: 'FORMAT() inside each measure', explain: 'FORMAT returns text, which breaks charts.' },
-      { id: 'd', text: 'A field parameter with 120 measures', explain: 'A field parameter switches fields; it doesn’t create the variants.' },
+      { id: 'a', text: 'FORMAT() inside each measure', explain: 'FORMAT returns text, which breaks charts.' },
+      { id: 'b', text: 'A field parameter with 120 measures', explain: 'A field parameter switches fields; it doesn’t create the variants.' },
+      { id: 'c', text: 'A calculation group for the time intelligence variants', explain: 'Correct. Calculation items apply YTD, PY, and YoY% to any measure.' },
+      { id: 'd', text: 'Dynamic format strings for the currency formats', explain: 'Correct. Measures stay numeric while the format changes by context.' },
     ],
-    answers: ['a', 'b'],
+    answers: ['c', 'd'],
   },
   {
     id: 'CS4-05',

@@ -30,12 +30,12 @@ export const threadIntakeQuestions: Question[] = [
     stem: 'You are creating a new cloud connection to a SQL Server data source in Manage connections and gateways. Which two authentication methods can you choose for this connection type? Choose two.',
     sources: [S.connections],
     options: [
-      { id: 'a', text: 'OAuth2', explain: 'Correct. OAuth2 is listed, with the caveat that long-running queries can fail when the token expires.' },
-      { id: 'b', text: 'Service Principal', explain: 'Correct. Service Principal is one of the listed authentication methods.' },
-      { id: 'c', text: 'Workspace identity in the CREDENTIAL clause', explain: 'Workspace identity in CREDENTIAL belongs to the T-SQL COPY statement, not to creating a cloud connection.' },
-      { id: 'd', text: 'Row-level security role', explain: 'RLS roles restrict rows in a model or warehouse; they aren’t an authentication method for a connection.' },
+      { id: 'a', text: 'Workspace identity in the CREDENTIAL clause', explain: 'Workspace identity in CREDENTIAL belongs to the T-SQL COPY statement, not to creating a cloud connection.' },
+      { id: 'b', text: 'OAuth2', explain: 'Correct. OAuth2 is listed, with the caveat that long-running queries can fail when the token expires.' },
+      { id: 'c', text: 'Row-level security role', explain: 'RLS roles restrict rows in a model or warehouse; they aren’t an authentication method for a connection.' },
+      { id: 'd', text: 'Service Principal', explain: 'Correct. Service Principal is one of the listed authentication methods.' },
     ],
-    answers: ['a', 'b'],
+    answers: ['b', 'd'],
   },
   {
     id: 'TI-03',
@@ -307,11 +307,11 @@ export const threadIntakeQuestions: Question[] = [
     sources: [S.ingestWarehouse],
     options: [
       { id: 'a', text: 'CREATE TABLE AS SELECT (CTAS)', explain: 'Correct. CTAS can read from lakehouse tables in the same workspace using three-part names.' },
-      { id: 'b', text: 'INSERT ... SELECT', explain: 'Correct. INSERT...SELECT reads from other warehouses, lakehouses, or mirrored databases in the same workspace.' },
-      { id: 'c', text: 'CREATE EXTERNAL TABLE', explain: 'Learn’s ingestion options for the warehouse list COPY, INSERT...SELECT, SELECT INTO, and CTAS, not external tables.' },
-      { id: 'd', text: 'BACKUP DATABASE', explain: 'Backup isn’t a data ingestion statement in Fabric Data Warehouse.' },
+      { id: 'b', text: 'CREATE EXTERNAL TABLE', explain: 'Learn’s ingestion options for the warehouse list COPY, INSERT...SELECT, SELECT INTO, and CTAS, not external tables.' },
+      { id: 'c', text: 'BACKUP DATABASE', explain: 'Backup isn’t a data ingestion statement in Fabric Data Warehouse.' },
+      { id: 'd', text: 'INSERT ... SELECT', explain: 'Correct. INSERT...SELECT reads from other warehouses, lakehouses, or mirrored databases in the same workspace.' },
     ],
-    answers: ['a', 'b'],
+    answers: ['a', 'd'],
   },
   {
     id: 'TI-18',

@@ -4,7 +4,7 @@ import { outline } from '../../data/outline'
 import { allNotes } from '../notes'
 import { allQuestions, caseStudies } from '.'
 import { CASES_PENDING, QUESTIONS_PENDING } from './requirements'
-import type { Question, SingleQuestion } from './types'
+import type { MultiQuestion, Question, SingleQuestion, YesNoQuestion } from './types'
 import { jaccard, questionStats, validateQuestions } from './validate'
 
 const src = ['https://learn.microsoft.com/en-us/fabric/fundamentals/direct-lake-overview']
@@ -119,6 +119,33 @@ describe('question bank', () => {
     expect(errs).toMatch(/Case study k1 has 2 questions; needs 6–8/)
     expect(errs).toMatch(/Case study k1 must span all 3 domains/)
     expect(errs).toMatch(/Expected 4 case studies, found 1/)
+  })
+
+  it('flags skewed multi-select positions and Yes/No shares', () => {
+    const multi = (i: number): MultiQuestion => ({
+      id: `m${i}`,
+      machineId: 'loom-gearbox',
+      bulletIds: ['S1.1'],
+      format: 'multi',
+      difficulty: 2,
+      stem: `Scenario ${i} with storage choices number ${i * 7}. Which two apply? Choose two.`,
+      sources: src,
+      options: ['a', 'b', 'c', 'd'].map((id) => ({ id, text: `Option ${id}`, explain: 'x' })),
+      answers: ['a', 'b'],
+    })
+    const yesno = (i: number): YesNoQuestion => ({
+      id: `y${i}`,
+      machineId: 'loom-gearbox',
+      bulletIds: ['S1.1'],
+      format: 'yesno',
+      difficulty: 2,
+      stem: `Statement set ${i} about modes ${i * 11}. Select Yes if true.`,
+      sources: src,
+      statements: [1, 2, 3].map((n) => ({ id: `s${n}`, text: `Statement ${n}`, answer: true, explain: 'x' })),
+    })
+    const errs = v([...Array.from({ length: 10 }, (_, i) => multi(i)), ...Array.from({ length: 4 }, (_, i) => yesno(i))]).join('\n')
+    expect(errs).toMatch(/Multi-select \(4 options\): position 1 is correct in 10\/10/)
+    expect(errs).toMatch(/Yes\/No statements: Yes is the answer for 12\/12/)
   })
 
   it('ends Step 3 with nothing pending', () => {

@@ -102,11 +102,11 @@ export const discoverChooseQuestions: Question[] = [
     sources: [S.rtHub],
     options: [
       { id: 'a', text: 'Fabric workspace item events', explain: 'Correct. Fabric events include workspace item events, OneLake events, job events, and capacity overview events.' },
-      { id: 'b', text: 'Azure Blob Storage events', explain: 'Correct. Azure storage account events are listed under Azure events.' },
-      { id: 'c', text: 'Semantic model DAX query events', explain: 'DAX query events aren’t among the Fabric or Azure event sources listed in the Real-Time hub.' },
+      { id: 'b', text: 'Semantic model DAX query events', explain: 'DAX query events aren’t among the Fabric or Azure event sources listed in the Real-Time hub.' },
+      { id: 'c', text: 'Azure Blob Storage events', explain: 'Correct. Azure storage account events are listed under Azure events.' },
       { id: 'd', text: 'Power BI report page view events', explain: 'Report page views aren’t listed as Real-Time hub event sources.' },
     ],
-    answers: ['a', 'b'],
+    answers: ['a', 'c'],
   },
   {
     id: 'BC-07',
@@ -275,12 +275,12 @@ export const discoverChooseQuestions: Question[] = [
     stem: 'You are deciding between a lakehouse and a warehouse. Which two requirements point to a warehouse? Choose two.',
     sources: [S.decisionLhWh],
     options: [
-      { id: 'a', text: 'The team develops with T-SQL', explain: 'Correct. T-SQL development maps to the warehouse in the decision guide.' },
-      { id: 'b', text: 'Loads must update several tables in one transaction', explain: 'Correct. Multi-table transactions map to the warehouse.' },
-      { id: 'c', text: 'The data includes unstructured files such as images', explain: 'Unstructured or mixed data maps to the lakehouse.' },
-      { id: 'd', text: 'The team develops with PySpark', explain: 'Spark development maps to the lakehouse.' },
+      { id: 'a', text: 'The data includes unstructured files such as images', explain: 'Unstructured or mixed data maps to the lakehouse.' },
+      { id: 'b', text: 'The team develops with T-SQL', explain: 'Correct. T-SQL development maps to the warehouse in the decision guide.' },
+      { id: 'c', text: 'The team develops with PySpark', explain: 'Spark development maps to the lakehouse.' },
+      { id: 'd', text: 'Loads must update several tables in one transaction', explain: 'Correct. Multi-table transactions map to the warehouse.' },
     ],
-    answers: ['a', 'b'],
+    answers: ['b', 'd'],
   },
   {
     id: 'VS-09',
@@ -439,10 +439,10 @@ export const discoverChooseQuestions: Question[] = [
     sources: [S.eventhouseOneLake],
     options: [
       { id: 'a', text: 'Power BI Direct Lake mode', explain: 'Correct. Learn lists Direct Lake mode in Power BI among the engines that can query the Delta data.' },
-      { id: 'b', text: 'Spark notebooks', explain: 'Correct. Notebooks are listed among the engines that can query the data.' },
-      { id: 'c', text: 'Power BI Desktop live connection to Analysis Services', explain: 'A live connection to Analysis Services doesn’t read OneLake Delta tables.' },
-      { id: 'd', text: 'The XMLA endpoint', explain: 'The XMLA endpoint exposes semantic models, not KQL database data in OneLake.' },
+      { id: 'b', text: 'Power BI Desktop live connection to Analysis Services', explain: 'A live connection to Analysis Services doesn’t read OneLake Delta tables.' },
+      { id: 'c', text: 'The XMLA endpoint', explain: 'The XMLA endpoint exposes semantic models, not KQL database data in OneLake.' },
+      { id: 'd', text: 'Spark notebooks', explain: 'Correct. Notebooks are listed among the engines that can query the data.' },
     ],
-    answers: ['a', 'b'],
+    answers: ['a', 'd'],
   },
 ]

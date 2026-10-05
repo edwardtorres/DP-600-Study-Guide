@@ -90,6 +90,7 @@ The free practice assessment shows "the style, wording, and difficulty"; the rea
 - Questions are typed data in `src/content/questions/<floor>.ts` plus `cases.ts` (types in `types.ts`, rules in `requirements.ts`, checks in `validate.ts`). Formats: `single`, `multi` ("choose two/three"), `yesno` statement sets, `order`, `match`, `dropdown` (T-SQL/KQL/DAX code completion).
 - Every question has: id, machineId, bulletIds, format, difficulty 1–3, a scenario-style stem, a key, an explanation for **every** option/statement/item/pair/slot option, at least one learn.microsoft.com source that confirms the key, optional `trapPairId` (a notes "don't confuse" pair), `preview`, `placement`, `caseStudyId`.
 - Rules enforced by `check:content`: ≥6 questions per bullet; domain shares inside the official ranges; ≤35% of 4-option answers in any one position; correct option strictly longest ≤40%; no near-duplicate stems (Jaccard ≥ 0.8); Preview ≤5%; every PL-300 carryover machine has ≥8 placement-eligible questions; placement questions on partial-carryover machines are never keyed to Power Query; no "all/none of the above"; no phrases tied to open needs-verification items (`BANNED_TERMS`).
+- Answer order is controlled twice. In the bank, `arrange()` rotates single-choice answers, multi-select sources are balanced (no position correct in more than 60% of questions with that option count), and Yes/No statements are 40–60% "Yes"; `check:content` enforces and prints all three. At render time, `src/game/shuffle.ts` shuffles every format with a seeded PRNG: stable within one attempt, new per attempt, and ordering items never start solved.
 - **Never write a question whose answer depends on a needs-verification item** or anything not confirmed on Learn.
 - Each floor's questions are checked by an **independent reviewer agent** that answers blind (`npm run export:questions -- <floor> <dir>` writes blind and keyed JSON outside the repo; `scripts/compare-review.ts` diffs answers), then checks each key against its sources. Disagreements are fixed or dropped and logged in `docs/reviews/step-3-question-review.md`.
 - Hidden review page: `/review` (or `#/review`). Not linked from the game. **Step 9 must add an SPA fallback** so `/review` serves `index.html` in production.
@@ -127,6 +128,6 @@ src/components/                 MillMap, MachineNode, Threads, MachineDetail, No
 4. Core game loop: XP, levels, streaks, badges, 5-question machine inspections (80% to certify), PL-300 placement checks.
 5. Puzzles: SQL/KQL/DAX predict-the-result, star schema builder, storage-mode picker, Direct Lake fallback scenarios.
 6. Hands-on Fabric trial labs (label Windows-only ones).
-7. Spaced repetition and a timed mock exam with a case study.
+7. Spaced repetition and a timed mock exam with a case study. Also raise the difficulty-3 share of the question bank to about 25% (17% after Step 3) with new scenario questions, concentrated in Prepare data and Semantic models.
 8. Fact-check all content against Microsoft Learn.
 9. Deploy to dp600.edwardtorres.dev.

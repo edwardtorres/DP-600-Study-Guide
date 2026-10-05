@@ -183,12 +183,12 @@ export const modelAQuestions: Question[] = [
     stem: 'Your organization is weighing Direct Lake for an IT-managed analytics project on OneLake. Which two statements describe benefits Learn lists for Direct Lake? Choose two.',
     sources: [S.directLake],
     options: [
-      { id: 'a', text: 'Analyzed data volumes can exceed the capacity’s max memory, because only the data needed for a query is loaded', explain: 'Correct. Learn lists this as an ROI benefit of Direct Lake.' },
-      { id: 'b', text: 'Data preparation moves upstream to OneLake, using Spark, T-SQL, dataflows, and pipelines', explain: 'Correct. Direct Lake depends on preparation in the lake, which maximizes reuse.' },
-      { id: 'c', text: 'Power Query transformations run inside the model for every Direct Lake table', explain: 'Power Query preparation is an Import feature; Direct Lake relies on upstream preparation.' },
-      { id: 'd', text: 'It works with any Power BI license, including Free', explain: 'Direct Lake requires a Fabric capacity subscription.' },
+      { id: 'a', text: 'Power Query transformations run inside the model for every Direct Lake table', explain: 'Power Query preparation is an Import feature; Direct Lake relies on upstream preparation.' },
+      { id: 'b', text: 'Analyzed data volumes can exceed the capacity’s max memory, because only the data needed for a query is loaded', explain: 'Correct. Learn lists this as an ROI benefit of Direct Lake.' },
+      { id: 'c', text: 'It works with any Power BI license, including Free', explain: 'Direct Lake requires a Fabric capacity subscription.' },
+      { id: 'd', text: 'Data preparation moves upstream to OneLake, using Spark, T-SQL, dataflows, and pipelines', explain: 'Correct. Direct Lake depends on preparation in the lake, which maximizes reuse.' },
     ],
-    answers: ['a', 'b'],
+    answers: ['b', 'd'],
   },
 
   // ── Warp Frame: S1.2 star schema in the model ───────────────────────
@@ -766,11 +766,11 @@ export const modelAQuestions: Question[] = [
     sources: [S.fieldParams],
     options: [
       { id: 'a', text: 'AI visuals and Q&A aren’t supported with field parameters', explain: 'Correct. Learn lists this limitation.' },
-      { id: 'b', text: 'A field parameter can’t include implicit measures', explain: 'Correct. Create explicit measures for aggregated columns you want to include.' },
-      { id: 'c', text: 'A field parameter can’t be placed on a slicer', explain: 'Using the field parameter on a slicer is how readers choose fields.' },
-      { id: 'd', text: 'A field parameter can contain measures or columns, never both', explain: 'Learn’s guidance doesn’t restrict a parameter to one kind of field.' },
+      { id: 'b', text: 'A field parameter can’t be placed on a slicer', explain: 'Using the field parameter on a slicer is how readers choose fields.' },
+      { id: 'c', text: 'A field parameter can contain measures or columns, never both', explain: 'Learn’s guidance doesn’t restrict a parameter to one kind of field.' },
+      { id: 'd', text: 'A field parameter can’t include implicit measures', explain: 'Correct. Create explicit measures for aggregated columns you want to include.' },
     ],
-    answers: ['a', 'b'],
+    answers: ['a', 'd'],
   },
   {
     id: 'JH-07',

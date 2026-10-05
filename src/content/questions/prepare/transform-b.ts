@@ -140,12 +140,12 @@ export const transformBQuestions: Question[] = [
     stem: 'You need a GrossRevenue column stored in a Fabric warehouse fact table so that every report and SQL query uses the same value. Which two approaches meet the goal? Choose two.',
     sources: [S.ingestWarehouse, S.loadTables],
     options: [
-      { id: 'a', text: 'Compute UnitPrice * Quantity in the SELECT of a CREATE TABLE AS SELECT statement', explain: 'Correct. The column is computed during the load and stored in the warehouse table.' },
-      { id: 'b', text: 'Add the calculated column in a Dataflow Gen2 that loads the fact table', explain: 'Correct. Dataflows can use functions to produce calculated columns before ingestion.' },
-      { id: 'c', text: 'Add a DAX calculated column to one semantic model', explain: 'The column would exist only in that model, not in the warehouse table that SQL queries read.' },
-      { id: 'd', text: 'Create a OneLake shortcut to the staging table', explain: 'A shortcut references data where it is; it doesn’t add columns.' },
+      { id: 'a', text: 'Add a DAX calculated column to one semantic model', explain: 'The column would exist only in that model, not in the warehouse table that SQL queries read.' },
+      { id: 'b', text: 'Create a OneLake shortcut to the staging table', explain: 'A shortcut references data where it is; it doesn’t add columns.' },
+      { id: 'c', text: 'Compute UnitPrice * Quantity in the SELECT of a CREATE TABLE AS SELECT statement', explain: 'Correct. The column is computed during the load and stored in the warehouse table.' },
+      { id: 'd', text: 'Add the calculated column in a Dataflow Gen2 that loads the fact table', explain: 'Correct. Dataflows can use functions to produce calculated columns before ingestion.' },
     ],
-    answers: ['a', 'b'],
+    answers: ['c', 'd'],
   },
   {
     id: 'DV-08',
@@ -608,10 +608,10 @@ export const transformBQuestions: Question[] = [
     sources: [S.dimTables, S.loadTables, S.createView],
     options: [
       { id: 'a', text: 'Load a new table with CREATE TABLE AS SELECT that joins the three tables', explain: 'Correct. Joining in the ETL stores one flattened customer table.' },
-      { id: 'b', text: 'Create a view that joins the three tables', explain: 'Correct. A view delivers a denormalized result over the normalized tables.' },
-      { id: 'c', text: 'Add NOT ENFORCED foreign key constraints between the tables', explain: 'Constraints describe relationships; they don’t combine the tables into one.' },
+      { id: 'b', text: 'Add NOT ENFORCED foreign key constraints between the tables', explain: 'Constraints describe relationships; they don’t combine the tables into one.' },
+      { id: 'c', text: 'Create a view that joins the three tables', explain: 'Correct. A view delivers a denormalized result over the normalized tables.' },
       { id: 'd', text: 'Split Country into a separate Region table', explain: 'This normalizes further, adding another table instead of flattening.' },
     ],
-    answers: ['a', 'b'],
+    answers: ['a', 'c'],
   },
 ]

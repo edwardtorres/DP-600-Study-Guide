@@ -8,6 +8,9 @@ import {
   MAX_CASE_QUESTIONS,
   MIN_CASE_QUESTIONS,
   MAX_LONGEST_CORRECT_SHARE,
+  MAX_MULTI_POSITION_SHARE,
+  MIN_FOR_DISTRIBUTION,
+  YES_SHARE,
   MAX_POSITION_SHARE,
   MAX_PREVIEW_SHARE,
   MIN_PER_BULLET,
@@ -87,6 +90,10 @@ export interface QuestionStats {
   longestCorrect: { count: number; of: number }
   placement: Map<string, number>
   preview: number
+  /** Multi-select: per option count, how many questions and how often each position is correct. */
+  multiPositions: Map<number, { questions: number; correct: number[] }>
+  /** Yes/No sets: statements answered Yes, out of all statements. */
+  yesNo: { yes: number; of: number }
 }
 
 export function questionStats(questions: Question[], outline: Outline): QuestionStats {
@@ -99,6 +106,8 @@ export function questionStats(questions: Question[], outline: Outline): Question
   const placement = new Map<string, number>()
   const positions = [0, 0, 0, 0]
   const longestCorrect = { count: 0, of: 0 }
+  const multiPositions = new Map<number, { questions: number; correct: number[] }>()
+  const yesNo = { yes: 0, of: 0 }
   let preview = 0
   for (const q of questions) {
     q.bulletIds.forEach((b) => inc(perBullet, b))
@@ -113,6 +122,21 @@ export function questionStats(questions: Question[], outline: Outline): Question
       const idx = q.options.findIndex((o) => o.id === q.answer)
       if (idx >= 0) positions[idx] = (positions[idx] ?? 0) + 1
     }
+    if (q.format === 'multi') {
+      const n = q.options.length
+      const entry = multiPositions.get(n) ?? { questions: 0, correct: Array<number>(n).fill(0) }
+      entry.questions++
+      q.options.forEach((o, i) => {
+        if (q.answers.includes(o.id)) entry.correct[i] = (entry.correct[i] ?? 0) + 1
+      })
+      multiPositions.set(n, entry)
+    }
+    if (q.format === 'yesno') {
+      for (const st of q.statements) {
+        yesNo.of++
+        if (st.answer) yesNo.yes++
+      }
+    }
     if (q.format === 'single') {
       longestCorrect.of++
       const correct = q.options.find((o) => o.id === q.answer)
@@ -122,7 +146,7 @@ export function questionStats(questions: Question[], outline: Outline): Question
   }
   const domainTotal = [...perDomain.values()].reduce((a, b) => a + b, 0)
   const domainShare = new Map([...perDomain].map(([k, v]) => [k, domainTotal ? v / domainTotal : 0]))
-  return { total: questions.length, perBullet, perMachine, perDomain, domainShare, formats, difficulty, positions, longestCorrect, placement, preview }
+  return { total: questions.length, perBullet, perMachine, perDomain, domainShare, formats, difficulty, positions, longestCorrect, placement, preview, multiPositions, yesNo }
 }
 
 export function validateQuestions(
@@ -285,6 +309,20 @@ export function validateQuestions(
   }
   if (stats.longestCorrect.of >= 20 && stats.longestCorrect.count / stats.longestCorrect.of > MAX_LONGEST_CORRECT_SHARE) {
     errors.push(`The correct option is the longest in ${stats.longestCorrect.count}/${stats.longestCorrect.of} single-choice questions (max 40%)`)
+  }
+  for (const [n, m] of stats.multiPositions) {
+    if (m.questions < MIN_FOR_DISTRIBUTION) continue
+    m.correct.forEach((c, i) => {
+      if (c / m.questions > MAX_MULTI_POSITION_SHARE) {
+        errors.push(`Multi-select (${n} options): position ${i + 1} is correct in ${c}/${m.questions} questions (max 60%)`)
+      }
+    })
+  }
+  if (stats.yesNo.of >= MIN_FOR_DISTRIBUTION) {
+    const share = stats.yesNo.yes / stats.yesNo.of
+    if (share < YES_SHARE.min || share > YES_SHARE.max) {
+      errors.push(`Yes/No statements: Yes is the answer for ${stats.yesNo.yes}/${stats.yesNo.of} (must be 40–60%)`)
+    }
   }
   if (stats.total >= 20 && stats.preview / stats.total > MAX_PREVIEW_SHARE) {
     errors.push(`Preview questions are ${stats.preview}/${stats.total} (max 5%)`)

@@ -6,6 +6,12 @@ export const MAX_PREVIEW_SHARE = 0.05
 export const MAX_POSITION_SHARE = 0.35
 export const MAX_LONGEST_CORRECT_SHARE = 0.4
 export const NEAR_DUPLICATE_JACCARD = 0.8
+/** Multi-select: no option position may be correct in more than this share of questions with that option count. */
+export const MAX_MULTI_POSITION_SHARE = 0.6
+/** Yes/No statements: the share answered Yes must stay inside this range. */
+export const YES_SHARE = { min: 0.4, max: 0.6 }
+/** Distribution rules apply once a bank has at least this many items. */
+export const MIN_FOR_DISTRIBUTION = 10
 export const CASE_STUDY_COUNT = 4
 export const MIN_CASE_QUESTIONS = 6
 export const MAX_CASE_QUESTIONS = 8

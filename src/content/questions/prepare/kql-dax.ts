@@ -230,12 +230,12 @@ export const kqlDaxQuestions: Question[] = [
     stem: 'For each name in the dependencies table, you need the number of distinct type values. A fast estimate is acceptable. Which two KQL queries meet the goal? Choose two.',
     sources: [S.sqlToKql, S.kqlDcount],
     options: [
-      { id: 'a', text: 'dependencies | summarize dcount(type) by name', explain: 'Correct. dcount() returns an estimate of the distinct values per group, which the stem allows; Learn’s cheat sheet maps COUNT(DISTINCT) to it.' },
-      { id: 'b', text: 'dependencies | summarize by name, type | summarize count() by name', explain: 'Correct. The first summarize leaves one row per name and type; the second counts them per name, giving an exact count.' },
-      { id: 'c', text: 'dependencies | summarize count() by name, type', explain: 'This counts rows per name and type pair, not distinct types per name.' },
+      { id: 'a', text: 'dependencies | summarize count() by name, type', explain: 'This counts rows per name and type pair, not distinct types per name.' },
+      { id: 'b', text: 'dependencies | summarize dcount(type) by name', explain: 'Correct. dcount() returns an estimate of the distinct values per group, which the stem allows; Learn’s cheat sheet maps COUNT(DISTINCT) to it.' },
+      { id: 'c', text: 'dependencies | summarize by name, type | summarize count() by name', explain: 'Correct. The first summarize leaves one row per name and type; the second counts them per name, giving an exact count.' },
       { id: 'd', text: 'dependencies | distinct name | count', explain: 'This returns the number of distinct names, a single value.' },
     ],
-    answers: ['a', 'b'],
+    answers: ['b', 'c'],
   },
   {
     id: 'KT-13',

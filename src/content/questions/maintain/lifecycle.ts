@@ -222,12 +222,12 @@ export const lifecycleQuestions: Question[] = [
     stem: 'Which two files does Power BI Desktop’s generated .gitignore exclude from a project? Choose two.',
     sources: [S.pbip],
     options: [
-      { id: 'a', text: 'cache.abf', explain: 'Correct. The local data cache isn’t committed.' },
-      { id: 'b', text: 'localSettings.json', explain: 'Correct. User-specific local settings aren’t committed.' },
-      { id: 'c', text: 'definition.pbir', explain: 'The report definition is what you want in source control.' },
+      { id: 'a', text: 'definition.pbir', explain: 'The report definition is what you want in source control.' },
+      { id: 'b', text: 'cache.abf', explain: 'Correct. The local data cache isn’t committed.' },
+      { id: 'c', text: 'localSettings.json', explain: 'Correct. User-specific local settings aren’t committed.' },
       { id: 'd', text: 'The TMDL files', explain: 'TMDL holds the model metadata that should be committed.' },
     ],
-    answers: ['a', 'b'],
+    answers: ['b', 'c'],
   },
   {
     id: 'DT-07',
@@ -799,11 +799,11 @@ export const lifecycleQuestions: Question[] = [
     stem: 'You want report authors across the organization to find and reuse your shared semantic model. Which two actions help? Choose two.',
     sources: [S.sharedModels, S.endorsement],
     options: [
-      { id: 'a', text: 'Endorse the model as Promoted or Certified', explain: 'Correct. Endorsement helps people find trustworthy content.' },
-      { id: 'b', text: 'Grant Build permission to the authors', explain: 'Correct. Build lets them create content on the model.' },
-      { id: 'c', text: 'Export the model as a .pbids file', explain: 'A .pbids describes a data source connection, not a shared model.' },
-      { id: 'd', text: 'Turn off the XMLA endpoint', explain: 'This doesn’t help reuse.' },
+      { id: 'a', text: 'Export the model as a .pbids file', explain: 'A .pbids describes a data source connection, not a shared model.' },
+      { id: 'b', text: 'Turn off the XMLA endpoint', explain: 'This doesn’t help reuse.' },
+      { id: 'c', text: 'Endorse the model as Promoted or Certified', explain: 'Correct. Endorsement helps people find trustworthy content.' },
+      { id: 'd', text: 'Grant Build permission to the authors', explain: 'Correct. Build lets them create content on the model.' },
     ],
-    answers: ['a', 'b'],
+    answers: ['c', 'd'],
   },
 ]

@@ -268,11 +268,11 @@ export const queryQuestions: Question[] = [
     sources: [S.endpoint, S.queryWarehouse],
     options: [
       { id: 'a', text: 'UPDATE dbo.Orders SET Status = \'Closed\' WHERE OrderID = 5', explain: 'The endpoint is read-only over Delta tables; you can’t update data through it.' },
-      { id: 'b', text: 'A CREATE VIEW statement over two lakehouse tables', explain: 'Correct. You can create views, functions, and procedures in the SQL analytics endpoint.' },
-      { id: 'c', text: 'A SELECT that joins to another warehouse in the workspace by its three-part name', explain: 'Correct. Cross-database queries work from SQL analytics endpoints and warehouses in the same workspace.' },
-      { id: 'd', text: 'INSERT INTO dbo.Orders SELECT * FROM staging_orders', explain: 'Inserting isn’t possible through the endpoint. Use Spark to modify lakehouse data.' },
+      { id: 'b', text: 'INSERT INTO dbo.Orders SELECT * FROM staging_orders', explain: 'Inserting isn’t possible through the endpoint. Use Spark to modify lakehouse data.' },
+      { id: 'c', text: 'A CREATE VIEW statement over two lakehouse tables', explain: 'Correct. You can create views, functions, and procedures in the SQL analytics endpoint.' },
+      { id: 'd', text: 'A SELECT that joins to another warehouse in the workspace by its three-part name', explain: 'Correct. Cross-database queries work from SQL analytics endpoints and warehouses in the same workspace.' },
     ],
-    answers: ['b', 'c'],
+    answers: ['c', 'd'],
   },
 
   // ── Recipe Book: P2.1 views, functions, stored procedures ───────────
@@ -485,11 +485,11 @@ export const queryQuestions: Question[] = [
     stem: 'You are writing a SELECT in a Fabric warehouse. Which two kinds of user-defined objects can you reference in its FROM clause? Choose two.',
     sources: [S.createView, S.createFunction],
     options: [
-      { id: 'a', text: 'A stored procedure', explain: 'Procedures are run with EXEC; they can’t appear in FROM.' },
-      { id: 'b', text: 'A view', explain: 'Correct. A view behaves like a virtual table.' },
+      { id: 'a', text: 'A view', explain: 'Correct. A view behaves like a virtual table.' },
+      { id: 'b', text: 'A stored procedure', explain: 'Procedures are run with EXEC; they can’t appear in FROM.' },
       { id: 'c', text: 'An inline table-valued function', explain: 'Correct. A TVF returns a table and is queried in FROM.' },
       { id: 'd', text: 'A pipeline', explain: 'A pipeline is a Data Factory item that orchestrates activities, not a SQL object.' },
     ],
-    answers: ['b', 'c'],
+    answers: ['a', 'c'],
   },
 ]
