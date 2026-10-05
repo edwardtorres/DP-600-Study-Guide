@@ -15,6 +15,12 @@ export const migrations: Migration[] = [
     from: 1,
     migrate: (old) => ({ ...old, answers: [] }),
   },
+  {
+    // v2 → v3 (Step 5): the answer log may now hold puzzle plays (code 'z'), and
+    // machines may record failed-inspection days. Both are additive, so the data is unchanged.
+    from: 2,
+    migrate: (old) => ({ ...old }),
+  },
 ]
 
 export function runMigrations(

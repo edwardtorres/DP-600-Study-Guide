@@ -5,12 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && tsx scripts/check-bundle.ts",
     "preview": "vite preview",
     "lint": "oxlint",
     "typecheck": "tsc -b",
     "test": "vitest run",
     "test:watch": "vitest",
+    "e2e": "playwright test",
     "check:content": "tsx scripts/check-content.ts",
     "check:secrets": "tsx scripts/check-secrets.ts",
     "check": "npm run typecheck && npm run lint && npm test && npm run check:content && npm run check:secrets",
@@ -22,6 +23,7 @@
     "react-dom": "^19.2.8"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/vite": "^4.3.3",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",

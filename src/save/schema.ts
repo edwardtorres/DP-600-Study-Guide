@@ -1,4 +1,4 @@
-export const SAVE_VERSION = 2
+export const SAVE_VERSION = 3
 export const SAVE_KEY = 'fabric-mill:save'
 export const BACKUP_KEY = 'fabric-mill:save:corrupt-backup'
 
@@ -9,12 +9,16 @@ export interface Certification {
   kind: 'inspection' | 'placement'
 }
 
-/** Which kind of attempt an answer came from: start-up check, inspection, or placement. */
-export type AttemptCode = 's' | 'i' | 'p'
+/** Which kind of attempt an answer came from: start-up check, inspection, placement, or puzzle. */
+export type AttemptCode = 's' | 'i' | 'p' | 'z'
+export const ATTEMPT_CODES: readonly AttemptCode[] = ['s', 'i', 'p', 'z']
 export type AttemptKind = 'startup' | 'inspection' | 'placement'
 export const attemptCode: Record<AttemptKind, AttemptCode> = { startup: 's', inspection: 'i', placement: 'p' }
 
-/** One answered question, kept compact for spaced repetition: [questionId, correct, unix seconds, attempt]. */
+/**
+ * One answered question (or one puzzle play, code 'z'), kept compact for spaced
+ * repetition: [questionId or puzzleId, correct, unix seconds, attempt].
+ */
 export type AnswerEntry = [questionId: string, correct: 0 | 1, at: number, attempt: AttemptCode]
 
 export interface MachineProgress {
@@ -28,6 +32,8 @@ export interface MachineProgress {
   placementDays?: string[]
   /** Question ids of a placement check that was started but not yet submitted. */
   placementOpen?: string[]
+  /** Local calendar days (YYYY-MM-DD) of failed inspections, one entry per failure (recent days only). */
+  inspectionFails?: string[]
 }
 
 export interface SaveV1 {
@@ -42,12 +48,21 @@ export interface SaveV2 {
   version: 2
   createdAt: string
   updatedAt: string
+  machines: Record<string, Omit<MachineProgress, 'inspectionFails'>>
+  answers: [string, 0 | 1, number, 's' | 'i' | 'p'][]
+  settings: Record<string, never>
+}
+
+export interface SaveV3 {
+  version: 3
+  createdAt: string
+  updatedAt: string
   machines: Record<string, MachineProgress>
   answers: AnswerEntry[]
   settings: Record<string, never>
 }
 
-export type Save = SaveV2
+export type Save = SaveV3
 
 export function newSave(now: Date = new Date()): Save {
   const iso = now.toISOString()
@@ -97,6 +112,7 @@ function isMachineProgress(p: unknown): p is MachineProgress {
   }
   if (p.placementDays !== undefined && !(Array.isArray(p.placementDays) && p.placementDays.every(isDayKey))) return false
   if (p.placementOpen !== undefined && !isStringArray(p.placementOpen)) return false
+  if (p.inspectionFails !== undefined && !(Array.isArray(p.inspectionFails) && p.inspectionFails.every(isDayKey))) return false
   return true
 }
 
@@ -108,14 +124,33 @@ function isAnswerEntry(a: unknown): a is AnswerEntry {
     (a[1] === 0 || a[1] === 1) &&
     typeof a[2] === 'number' &&
     Number.isFinite(a[2]) &&
-    (a[3] === 's' || a[3] === 'i' || a[3] === 'p')
+    ATTEMPT_CODES.includes(a[3])
+  )
+}
+
+function hasSaveShell(v: unknown, version: number): v is Record<string, unknown> & { machines: Record<string, unknown>; answers: unknown[] } {
+  return (
+    isObject(v) &&
+    v.version === version &&
+    isIsoDate(v.createdAt) &&
+    isIsoDate(v.updatedAt) &&
+    isObject(v.settings) &&
+    isObject(v.machines) &&
+    Array.isArray(v.answers)
+  )
+}
+
+/** Structural check for version-2 saves (used by tests and migration fixtures). */
+export function isSaveV2(v: unknown): v is SaveV2 {
+  if (!hasSaveShell(v, 2)) return false
+  return (
+    Object.values(v.machines).every((p) => isMachineProgress(p) && p.inspectionFails === undefined) &&
+    v.answers.every((a) => isAnswerEntry(a) && a[3] !== 'z')
   )
 }
 
 /** Structural check for the current save version. */
-export function isSaveV2(v: unknown): v is SaveV2 {
-  if (!isObject(v) || v.version !== 2) return false
-  if (!isIsoDate(v.createdAt) || !isIsoDate(v.updatedAt)) return false
-  if (!isObject(v.settings) || !isObject(v.machines) || !Array.isArray(v.answers)) return false
+export function isSaveV3(v: unknown): v is SaveV3 {
+  if (!hasSaveShell(v, 3)) return false
   return Object.values(v.machines).every(isMachineProgress) && v.answers.every(isAnswerEntry)
 }

@@ -27,14 +27,16 @@ interface Props {
   questions: Question[]
   onSubmit: (correct: boolean[]) => AttemptOutcome
   onRetry?: () => void
+  /** Why a retry isn't allowed right now (asked after the result is recorded), or null if it is. */
+  retryBlocked?: () => string | null
   onClose: () => void
   onOpenPair: (machineId: string, pairId: string) => void
 }
 
-export function AttemptPanel({ machine, kind, questions, onSubmit, onRetry, onClose, onOpenPair }: Props) {
+export function AttemptPanel({ machine, kind, questions, onSubmit, onRetry, retryBlocked, onClose, onOpenPair }: Props) {
   const [responses, setResponses] = useState<Response[]>(() => questions.map(emptyResponse))
   const [index, setIndex] = useState(0)
-  const [result, setResult] = useState<{ correct: boolean[]; outcome: AttemptOutcome } | null>(null)
+  const [result, setResult] = useState<{ correct: boolean[]; outcome: AttemptOutcome; blocked: string | null } | null>(null)
   const top = useRef<HTMLDivElement>(null)
 
   useEffect(() => top.current?.focus(), [index, result])
@@ -45,7 +47,8 @@ export function AttemptPanel({ machine, kind, questions, onSubmit, onRetry, onCl
 
   const submit = () => {
     const correct = questions.map((qq, i) => isCorrect(qq, responses[i]!))
-    setResult({ correct, outcome: onSubmit(correct) })
+    const outcome = onSubmit(correct)
+    setResult({ correct, outcome, blocked: outcome === 'failed' ? (retryBlocked?.() ?? null) : null })
   }
 
   const right = result ? result.correct.filter(Boolean).length : 0
@@ -99,6 +102,11 @@ export function AttemptPanel({ machine, kind, questions, onSubmit, onRetry, onCl
                 </p>
                 <p className="mt-1 text-sm text-mill-200">{result.outcome === 'passed' ? passedText[kind] : result.outcome === 'failed' ? failedText[kind] : 'This attempt could not be recorded.'}</p>
                 <p className="mt-1 text-xs text-mill-400">A question counts only if every part of it is right.</p>
+                {result.blocked && (
+                  <p className="mt-2 text-sm font-semibold text-madder" data-testid="retry-blocked">
+                    {result.blocked}
+                  </p>
+                )}
               </div>
               {questions.map((qq, i) => (
                 <QuestionResult key={qq.id} index={i} question={qq} response={responses[i]!} correct={result.correct[i]!} onOpenPair={onOpenPair} />
@@ -138,7 +146,7 @@ export function AttemptPanel({ machine, kind, questions, onSubmit, onRetry, onCl
               <button type="button" onClick={onClose} className="rounded-lg border border-mill-600 px-4 py-2 text-sm text-mill-50">
                 Back to the mill
               </button>
-              {result.outcome === 'failed' && onRetry && kind !== 'placement' && (
+              {result.outcome === 'failed' && onRetry && kind !== 'placement' && !result.blocked && (
                 <button type="button" onClick={onRetry} className="rounded-lg bg-brass-400 px-4 py-2 text-sm font-semibold text-mill-950 hover:bg-brass-300">
                   Try again (new draw)
                 </button>

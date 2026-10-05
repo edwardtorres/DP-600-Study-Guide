@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { machineById } from '../data/machines'
 import { millGraph } from '../data/mill'
 import { newSave, type Save } from '../save/schema'
-import { allStates, beginPlacement, canAttempt, isPlaced, machineState, openNotes, passes, recordAttempt } from './state'
+import { INSPECTION_LOCK_REASON, allStates, beginPlacement, canAttempt, isPlaced, machineState, openNotes, passes, recordAttempt } from './state'
 
 const tz = 'America/Los_Angeles'
 const now = new Date('2026-10-04T19:00:00Z') // 12:00 in Los Angeles
@@ -71,6 +71,48 @@ describe('machine lifecycle', () => {
     expect(machineState(fc.id, millGraph, four.save)).toBe('certified')
     expect(four.save.machines[fc.id]?.certification).toMatchObject({ kind: 'inspection', score: 0.8 })
     expect(machineState('water-wheel', millGraph, four.save)).toBe('idle')
+  })
+
+  it('locks inspections for the rest of the local day after a second failure; the first retry is immediate', () => {
+    for (const [zone, at, lateSameDay, nextDay] of [
+      ['America/Los_Angeles', now, new Date('2026-10-05T06:59:00Z'), new Date('2026-10-05T07:01:00Z')],
+      ['Asia/Tokyo', new Date('2026-10-04T03:00:00Z'), new Date('2026-10-04T14:59:00Z'), new Date('2026-10-04T15:01:00Z')],
+    ] as const) {
+      const fc = m('founding-charter')
+      let save = openNotes(newSave(at), fc.id, at)
+      save = recordAttempt(save, attempt(fc.id, 'startup', [true, true]), fc, millGraph, at, zone).save
+      const fail = [true, true, true, false, false]
+      const first = recordAttempt(save, attempt(fc.id, 'inspection', fail), fc, millGraph, at, zone)
+      expect(first.outcome).toBe('failed')
+      // First retry: allowed straight away.
+      expect(canAttempt('inspection', fc, millGraph, first.save, at, zone)).toEqual({ ok: true })
+      const second = recordAttempt(first.save, attempt(fc.id, 'inspection', fail), fc, millGraph, at, zone)
+      expect(second.outcome).toBe('failed')
+      expect(canAttempt('inspection', fc, millGraph, second.save, at, zone)).toEqual({ ok: false, reason: INSPECTION_LOCK_REASON })
+      expect(canAttempt('inspection', fc, millGraph, second.save, lateSameDay, zone).ok).toBe(false)
+      const pass = attempt(fc.id, 'inspection', [true, true, true, true, true])
+      expect(recordAttempt(second.save, pass, fc, millGraph, lateSameDay, zone).outcome).toBe('rejected')
+      // Next local day: open again, and a pass certifies.
+      expect(canAttempt('inspection', fc, millGraph, second.save, nextDay, zone).ok).toBe(true)
+      expect(recordAttempt(second.save, pass, fc, millGraph, nextDay, zone).outcome).toBe('passed')
+      // Other machines aren't affected.
+      const ww = m('water-wheel')
+      let other = certify(second.save, 'founding-charter')
+      other = openNotes(other, ww.id, at)
+      other = recordAttempt(other, attempt(ww.id, 'startup', [true, true]), ww, millGraph, at, zone).save
+      expect(canAttempt('inspection', ww, millGraph, other, at, zone).ok).toBe(true)
+    }
+  })
+
+  it('a pass after one failed inspection certifies normally', () => {
+    const fc = m('founding-charter')
+    let save = openNotes(newSave(now), fc.id, now)
+    save = recordAttempt(save, attempt(fc.id, 'startup', [true, true]), fc, millGraph, now, tz).save
+    save = recordAttempt(save, attempt(fc.id, 'inspection', [false, false, true, true, true]), fc, millGraph, now, tz).save
+    expect(save.machines[fc.id]?.inspectionFails).toEqual(['2026-10-04'])
+    const pass = recordAttempt(save, attempt(fc.id, 'inspection', [true, true, true, true, false]), fc, millGraph, now, tz)
+    expect(pass.outcome).toBe('passed')
+    expect(machineState(fc.id, millGraph, pass.save)).toBe('certified')
   })
 
   it('placement: carryover only, even while locked, 5/5 required, unlocks dependents, marks placed', () => {

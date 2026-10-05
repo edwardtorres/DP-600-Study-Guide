@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest'
 import type { Migration } from './migrations'
 import { migrations, runMigrations } from './migrations'
 import v1Fixture from './fixtures/save-v1.json'
-import { BACKUP_KEY, SAVE_KEY, SAVE_VERSION, isSaveV1, isSaveV2, newSave } from './schema'
+import v2Fixture from './fixtures/save-v2.json'
+import { BACKUP_KEY, SAVE_KEY, SAVE_VERSION, isSaveV1, isSaveV2, isSaveV3, newSave } from './schema'
 import { backupSave, exportSave, importSave, loadSave, writeSave, type StorageLike } from './storage'
 
 function memory(initial: Record<string, string> = {}): StorageLike & { data: Record<string, string> } {
@@ -13,24 +14,38 @@ function memory(initial: Record<string, string> = {}): StorageLike & { data: Rec
 const now = new Date('2026-10-04T12:00:00Z')
 
 describe('save system', () => {
-  it('starts a fresh version-2 save when nothing is stored', () => {
+  it('starts a fresh version-3 save when nothing is stored', () => {
     const r = loadSave({ storage: memory(), now })
     expect(r.status).toBe('new')
     expect(r.save).toEqual(newSave(now))
-    expect(SAVE_VERSION).toBe(2)
+    expect(SAVE_VERSION).toBe(3)
     expect(r.save.answers).toEqual([])
   })
 
-  it('migrates a real version-1 save to version 2 and keeps its progress', () => {
+  it('migrates a real version-1 save to version 3 and keeps its progress', () => {
     expect(isSaveV1(v1Fixture)).toBe(true)
     const r = loadSave({ storage: memory({ [SAVE_KEY]: JSON.stringify(v1Fixture) }), knownMachineIds: ['founding-charter', 'water-wheel'] })
     expect(r.status).toBe('loaded')
     if (r.status !== 'loaded') return
     expect(r.migratedFrom).toBe(1)
-    expect(isSaveV2(r.save)).toBe(true)
+    expect(isSaveV3(r.save)).toBe(true)
+    expect(r.save.version).toBe(3)
     expect(r.save.createdAt).toBe(v1Fixture.createdAt)
     expect(r.save.machines['founding-charter']).toEqual({ startedAt: '2026-10-01T08:20:00.000Z' })
     expect(r.save.answers).toEqual([])
+  })
+
+  it('migrates a real version-2 save (captured from the Step 4 app) to version 3 unchanged', () => {
+    expect(isSaveV2(v2Fixture)).toBe(true)
+    const ids = Object.keys(v2Fixture.machines)
+    const r = loadSave({ storage: memory({ [SAVE_KEY]: JSON.stringify(v2Fixture) }), knownMachineIds: ids })
+    expect(r.status).toBe('loaded')
+    if (r.status !== 'loaded') return
+    expect(r.migratedFrom).toBe(2)
+    expect(isSaveV3(r.save)).toBe(true)
+    expect(r.save).toEqual({ ...v2Fixture, version: 3 })
+    expect(r.save.answers.length).toBeGreaterThan(0)
+    expect(r.save.machines['founding-charter']?.certification?.kind).toBe('inspection')
   })
 
   it('validates the answer log and new machine fields', () => {
@@ -39,11 +54,16 @@ describe('save system', () => {
       machines: { 'water-wheel': { notesOpenedAt: now.toISOString(), lastDraw: { inspection: ['FO-04'] }, placementDays: ['2026-10-04'] } },
       answers: [['FO-04', 1, 1759579200, 'i']],
     }
-    expect(isSaveV2(good)).toBe(true)
-    expect(isSaveV2({ ...good, answers: [['FO-04', 2, 1, 'i']] })).toBe(false)
-    expect(isSaveV2({ ...good, answers: [['FO-04', 1, 1, 'x']] })).toBe(false)
-    expect(isSaveV2({ ...good, machines: { 'water-wheel': { placementDays: ['4 Oct'] } } })).toBe(false)
-    expect(isSaveV2({ ...good, machines: { 'water-wheel': { lastDraw: { review: [] } } } })).toBe(false)
+    expect(isSaveV3(good)).toBe(true)
+    expect(isSaveV3({ ...good, answers: [['QO-T01', 1, 1759579200, 'z']] })).toBe(true)
+    expect(isSaveV3({ ...good, machines: { 'water-wheel': { inspectionFails: ['2026-10-04', '2026-10-04'] } } })).toBe(true)
+    expect(isSaveV3({ ...good, answers: [['FO-04', 2, 1, 'i']] })).toBe(false)
+    expect(isSaveV3({ ...good, answers: [['FO-04', 1, 1, 'x']] })).toBe(false)
+    expect(isSaveV3({ ...good, machines: { 'water-wheel': { placementDays: ['4 Oct'] } } })).toBe(false)
+    expect(isSaveV3({ ...good, machines: { 'water-wheel': { inspectionFails: ['today'] } } })).toBe(false)
+    expect(isSaveV3({ ...good, machines: { 'water-wheel': { lastDraw: { review: [] } } } })).toBe(false)
+    // A v2 save can't hold puzzle plays.
+    expect(isSaveV2({ ...good, version: 2, answers: [['QO-T01', 1, 1, 'z']] })).toBe(false)
   })
 
   it('imports a valid save file, migrating older versions, and rejects bad files without side effects', () => {
@@ -110,7 +130,7 @@ describe('save system', () => {
     expect(r).toEqual({
       status: 'loaded',
       migratedFrom: 0,
-      save: { version: 2, createdAt: v0.created, updatedAt: v0.created, machines: { 'water-wheel': { startedAt: v0.created } }, settings: {}, answers: [] },
+      save: { version: 3, createdAt: v0.created, updatedAt: v0.created, machines: { 'water-wheel': { startedAt: v0.created } }, settings: {}, answers: [] },
     })
     expect(() => runMigrations({ version: 0 }, 1, [])).toThrow(/No migration/)
   })

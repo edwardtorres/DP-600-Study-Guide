@@ -1,10 +1,17 @@
-import type { Question } from '../content/questions/types'
-import { questionDomain } from '../content/questions/validate'
 import type { Graph } from '../data/graph'
 import type { DomainId, FloorId, Machine, Outline } from '../data/types'
-import type { AnswerEntry, Save } from '../save/schema'
+import type { AnswerEntry, AttemptCode, Save } from '../save/schema'
 import { isCertified, isPlaced } from './state'
 import { addDays, dayKey, localTimeZone } from './time'
+
+/**
+ * Anything that can appear in the answer log: a question or a puzzle. Both carry
+ * a difficulty (for XP) and the outline bullets they test (for readiness).
+ */
+export interface Scorable {
+  difficulty: 1 | 2 | 3
+  bulletIds: string[]
+}
 
 // ── XP and levels ──────────────────────────────────────────────────────
 
@@ -14,10 +21,10 @@ export const XP_BY_DIFFICULTY = { 1: 10, 2: 20, 3: 30 } as const
 export const REPEAT_XP_SHARE = 0.25
 
 /**
- * XP from the answer log. The first correct answer to a question earns full XP;
- * later correct answers earn 25% (rounded down, at least 1). XP never certifies anything.
+ * XP from the answer log. The first correct answer to a question (or puzzle) earns
+ * full XP; later correct answers earn 25% (rounded down, at least 1). XP never certifies anything.
  */
-export function totalXp(answers: AnswerEntry[], questionsById: Map<string, Question>): number {
+export function totalXp(answers: AnswerEntry[], questionsById: Map<string, Scorable>): number {
   const seen = new Set<string>()
   let xp = 0
   for (const [id, correct] of answers) {
@@ -170,6 +177,19 @@ export function placedCount(save: Save, machines: Machine[]): { placed: number; 
 /** How many recent answers per domain feed readiness, and the minimum before a score shows. */
 export const READINESS_WINDOW = 40
 export const READINESS_MIN_ANSWERS = 10
+/**
+ * Which answers count toward readiness: inspections, placements, and puzzles.
+ * Start-up checks ('s') don't. Step 7 adds the review and mock-exam codes here.
+ */
+export const READINESS_CODES: readonly AttemptCode[] = ['i', 'p', 'z']
+
+/** The domain of an item's first outline bullet. */
+export function domainOf(bulletIds: string[], outline: Outline): DomainId | null {
+  const first = bulletIds[0]
+  if (!first) return null
+  for (const d of outline.domains) for (const s of d.sections) if (s.bullets.some((b) => b.id === first)) return d.id
+  return null
+}
 
 export interface DomainReadiness {
   domain: DomainId
@@ -195,18 +215,20 @@ export function domainWeights(outline: Outline): Map<DomainId, number> {
 }
 
 /**
- * Readiness is accuracy, never XP. For each domain: accuracy over the most
- * recent 40 answers in that domain, multiplied by coverage (distinct bullets
- * answered ÷ bullets in the domain, capped at 1). Overall is the weighted mean
- * using the official domain percentages.
+ * Readiness is accuracy, never XP. Only inspection, placement, and puzzle answers
+ * count (READINESS_CODES); start-up checks don't. For each domain: accuracy over
+ * the most recent 40 counted answers in that domain, multiplied by coverage
+ * (distinct bullets answered ÷ bullets in the domain, capped at 1). Overall is the
+ * weighted mean using the official domain percentages.
  */
-export function readiness(answers: AnswerEntry[], questionsById: Map<string, Question>, outline: Outline): Readiness {
+export function readiness(answers: AnswerEntry[], questionsById: Map<string, Scorable>, outline: Outline): Readiness {
   const weights = domainWeights(outline)
+  const counted = answers.filter(([, , , code]) => READINESS_CODES.includes(code))
   const domains: DomainReadiness[] = outline.domains.map((d) => {
     const bulletCount = d.sections.reduce((n, s) => n + s.bullets.length, 0)
-    const inDomain = answers.filter(([id]) => {
+    const inDomain = counted.filter(([id]) => {
       const q = questionsById.get(id)
-      return q ? questionDomain(q, outline) === d.id : false
+      return q ? domainOf(q.bulletIds, outline) === d.id : false
     })
     const recent = inDomain.slice(-READINESS_WINDOW)
     const right = recent.filter(([, c]) => c === 1).length

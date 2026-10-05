@@ -15,22 +15,13 @@ import { millGraph } from './data/mill'
 import { outline } from './data/outline'
 import { drawFor, machinePool, placementPool } from './game/draw'
 import { badges as computeBadges, levelFor, readiness as computeReadiness, streak as computeStreak, totalXp } from './game/progress'
-import { mulberry32, newAttemptSeed, shuffleForAttempt } from './game/shuffle'
+import { makeRandom } from './game/random'
+import { newAttemptSeed, shuffleForAttempt } from './game/shuffle'
 import { allStates, beginPlacement, canAttempt, isPlaced, openNotes, recordAttempt } from './game/state'
 import { newSave, type AttemptKind, type Save } from './save/schema'
 import { backupSave, loadSave, writeSave, type LoadResult } from './save/storage'
 
 const questionsById = new Map(allQuestions.map((q) => [q.id, q]))
-
-/**
- * Randomness for draws and shuffles. `?seed=N` in the URL makes every draw and
- * shuffle repeatable (used by the Playwright run); otherwise it is Math.random.
- */
-function makeRandom(): () => number {
-  if (typeof window === 'undefined') return Math.random
-  const seed = new URLSearchParams(window.location.search).get('seed')
-  return seed !== null && /^\d+$/.test(seed) ? mulberry32(Number(seed)) : Math.random
-}
 
 interface Attempt {
   key: number
@@ -43,7 +34,7 @@ export default function App() {
   const [initial] = useState<LoadResult>(() => loadSave({ knownMachineIds: machineById.keys() }))
   const [save, setSave] = useState(initial.save)
   const saveRef = useRef(save)
-  const [rand] = useState(makeRandom)
+  const [rand] = useState(() => makeRandom())
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [focusPairId, setFocusPairId] = useState<string | null>(null)
   const [dialog, setDialog] = useState<'glossary' | 'settings' | 'badges' | null>(null)
@@ -179,6 +170,10 @@ export default function App() {
           questions={attempt.questions}
           onSubmit={submitAttempt}
           onRetry={() => startAttempt(attempt.machineId, attempt.kind)}
+          retryBlocked={() => {
+            const a = canAttempt(attempt.kind, attemptMachine, millGraph, saveRef.current)
+            return a.ok ? null : a.reason
+          }}
           onClose={() => setAttempt(null)}
           onOpenPair={(machineId, pairId) => {
             setAttempt(null)

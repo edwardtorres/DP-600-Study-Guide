@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { allQuestions } from '../content/questions'
-import { hashString, mulberry32, shuffleForAttempt } from './shuffle'
+import { displacedCount, hashString, minDisplaced, mulberry32, shuffleForAttempt } from './shuffle'
 
 const order = (q: ReturnType<typeof shuffleForAttempt>) => {
   switch (q.format) {
@@ -36,15 +36,25 @@ describe('render-time shuffle', () => {
     }
   })
 
-  it('never shows ordering items in the correct order', () => {
+  it('starts every ordering with at least half its items (rounded up) out of place, across 200 seeds', () => {
     const orders = allQuestions.filter((q) => q.format === 'order')
+    expect(orders.length).toBeGreaterThan(0)
     for (const q of orders) {
       for (let seed = 0; seed < 200; seed++) {
         const s = shuffleForAttempt(q, seed)
         if (s.format !== 'order') throw new Error('format changed')
-        expect(s.items.map((i) => i.id)).not.toEqual(q.answerOrder)
+        const ids = s.items.map((i) => i.id)
+        expect(ids).not.toEqual(q.answerOrder)
+        expect(displacedCount(ids, q.answerOrder)).toBeGreaterThanOrEqual(minDisplaced(q.items.length))
+        expect([...ids].sort()).toEqual([...q.answerOrder].sort())
       }
     }
+  })
+
+  it('counts displaced items and rounds the minimum up', () => {
+    expect(displacedCount(['a', 'b', 'c'], ['a', 'b', 'c'])).toBe(0)
+    expect(displacedCount(['b', 'a', 'c'], ['a', 'b', 'c'])).toBe(2)
+    expect([2, 3, 4, 5, 6].map(minDisplaced)).toEqual([1, 2, 2, 3, 3])
   })
 
   it('keeps ids, keys, and explanations together', () => {

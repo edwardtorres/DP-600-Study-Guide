@@ -104,6 +104,24 @@ describe('readiness', () => {
     expect(readiness(log2, byId(qs), outline).domains.find((d) => d.domain === 'PREPARE')!.score).toBe(50)
   })
 
+  it('counts inspection, placement, and puzzle answers, never start-up checks', () => {
+    const prepBullets = outline.domains.find((d) => d.id === 'PREPARE')!.sections.flatMap((s) => s.bullets.map((b) => b.id))
+    const qs = prepBullets.map((b, i) => q(`p${i}`, 1, b))
+    const prep = (log: AnswerEntry[]) => readiness(log, byId(qs), outline).domains.find((d) => d.domain === 'PREPARE')!
+    const base: AnswerEntry[] = qs.slice(0, 10).map((x, i) => [x.id, 1, i, 'i'])
+    // Start-up answers (even wrong ones on new bullets) change nothing.
+    const startups: AnswerEntry[] = qs.slice(10).map((x, i) => [x.id, 0, 100 + i, 's'])
+    expect(prep([...base, ...startups])).toEqual(prep(base))
+    // Placement answers count.
+    expect(prep([...base, [qs[11]!.id, 0, 200, 'p']]).answered).toBe(11)
+    // A puzzle play counts toward accuracy and covers its bullets.
+    const puzzle = { id: 'QO-T01', difficulty: 2 as const, bulletIds: [prepBullets[15]!, prepBullets[16]!] }
+    const lookup = new Map<string, { difficulty: 1 | 2 | 3; bulletIds: string[] }>([...byId(qs), [puzzle.id, puzzle]])
+    const withPuzzle = readiness([...base, [puzzle.id, 1, 300, 'z']], lookup, outline).domains.find((d) => d.domain === 'PREPARE')!
+    expect(withPuzzle.answered).toBe(11)
+    expect(withPuzzle.coverage).toBeCloseTo(12 / prepBullets.length, 5)
+  })
+
   it('computes the weighted overall once every domain has a score', () => {
     const all = outline.domains.flatMap((d) => d.sections.flatMap((s) => s.bullets.map((b) => q(`${b.id}`, 1, b.id))))
     const log: AnswerEntry[] = all.map((x, i) => [x.id, x.bulletIds[0]!.startsWith('P') ? 1 : 0, i, 'i'])

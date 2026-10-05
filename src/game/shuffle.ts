@@ -36,13 +36,20 @@ export function shuffled<T>(items: readonly T[], rand: () => number): T[] {
   return out
 }
 
-const sameOrder = (ids: string[], answer: string[]) => ids.length === answer.length && ids.every((id, i) => id === answer[i])
+/** How many items sit somewhere other than their correct position. */
+export function displacedCount(ids: string[], answer: string[]): number {
+  return ids.filter((id, i) => id !== answer[i]).length
+}
+
+/** An ordering must start with at least half its items (rounded up) out of place. */
+export const minDisplaced = (n: number) => Math.ceil(n / 2)
 
 /**
  * Returns the question as it should be displayed in one attempt. The same
  * (attemptSeed, question) pair always gives the same order; a new attempt seed
  * gives a new order. Ids and keys are untouched, so explanations stay with
- * their options and scoring is unaffected. Ordering items never start solved.
+ * their options and scoring is unaffected. Ordering items start with at least
+ * half of them (rounded up) out of their correct position.
  */
 export function shuffleForAttempt(q: Question, attemptSeed: number): Question {
   const rand = mulberry32((attemptSeed ^ hashString(q.id)) >>> 0)
@@ -57,12 +64,16 @@ export function shuffleForAttempt(q: Question, attemptSeed: number): Question {
     case 'dropdown':
       return { ...q, slots: q.slots.map((s) => ({ ...s, options: shuffled(s.options, rand) })) }
     case 'order': {
+      const need = minDisplaced(q.items.length)
+      const ok = (list: typeof q.items) => displacedCount(list.map((i) => i.id), q.answerOrder) >= need
       let items = shuffled(q.items, rand)
-      // With 2+ items a non-solved order exists; reshuffle until we find one.
-      for (let tries = 0; items.length > 1 && sameOrder(items.map((i) => i.id), q.answerOrder) && tries < 50; tries++) {
-        items = shuffled(q.items, rand)
+      for (let tries = 0; !ok(items) && tries < 50; tries++) items = shuffled(q.items, rand)
+      if (!ok(items)) {
+        // Rotating the correct order by one moves every item (2+ items).
+        const byId = new Map(q.items.map((i) => [i.id, i]))
+        const solved = q.answerOrder.map((id) => byId.get(id)!)
+        items = [...solved.slice(1), solved[0]!]
       }
-      if (items.length > 1 && sameOrder(items.map((i) => i.id), q.answerOrder)) items = [...items.slice(1), items[0]!]
       return { ...q, items }
     }
   }

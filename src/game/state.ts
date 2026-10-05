@@ -2,10 +2,14 @@ import type { Graph } from '../data/graph'
 import type { Machine, MachineState } from '../data/types'
 import { attemptCode, type AnswerEntry, type AttemptKind, type MachineProgress, type Save } from '../save/schema'
 import { INSPECTION_SIZE, PLACEMENT_SIZE, STARTUP_SIZE } from './draw'
-import { dayKey, localTimeZone } from './time'
+import { addDays, dayKey, localTimeZone } from './time'
 
 /** Inspections certify at 80% or more (4 of 5). */
 export const INSPECTION_PASS = 0.8
+/** After this many failed inspections on one machine in a local day, its inspections wait until the next day. */
+export const INSPECTION_FAILS_PER_DAY = 2
+export const INSPECTION_LOCK_REASON =
+  'Two inspections failed today. Inspections for this machine reopen tomorrow, giving you time to study the notes and explanations.'
 
 export function isCertified(save: Save, id: string): boolean {
   return save.machines[id]?.certification !== undefined
@@ -63,7 +67,10 @@ export function canAttempt(
     return { ok: true }
   }
   if (kind === 'inspection') {
-    return state === 'running' ? { ok: true } : { ok: false, reason: 'Start the machine first.' }
+    if (state !== 'running') return { ok: false, reason: 'Start the machine first.' }
+    const today = dayKey(now, timeZone)
+    const failsToday = (progress?.inspectionFails ?? []).filter((d) => d === today).length
+    return failsToday >= INSPECTION_FAILS_PER_DAY ? { ok: false, reason: INSPECTION_LOCK_REASON } : { ok: true }
   }
   if (!machine.pl300) return { ok: false, reason: 'Placement checks are only for PL-300 carryover machines.' }
   if (state === 'certified') return { ok: false, reason: 'Already certified.' }
@@ -148,6 +155,11 @@ export function recordAttempt(
   if (attempt.kind === 'placement') patch.placementOpen = undefined
 
   const passed = passes(attempt.kind, attempt.correct)
+  if (attempt.kind === 'inspection' && !passed) {
+    // Keep only recent days; the lock only ever looks at today.
+    const recent = (prev.inspectionFails ?? []).filter((d) => d >= addDays(dayKey(now, timeZone), -7))
+    patch.inspectionFails = [...recent, dayKey(now, timeZone)]
+  }
   if (passed) {
     const score = attempt.correct.filter(Boolean).length / attempt.correct.length
     if (attempt.kind === 'startup') patch.startedAt = now.toISOString()

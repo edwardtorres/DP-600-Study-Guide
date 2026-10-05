@@ -10,5 +10,7 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/test/setup.ts'],
+    // Browser flows run with `npm run e2e` (Playwright), not here.
+    exclude: ['e2e/**', 'node_modules/**', 'dist/**'],
   },
 })

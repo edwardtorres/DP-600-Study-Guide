@@ -114,10 +114,19 @@ export function MachineDetail({ machine, state, graph, edges, machinesById, stat
         )}
         {state === 'running' && (
           <>
-            <button type="button" onClick={() => onAttempt('inspection')} className="rounded-lg bg-indigo-thread px-4 py-2 font-semibold text-mill-950 hover:bg-indigo-200">
+            <button
+              type="button"
+              onClick={() => onAttempt('inspection')}
+              disabled={!availability.inspection.ok}
+              className="rounded-lg bg-indigo-thread px-4 py-2 font-semibold text-mill-950 hover:bg-indigo-200 disabled:opacity-40"
+            >
               Take the inspection (5 questions, 4 to pass)
             </button>
-            <p className="text-xs text-mill-400">Drawn from {poolSizes.inspection} questions on this machine; every exam skill on it is covered.</p>
+            <p className="text-xs text-mill-400" data-testid="inspection-note">
+              {availability.inspection.ok
+                ? `Drawn from ${poolSizes.inspection} questions on this machine; every exam skill on it is covered.`
+                : availability.inspection.reason}
+            </p>
           </>
         )}
         {state === 'certified' && (
