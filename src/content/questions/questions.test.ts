@@ -116,3 +116,13 @@ describe('question bank', () => {
     }
   })
 })
+
+describe('arrange', () => {
+  it('rotates answer positions and keeps each explanation with its option', async () => {
+    const { arrange } = await import('./arrange')
+    const qs = Array.from({ length: 8 }, (_, i) => single(`r${i}`, { answer: 'c' }))
+    const out = arrange(qs) as SingleQuestion[]
+    expect(out.map((q) => q.answer)).toEqual(['a', 'b', 'c', 'd', 'a', 'b', 'c', 'd'])
+    for (const q of out) expect(q.options.find((o) => o.id === q.answer)?.text).toBe('Direct Lake')
+  })
+})

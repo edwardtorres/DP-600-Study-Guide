@@ -421,6 +421,10 @@ export const orientationNotes: MachineNotes[] = [
     ],
     needsVerification: [
       {
+        claim: 'The trial capacity size: "F4 or F64" (trial page) vs only "64 capacity units" (licenses page SKU table).',
+        why: 'Raised by the Step 3 question reviewer. Learn pages disagree; no question depends on the trial size until Step 8 resolves it.',
+      },
+      {
         claim: 'The trial page lists "Real-Time Analytics" as a workload, while the Fabric overview says "Real-Time Intelligence".',
         why: 'No Learn page found that states the rename explicitly. Confirm in Step 8 before listing it as a renamed feature.',
       },
