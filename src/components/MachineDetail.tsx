@@ -135,7 +135,7 @@ export function MachineDetail({ machine, state, graph, edges, machinesById, stat
             </button>
             <p className="text-xs text-mill-400">
               {availability.placement.ok
-                ? `Tests what DP-600 adds beyond PL-300 (${poolSizes.placement} questions in the pool). One attempt per day, available even while locked.`
+                ? `Tests what DP-600 adds beyond PL-300 (${poolSizes.placement} questions in the pool). One attempt per day (it counts once you start), available even while locked.`
                 : availability.placement.reason}
             </p>
           </>

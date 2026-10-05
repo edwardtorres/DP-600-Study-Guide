@@ -73,6 +73,35 @@ export function canAttempt(
   return { ok: true }
 }
 
+/**
+ * Starting a placement check uses up that machine's attempt for the local day,
+ * even if it's closed without submitting, so the pool can't be previewed by
+ * opening and closing it. Only this draw can then be submitted, once.
+ */
+export function beginPlacement(
+  save: Save,
+  machine: Machine,
+  graph: Graph,
+  questionIds: string[],
+  now: Date = new Date(),
+  timeZone: string = localTimeZone(),
+): Save {
+  if (!canAttempt('placement', machine, graph, save, now, timeZone).ok) return save
+  const prev = save.machines[machine.id] ?? {}
+  return updateMachine(
+    save,
+    machine.id,
+    {
+      placementDays: [...(prev.placementDays ?? []), dayKey(now, timeZone)],
+      lastDraw: { ...prev.lastDraw, placement: questionIds },
+      placementOpen: questionIds,
+    },
+    now,
+  )
+}
+
+const sameIds = (a: string[] | undefined, b: string[]) => !!a && a.length === b.length && a.every((id, i) => id === b[i])
+
 export interface AttemptResult {
   machineId: string
   kind: AttemptKind
@@ -106,13 +135,17 @@ export function recordAttempt(
   timeZone: string = localTimeZone(),
 ): { save: Save; outcome: AttemptOutcome } {
   if (machine.id !== attempt.machineId || attempt.questionIds.length !== attempt.correct.length) return { save, outcome: 'rejected' }
-  if (!canAttempt(attempt.kind, machine, graph, save, now, timeZone).ok) return { save, outcome: 'rejected' }
+  const allowed =
+    attempt.kind === 'placement'
+      ? !!machine.pl300 && !isCertified(save, machine.id) && sameIds(save.machines[machine.id]?.placementOpen, attempt.questionIds)
+      : canAttempt(attempt.kind, machine, graph, save, now, timeZone).ok
+  if (!allowed) return { save, outcome: 'rejected' }
 
   const at = Math.floor(now.getTime() / 1000)
   const entries: AnswerEntry[] = attempt.questionIds.map((id, i) => [id, attempt.correct[i] ? 1 : 0, at, attemptCode[attempt.kind]])
   const prev = save.machines[machine.id] ?? {}
   const patch: Partial<MachineProgress> = { lastDraw: { ...prev.lastDraw, [attempt.kind]: attempt.questionIds } }
-  if (attempt.kind === 'placement') patch.placementDays = [...(prev.placementDays ?? []), dayKey(now, timeZone)]
+  if (attempt.kind === 'placement') patch.placementOpen = undefined
 
   const passed = passes(attempt.kind, attempt.correct)
   if (passed) {

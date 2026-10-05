@@ -16,7 +16,7 @@ import { outline } from './data/outline'
 import { drawFor, machinePool, placementPool } from './game/draw'
 import { badges as computeBadges, levelFor, readiness as computeReadiness, streak as computeStreak, totalXp } from './game/progress'
 import { mulberry32, newAttemptSeed, shuffleForAttempt } from './game/shuffle'
-import { allStates, canAttempt, isPlaced, openNotes, recordAttempt } from './game/state'
+import { allStates, beginPlacement, canAttempt, isPlaced, openNotes, recordAttempt } from './game/state'
 import { newSave, type AttemptKind, type Save } from './save/schema'
 import { backupSave, loadSave, writeSave, type LoadResult } from './save/storage'
 
@@ -88,6 +88,12 @@ export default function App() {
       const previous = saveRef.current.machines[machineId]?.lastDraw?.[kind] ?? []
       const seed = rand === Math.random ? newAttemptSeed() : Math.floor(rand() * 0xffffffff)
       const drawn = drawFor(kind, machine, allQuestions, previous, rand)
+      if (kind === 'placement') {
+        // Starting a placement uses the day's attempt, even if it's closed unsubmitted.
+        const next = beginPlacement(saveRef.current, machine, millGraph, drawn.map((q) => q.id))
+        saveRef.current = next
+        setSave(next)
+      }
       setAttempt((a) => ({ key: (a?.key ?? 0) + 1, machineId, kind, questions: drawn.map((q) => shuffleForAttempt(q, seed)) }))
     },
     [rand],

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { machineById } from '../data/machines'
 import { millGraph } from '../data/mill'
 import { newSave, type Save } from '../save/schema'
-import { allStates, canAttempt, isPlaced, machineState, openNotes, passes, recordAttempt } from './state'
+import { allStates, beginPlacement, canAttempt, isPlaced, machineState, openNotes, passes, recordAttempt } from './state'
 
 const tz = 'America/Los_Angeles'
 const now = new Date('2026-10-04T19:00:00Z') // 12:00 in Los Angeles
@@ -17,6 +17,13 @@ const attempt = (machineId: string, kind: 'startup' | 'inspection' | 'placement'
   questionIds: correct.map((_, i) => `Q-${i}`),
   correct,
 })
+
+/** Starts a placement (using the day's attempt) and submits it. */
+const place = (save: Save, id: string, correct: boolean[], at: Date = now) => {
+  const a = attempt(id, 'placement', correct)
+  const started = beginPlacement(save, m(id), millGraph, a.questionIds, at, tz)
+  return recordAttempt(started, a, m(id), millGraph, at, tz)
+}
 
 describe('machine lifecycle', () => {
   it('opens only the starting machine on a new save', () => {
@@ -71,11 +78,12 @@ describe('machine lifecycle', () => {
     const save = newSave(now)
     expect(machineState(dax.id, millGraph, save)).toBe('locked')
     expect(canAttempt('placement', m('bale-catalog'), millGraph, save, now, tz).ok).toBe(false)
-    const fail = recordAttempt(save, attempt(dax.id, 'placement', [true, true, true, true, false]), dax, millGraph, now, tz)
+    expect(recordAttempt(save, attempt(dax.id, 'placement', [true, true, true, true, true]), dax, millGraph, now, tz).outcome).toBe('rejected')
+    const fail = place(save, dax.id, [true, true, true, true, false])
     expect(fail.outcome).toBe('failed')
     expect(machineState(dax.id, millGraph, fail.save)).toBe('locked')
 
-    const pass = recordAttempt(save, attempt(dax.id, 'placement', [true, true, true, true, true]), dax, millGraph, now, tz)
+    const pass = place(save, dax.id, [true, true, true, true, true])
     expect(pass.outcome).toBe('passed')
     expect(machineState(dax.id, millGraph, pass.save)).toBe('certified')
     expect(isPlaced(pass.save, dax.id)).toBe(true)
@@ -89,18 +97,36 @@ describe('machine lifecycle', () => {
 
   it('allows one placement attempt per machine per local day', () => {
     const dax = m('dax-scale')
-    const first = recordAttempt(newSave(now), attempt(dax.id, 'placement', [false, true, true, true, true]), dax, millGraph, now, tz)
+    const first = place(newSave(now), dax.id, [false, true, true, true, true])
     expect(first.save.machines[dax.id]?.placementDays).toEqual(['2026-10-04'])
+    expect(first.save.machines[dax.id]?.placementOpen).toBeUndefined()
     expect(canAttempt('placement', dax, millGraph, first.save, now, tz)).toMatchObject({ ok: false })
     // 23:59 local the same day: still blocked.
     const lateSameDay = new Date('2026-10-05T06:59:00Z')
     expect(canAttempt('placement', dax, millGraph, first.save, lateSameDay, tz).ok).toBe(false)
     expect(recordAttempt(first.save, attempt(dax.id, 'placement', [true, true, true, true, true]), dax, millGraph, lateSameDay, tz).outcome).toBe('rejected')
+    expect(beginPlacement(first.save, dax, millGraph, ['Q-0'], lateSameDay, tz)).toBe(first.save)
     // 00:01 local the next day: allowed.
     const nextDay = new Date('2026-10-05T07:01:00Z')
     expect(canAttempt('placement', dax, millGraph, first.save, nextDay, tz).ok).toBe(true)
     // Another carryover machine isn't affected.
     expect(canAttempt('placement', m('loom-gearbox'), millGraph, first.save, now, tz).ok).toBe(true)
+  })
+
+  it('starting a placement uses the day even if it is never submitted, and only that draw can be submitted once', () => {
+    const dax = m('dax-scale')
+    const ids = ['DS-01', 'DS-02', 'DS-03', 'DS-04', 'DS-05']
+    const started = beginPlacement(newSave(now), dax, millGraph, ids, now, tz)
+    expect(started.machines[dax.id]?.placementOpen).toEqual(ids)
+    expect(canAttempt('placement', dax, millGraph, started, now, tz).ok).toBe(false)
+    const other = { machineId: dax.id, kind: 'placement' as const, questionIds: ['DS-06', 'DS-07', 'DS-08', 'DS-09', 'DS-10'], correct: [true, true, true, true, true] }
+    expect(recordAttempt(started, other, dax, millGraph, now, tz).outcome).toBe('rejected')
+    const done = recordAttempt(started, { ...other, questionIds: ids }, dax, millGraph, now, tz)
+    expect(done.outcome).toBe('passed')
+    expect(recordAttempt(done.save, { ...other, questionIds: ids }, dax, millGraph, now, tz).outcome).toBe('rejected')
+    // Submitting just after local midnight still works for the attempt started the day before.
+    const afterMidnight = new Date('2026-10-05T07:05:00Z')
+    expect(recordAttempt(started, { ...other, questionIds: ids }, dax, millGraph, afterMidnight, tz).outcome).toBe('passed')
   })
 
   it('certification only comes from passed tests', () => {

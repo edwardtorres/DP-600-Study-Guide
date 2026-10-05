@@ -17,7 +17,7 @@ const attemptTitle: Record<AttemptKind, string> = {
 const rule: Record<AttemptKind, string> = {
   startup: '2 questions. Get both right to start the machine.',
   inspection: '5 questions. Get at least 4 right (80%) to certify the machine.',
-  placement: '5 questions from what DP-600 adds beyond PL-300. Get all 5 right to certify the machine as placed. One attempt per day.',
+  placement: '5 questions from what DP-600 adds beyond PL-300. Get all 5 right to certify the machine as placed. One attempt per day, used as soon as you start.',
 }
 
 interface Props {

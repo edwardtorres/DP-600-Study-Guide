@@ -26,6 +26,8 @@ export interface MachineProgress {
   lastDraw?: Partial<Record<AttemptKind, string[]>>
   /** Local calendar days (YYYY-MM-DD) on which a placement check was attempted. */
   placementDays?: string[]
+  /** Question ids of a placement check that was started but not yet submitted. */
+  placementOpen?: string[]
 }
 
 export interface SaveV1 {
@@ -94,6 +96,7 @@ function isMachineProgress(p: unknown): p is MachineProgress {
     }
   }
   if (p.placementDays !== undefined && !(Array.isArray(p.placementDays) && p.placementDays.every(isDayKey))) return false
+  if (p.placementOpen !== undefined && !isStringArray(p.placementOpen)) return false
   return true
 }
 
