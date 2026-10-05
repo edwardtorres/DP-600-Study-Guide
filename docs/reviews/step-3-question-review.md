@@ -93,3 +93,32 @@ Reviewer flags from the blind pass:
 | BW-02 | A distractor explanation ("keeps no rows") was wrong. | Rewritten: it drops the start boundary and loads rows after RangeEnd. |
 
 **Dropped: DLS-05** (Learn contradiction, see above).
+
+## Gatehouse & Pattern Room (87 written, 86 kept)
+
+**Blind pass: 87/87 match.**
+
+Reviewer flags from the blind pass:
+
+| Question | Flag | Resolution |
+|---|---|---|
+| SL-06 | Giveaway: the key was a bare "No". | Key now reads "No, label access control isn't supported across tenants"; distractors balanced. |
+| GK-06 | The stem led with a Contributor scenario but asked about Viewers. | Stem rewritten neutrally. |
+| GK-09 | Contributors and Viewers can share if they have Reshare. | Stem now says "by default … a Contributor without Reshare permission". GK-01's explanation was updated to match. |
+| GK-03 | "RLS applies only to Viewers" overstated (users with item access but no role are also filtered). | Key reworded: "RLS doesn't apply to Contributors or higher roles". |
+| CV-09 | Rules can only be set on items that already exist in the target stage. | Rebuilt as 5 steps: deploy to Production, define the rule, redeploy. Matches create-rules: "Your rules don't apply until you deploy". |
+| RL-06 | Two prompts share a choice, and one choice is unused. | Stem now says choices may be reused or left unused. |
+| RM-05 | The correct option was the most specific. | Distractor lengthened. |
+| TS-05 s3, TS-11 | Asked to confirm the source and preview status. | CREATE USER sentence is on the cited sql-granular-permissions page. ReadWrite isn't labeled preview; only third-party engine enforcement is. |
+
+**Source pass: 82 supported, 5 partly supported, 0 not supported, 0 unreachable** (32 pages fetched).
+
+| Question | Finding | Resolution |
+|---|---|---|
+| GK-07 | The cited pages don't *recommend* security groups. | OneLake security get-started page added ("Simplify the management of Fabric workspace roles by assigning them to security groups"). |
+| GK-08 | "Data plane" is defined on an uncited page. | Same page added ("Data plane permissions: Govern what data you can see or change"). |
+| TS-06 | The stem didn't fix DirectLakeBehavior, so "they fail" was defensible. | Stem now says the setting is left at its default. How Direct Lake works (cited) marks Automatic as "(Default)". Distractor explanations corrected. |
+| RL-04 s1 | Pro-workspace XMLA claim judged implied. | No change: the cited large-models page says "Semantic models in Pro workspaces do not support XMLA-based write operations." |
+| SL-09 | No cited page says endorsement doesn't change access; the key was an inference. | **Dropped.** |
+
+**Dropped: SL-09** (key not stated on Learn).
