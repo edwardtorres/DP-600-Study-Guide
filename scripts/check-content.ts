@@ -10,6 +10,9 @@ import { floors } from '../src/data/floors.ts'
 import { allNotes, notesByMachine } from '../src/content/notes/index.ts'
 import { NOTES_PENDING } from '../src/content/requirements.ts'
 import { notesSources, notesWordCount, validateNotes } from '../src/content/validate.ts'
+import { allQuestions, caseStudies } from '../src/content/questions/index.ts'
+import { QUESTIONS_PENDING, CASES_PENDING } from '../src/content/questions/requirements.ts'
+import { questionStats, validateQuestions } from '../src/content/questions/validate.ts'
 
 const decode = (s: string) =>
   s
@@ -69,8 +72,32 @@ function printNotesSummary() {
   if (NOTES_PENDING.length > 0) console.warn(`⚠ Notes still pending for: ${NOTES_PENDING.join(', ')}`)
 }
 
+function printQuestionSummary() {
+  const st = questionStats(allQuestions, outline)
+  const pct = (n: number, d: number) => (d ? `${((n / d) * 100).toFixed(1)}%` : '—')
+  console.log(`Questions: ${st.total} (${caseStudies.length} case studies)`)
+  for (const d of outline.domains) {
+    console.log(`  ${d.title}: ${st.perDomain.get(d.id) ?? 0} (${pct(st.domainShare.get(d.id) ?? 0, 1)}; official ${d.weightText})`)
+  }
+  console.log(`  Formats: ${[...st.formats].map(([k, v]) => `${k} ${v}`).join(', ')}`)
+  console.log(`  Difficulty: ${[1, 2, 3].map((k) => `${k}=${st.difficulty.get(k) ?? 0}`).join(', ')}`)
+  const four = st.positions.reduce((a, b) => a + b, 0)
+  console.log(`  Answer position (4-option single): ${st.positions.map((n, i) => `${i + 1}=${n} (${pct(n, four)})`).join(', ')}`)
+  console.log(`  Correct option is longest: ${st.longestCorrect.count}/${st.longestCorrect.of} (${pct(st.longestCorrect.count, st.longestCorrect.of)})`)
+  console.log(`  Preview: ${st.preview}/${st.total} (${pct(st.preview, st.total)})`)
+  const low = machines.filter((m) => !QUESTIONS_PENDING.includes(m.floor)).flatMap((m) => m.bulletIds).filter((b) => (st.perBullet.get(b) ?? 0) < 6)
+  if (low.length) console.log(`  Bullets under 6: ${low.join(', ')}`)
+  if (QUESTIONS_PENDING.length || CASES_PENDING) {
+    console.warn(`⚠ Questions pending for: ${[...QUESTIONS_PENDING, ...(CASES_PENDING ? ['case studies'] : [])].join(', ')}`)
+  }
+}
+
 async function main() {
-  const errors = [...validateAll(outline, machines, edges), ...validateNotes(machines, allNotes)]
+  const errors = [
+    ...validateAll(outline, machines, edges),
+    ...validateNotes(machines, allNotes),
+    ...validateQuestions(outline, machines, allNotes, allQuestions, caseStudies),
+  ]
 
   if (process.argv.includes('--live')) {
     const res = await fetch(outline.source)
@@ -93,6 +120,7 @@ async function main() {
     process.exit(1)
   }
   printNotesSummary()
+  printQuestionSummary()
   const bullets = machines.reduce((n, m) => n + m.bulletIds.length, 0)
   console.log(
     `Content check passed: ${outline.domains.length} domains, ` +

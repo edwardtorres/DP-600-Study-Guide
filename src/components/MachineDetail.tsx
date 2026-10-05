@@ -172,6 +172,7 @@ export function MachineDetail({ machine, state, graph, edges, machinesById, stat
 
       <Section title="Hands-on lab platform">
         <p className="text-sm text-mill-200">{platformText[machine.labPlatform]}</p>
+        {machine.labNote && <p className="mt-1 text-xs text-mill-400">{machine.labNote}</p>}
       </Section>
     </aside>
   )

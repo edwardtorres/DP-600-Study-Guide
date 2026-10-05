@@ -393,7 +393,9 @@ export const machines: Machine[] = [
     themedName: 'Remote Loom Control',
     skillName: 'Deploy and manage semantic models with the XMLA endpoint',
     bulletIds: ['M2.5'],
-    labPlatform: 'tbd',
+    labPlatform: 'windows',
+    labNote:
+      'Tabular Editor 2 and SQL Server Profiler are Windows applications. Resolved outside Learn (lab logistics, not exam content).',
     notes: null,
   },
   {

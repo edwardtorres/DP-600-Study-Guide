@@ -45,6 +45,16 @@ const MERGE = `${L}sql/t-sql/statements/merge-transact-sql?view=fabric`
 const KQL_OPERATORS = `${L}kusto/query/tutorials/learn-common-operators?view=microsoft-fabric`
 const KQL_SUMMARIZE = `${L}kusto/query/summarize-operator?view=microsoft-fabric`
 const KQL_QUERYSET = `${L}fabric/real-time-intelligence/kusto-query-set`
+const KQL_JOIN = `${L}kusto/query/join-operator?view=microsoft-fabric`
+const KQL_JOIN_TUTORIAL = `${L}kusto/query/tutorials/join-data-from-multiple-tables?view=microsoft-fabric`
+const KQL_TAKE = `${L}kusto/query/take-operator?view=microsoft-fabric`
+const KQL_TOP = `${L}kusto/query/top-operator?view=microsoft-fabric`
+const KQL_SORT = `${L}kusto/query/sort-operator?view=microsoft-fabric`
+const KQL_WHERE = `${L}kusto/query/where-operator?view=microsoft-fabric`
+const KQL_PROJECT = `${L}kusto/query/project-operator?view=microsoft-fabric`
+const KQL_EXTEND = `${L}kusto/query/extend-operator?view=microsoft-fabric`
+const KQL_BIN = `${L}kusto/query/bin-function?view=microsoft-fabric`
+const SQL_TO_KQL = `${L}kusto/query/sql-cheat-sheet?view=microsoft-fabric`
 const DAX_QUERIES = `${L}dax/dax-queries`
 const DAX_QUERY_VIEW = `${L}power-bi/transform-model/dax-query-view`
 
@@ -1655,8 +1665,124 @@ export const prepareNotes: MachineNotes[] = [
         ],
         sources: [KQL_OPERATORS, KQL_SUMMARIZE],
       },
+      {
+        title: 'Filter rows and choose columns (where, project)',
+        language: 'kql',
+        illustrative: true,
+        steps: [
+          {
+            code: "StormEvents\n| where StartTime between (datetime(2007-08-01) .. datetime(2007-08-30))",
+            explain: 'where keeps only rows whose StartTime falls in August 1\u201330, 2007; between takes an inclusive range.',
+          },
+          {
+            code: "| where State == 'TEXAS' and EventType == 'Flood'",
+            explain: 'A second where narrows further. == is case-sensitive equality, and conditions combine with and.',
+          },
+          {
+            code: '| project StartTime, EndTime, State, EventType, DamageProperty',
+            explain: 'project returns only these five columns, in this order, like a SQL SELECT list.',
+          },
+        ],
+        sources: [KQL_WHERE, KQL_PROJECT, KQL_OPERATORS],
+      },
+      {
+        title: 'Add a calculated column and keep everything else (extend)',
+        language: 'kql',
+        illustrative: true,
+        steps: [
+          {
+            code: "StormEvents\n| where State == 'TEXAS' and EventType == 'Flood'",
+            explain: 'Start from Texas flood events.',
+          },
+          {
+            code: '| extend Duration = EndTime - StartTime',
+            explain: 'extend appends a Duration column (a timespan) and keeps all existing columns.',
+          },
+          {
+            code: '| project StartTime, Duration, DamageProperty',
+            explain: 'project trims the output to the columns you want to read, including the new one.',
+          },
+        ],
+        sources: [KQL_EXTEND, KQL_OPERATORS],
+      },
+      {
+        title: 'Count events per hour (summarize \u2026 by bin())',
+        language: 'kql',
+        illustrative: true,
+        steps: [
+          {
+            code: 'StormEvents',
+            explain: 'Start from the event table.',
+          },
+          {
+            code: '| summarize EventCount = count() by bin(StartTime, 1h)',
+            explain: 'bin() rounds each StartTime down to the hour, so summarize returns one row per hour with the number of events in it.',
+          },
+          {
+            code: '| sort by StartTime asc',
+            explain: 'Sort the hourly buckets oldest first; without asc the sort would be descending.',
+          },
+        ],
+        sources: [KQL_SUMMARIZE, KQL_BIN, KQL_SORT],
+      },
+      {
+        title: 'Rank rows (sort by vs top)',
+        language: 'kql',
+        illustrative: true,
+        steps: [
+          {
+            code: 'StormEvents\n| sort by State asc, StartTime desc',
+            explain: 'sort by (same as order by) orders by several columns: state A\u2013Z, newest storm first within each state.',
+          },
+          {
+            code: 'StormEvents\n| top 3 by InjuriesDirect',
+            explain: 'top returns the first 3 rows by InjuriesDirect, descending by default. It is equivalent to sort by InjuriesDirect | take 3.',
+          },
+        ],
+        sources: [KQL_SORT, KQL_TOP],
+      },
+      {
+        title: 'Preview a table quickly (take)',
+        language: 'kql',
+        illustrative: true,
+        steps: [
+          {
+            code: 'StormEvents\n| take 5',
+            explain: 'take returns up to 5 rows, with no guarantee which ones. Use it to look at the shape of the data, not to rank (take and limit are equivalent).',
+          },
+        ],
+        sources: [KQL_TAKE],
+      },
+      {
+        title: 'Combine two tables (join)',
+        language: 'kql',
+        illustrative: true,
+        steps: [
+          {
+            code: 'StormEvents\n| summarize PropertyDamage = sum(DamageProperty) by State',
+            explain: 'Total property damage per state from the events table.',
+          },
+          {
+            code: '| join kind=inner PopulationData on State',
+            explain: 'Join each state\u2019s total to PopulationData on the State column. kind=inner keeps only matching states; without kind the default flavor is innerunique.',
+          },
+          {
+            code: '| project State, PropertyDamagePerCapita = PropertyDamage / Population\n| sort by PropertyDamagePerCapita',
+            explain: 'Compute damage per person and sort descending by it (sort is descending by default).',
+          },
+        ],
+        sources: [KQL_JOIN, KQL_JOIN_TUTORIAL],
+      },
     ],
     traps: [
+      {
+        text: 'A KQL join without kind= uses innerunique, which de-duplicates the left side\u2019s keys first. It is not the same as an inner join. Specify kind=inner when you want every matching row.',
+        sources: [KQL_JOIN],
+      },
+      {
+        text: 'For best join performance, put the smaller table on the left side of a KQL join.',
+        sources: [KQL_JOIN],
+      },
       {
         text: 'sort in KQL is descending by default. Add asc for ascending.',
         sources: [KQL_OPERATORS],
@@ -1675,6 +1801,21 @@ export const prepareNotes: MachineNotes[] = [
       },
     ],
     dontConfuse: [
+      {
+        pairId: 'sql-vs-kql',
+        a: 'SQL (WHERE, GROUP BY, SELECT, ORDER BY)',
+        b: 'KQL (where, summarize \u2026 by, project, sort by)',
+        difference: [
+          {
+            text: 'SQL WHERE ↔ KQL | where (equality is == in KQL, not =). SQL SELECT col list ↔ | project col list. SQL GROUP BY with aggregates ↔ | summarize agg() by cols (the grouping and the aggregation are one operator). SQL ORDER BY ↔ | sort by (or order by), and SELECT TOP n … ORDER BY ↔ | top n by. KQL reads top to bottom as a pipeline, starting from the table name rather than SELECT.',
+            sources: [SQL_TO_KQL],
+          },
+          {
+            text: 'In a KQL queryset you can prefix a SQL query with a comment line containing explain to see its KQL translation.',
+            sources: [SQL_TO_KQL],
+          },
+        ],
+      },
       {
         pairId: 'project-vs-extend',
         a: 'project',
@@ -1705,6 +1846,21 @@ export const prepareNotes: MachineNotes[] = [
         term: 'summarize',
         definition: 'The KQL operator that groups rows by key expressions and computes aggregations per group.',
         sources: [KQL_SUMMARIZE],
+      },
+      {
+        term: 'take',
+        definition: 'A KQL operator that returns up to N arbitrary rows (same as limit). Good for previews, not for ranking.',
+        sources: [KQL_TAKE],
+      },
+      {
+        term: 'top (KQL)',
+        definition: 'A KQL operator returning the first N rows by an expression, descending by default; equivalent to sort by … | take N.',
+        sources: [KQL_TOP],
+      },
+      {
+        term: 'join (KQL)',
+        definition: 'A KQL operator that merges rows of two tables on matching columns. Flavors include innerunique (default), inner, leftouter, rightouter, fullouter, and anti or semi joins.',
+        sources: [KQL_JOIN],
       },
       {
         term: 'bin()',

@@ -56,6 +56,8 @@ export interface Machine {
   orientation?: true
   pl300?: Pl300Overlap
   labPlatform: LabPlatform
+  /** Lab logistics resolved outside Learn (never used in questions). */
+  labNote?: string
   /** Learn-sourced notes arrive in Step 2. */
   notes: null
 }

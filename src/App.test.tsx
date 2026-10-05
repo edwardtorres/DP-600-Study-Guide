@@ -48,3 +48,12 @@ describe('mill map', () => {
     expect(screen.getByRole('status')).toHaveTextContent(/could not be read/)
   })
 })
+
+describe('review page', () => {
+  it('renders the question bank browser', async () => {
+    const { ReviewPage } = await import('./review/ReviewPage')
+    render(<ReviewPage />)
+    expect(screen.getByRole('heading', { name: 'Question bank review' })).toBeInTheDocument()
+    expect(screen.getByRole('combobox', { name: 'Machine' })).toBeInTheDocument()
+  })
+})

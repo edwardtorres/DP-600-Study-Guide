@@ -767,11 +767,23 @@ export const maintainNotes: MachineNotes[] = [
             text: 'An optional deployment plan adds ordering and pre- or post-deployment actions.',
             sources: [PIPELINES_INTRO],
           },
+          {
+            text: 'Pipelines have only one permission, Admin, and it grants no access to workspace content. What you can do inside a stage comes from your workspace role there, so pipeline admin and workspace roles are managed separately.',
+            sources: [PIPELINES_PROCESS],
+          },
+          {
+            text: 'Autobinding: a deployed item reconnects to the item it depends on in the target stage (for example a report to the target stage’s semantic model). A Direct Lake semantic model is the exception: it stays bound to the source stage’s lakehouse until you add a datasource rule.',
+            sources: [PIPELINES_PROCESS],
+          },
         ],
         howTo: [
           {
             text: 'Create the pipeline (you need to be a workspace admin), name the stages, and assign a workspace to a stage. Compare stages, then deploy all or selected items to the next stage. Rules are defined on the target stage and take effect on the next deployment.',
             sources: [PIPELINES_START, PIPELINES_RULES],
+          },
+          {
+            text: 'Permissions per action: deploy between stages = pipeline admin + at least Contributor on both the source and target workspaces. Deploy to an empty stage = pipeline admin + Contributor on the source workspace. Assign a workspace to a stage = pipeline admin + Admin of that workspace.',
+            sources: [PIPELINES_PROCESS],
           },
         ],
       },
@@ -780,6 +792,14 @@ export const maintainNotes: MachineNotes[] = [
     traps: [
       {
         text: 'A deployment fails if an item depends on another item that isn’t in the target stage and isn’t being deployed (for example a report without its semantic model).',
+        sources: [PIPELINES_PROCESS],
+      },
+      {
+        text: 'A Direct Lake semantic model doesn’t autobind to the target stage’s lakehouse. After deployment it still reads the source stage’s lakehouse until you add a datasource rule. Other semantic models autobind to items in the target stage.',
+        sources: [PIPELINES_PROCESS],
+      },
+      {
+        text: 'Being a pipeline admin alone doesn’t let you see or deploy content. You also need a workspace role in the stages involved.',
         sources: [PIPELINES_PROCESS],
       },
       {
@@ -824,7 +844,13 @@ export const maintainNotes: MachineNotes[] = [
         sources: [PIPELINES_INTRO],
       },
     ],
-    upcoming: [],
+    upcoming: [
+      {
+        date: '2026-12-01',
+        change: 'Users without read-write permissions on all workspace items can’t deploy to, or assign, workspaces that contain items protected by sensitivity labels with protection policies.',
+        sources: [PIPELINES_PROCESS],
+      },
+    ],
     glossary: [
       {
         term: 'Deployment pipeline',
@@ -842,12 +868,7 @@ export const maintainNotes: MachineNotes[] = [
         sources: [PIPELINES_PROCESS],
       },
     ],
-    needsVerification: [
-      {
-        claim: 'The exact permission needed to deploy between stages.',
-        why: 'The deployment process page says a workspace is created but content isn’t copied if you lack permissions. The precise role per stage wasn’t extracted; confirm on the deployment pipelines permissions page.',
-      },
-    ],
+    needsVerification: [],
   },
 
   // ── Ripple Map ───────────────────────────────────────────────────────
@@ -1040,12 +1061,7 @@ export const maintainNotes: MachineNotes[] = [
         sources: [XMLA],
       },
     ],
-    needsVerification: [
-      {
-        claim: 'Tabular Editor 2 and SQL Server Profiler run only on Windows.',
-        why: 'The XMLA page lists the tools but doesn’t state their OS requirements. Confirm before labelling Step 6 labs.',
-      },
-    ],
+    needsVerification: [],
   },
 
   // ── Pattern Book ─────────────────────────────────────────────────────

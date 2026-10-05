@@ -85,9 +85,18 @@ The free practice assessment shows "the style, wording, and difficulty"; the rea
 - Each machine has: overview; per-bullet tools, key concepts, and how-to; worked examples (marked illustrative, one explanation per step) where the skill involves code; exam traps; "don't confuse" pairs; renamed features (old → new, which name the exam likely uses, based on the current study guide's wording); Preview labels; dated upcoming changes; glossary terms (each term defined once across the app).
 - `check:content` enforces all of this (`src/content/validate.ts`, `src/content/requirements.ts`). `npm run check:links` fetches every cited URL (network needed).
 
+## Question bank (Step 3)
+
+- Questions are typed data in `src/content/questions/<floor>.ts` plus `cases.ts` (types in `types.ts`, rules in `requirements.ts`, checks in `validate.ts`). Formats: `single`, `multi` ("choose two/three"), `yesno` statement sets, `order`, `match`, `dropdown` (T-SQL/KQL/DAX code completion).
+- Every question has: id, machineId, bulletIds, format, difficulty 1–3, a scenario-style stem, a key, an explanation for **every** option/statement/item/pair/slot option, at least one learn.microsoft.com source that confirms the key, optional `trapPairId` (a notes "don't confuse" pair), `preview`, `placement`, `caseStudyId`.
+- Rules enforced by `check:content`: ≥6 questions per bullet; domain shares inside the official ranges; ≤35% of 4-option answers in any one position; correct option strictly longest ≤40%; no near-duplicate stems (Jaccard ≥ 0.8); Preview ≤5%; every PL-300 carryover machine has ≥8 placement-eligible questions; placement questions on partial-carryover machines are never keyed to Power Query; no "all/none of the above"; no phrases tied to open needs-verification items (`BANNED_TERMS`).
+- **Never write a question whose answer depends on a needs-verification item** or anything not confirmed on Learn.
+- Each floor's questions are checked by an **independent reviewer agent** that answers blind (`npm run export:questions -- <floor> <dir>` writes blind and keyed JSON outside the repo; `scripts/compare-review.ts` diffs answers), then checks each key against its sources. Disagreements are fixed or dropped and logged in `docs/reviews/step-3-question-review.md`.
+- Hidden review page: `/review` (or `#/review`). Not linked from the game. **Step 9 must add an SPA fallback** so `/review` serves `index.html` in production.
+
 ## Platform note
 
-The user works on both Windows and Mac. Fabric runs in the browser, but Power BI Desktop and `.pbip` work are Windows-only. Every hands-on lab must show its platform. `labPlatform` on each machine is `browser`, `windows`, or `tbd`. It's preliminary until Step 6 verifies each lab on Learn.
+The user works on both Windows and Mac. Fabric runs in the browser, but Power BI Desktop and `.pbip` work are Windows-only. Every hands-on lab must show its platform. `labPlatform` on each machine is `browser`, `windows`, or `tbd`. It's preliminary until Step 6 verifies each lab on Learn. Lab-logistics facts (for example, which desktop tools run on Windows) may be resolved outside Learn; they're recorded in `Machine.labNote`, marked as such, and never used in questions.
 
 ## Save system
 
@@ -102,6 +111,8 @@ scripts/official-outline.json   verbatim outline
 scripts/check-content.ts        content check (+ --live)
 scripts/check-secrets.ts        secrets/paths check
 src/content/                    notes data, notes types, notes validator, requirements
+src/content/questions/          question bank, case studies, question validator
+src/review/                     hidden /review page
 src/data/                       outline loader, machines, edges, floors, graph utils, shared validators
 src/game/                       state derivation, map layout
 src/save/                       versioned save
