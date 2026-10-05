@@ -66,6 +66,7 @@ export const SRC = {
   dTopN: `${L}dax/topn-function-dax`,
   dVar: `${L}dax/var-dax`,
   dVarPractice: `${L}dax/best-practices/dax-variables`,
+  dQueries: `${L}dax/dax-queries`,
 } as const
 
 export type TrapId =
@@ -131,9 +132,9 @@ export const traps: Trap[] = [
   t('kql-innerunique', 'KQL innerunique default', 'A KQL join with no kind uses innerunique, which removes duplicate keys from the left side before matching. kind=inner keeps every left row.', [SRC.kInnerUnique, SRC.kJoin]),
   t('kql-dedupe-side', 'Which side innerunique deduplicates', 'innerunique deduplicates the left side only. Duplicates on the right side all match.', [SRC.kInnerUnique]),
   t('kql-leftanti', 'leftouter vs leftanti', 'leftanti returns only left rows with no match; leftouter returns every left row, matched or not.', [SRC.kLeftAnti, SRC.kLeftOuter]),
-  t('asc-vs-desc', 'Ascending vs descending', 'Check the sort direction. T-SQL ORDER BY defaults to ASC; KQL sort and top default to desc.', [SRC.orderBy, SRC.kSort, SRC.kTop]),
+  t('asc-vs-desc', 'Ascending vs descending', 'Check the sort direction. T-SQL ORDER BY defaults to ASC; KQL sort and top default to desc.', [SRC.orderBy, SRC.kSort, SRC.kTop, SRC.dQueries]),
   t('kql-sort-default', 'KQL sort default per column', 'In KQL, each sort column without asc or desc defaults to desc, even when an earlier column says asc.', [SRC.kSort]),
-  t('nulls-ignored', 'Nulls ignored by aggregates', 'AVG, SUM, and COUNT(column) skip nulls (KQL avg too, and DAX AVERAGE skips blanks), so a null isn’t treated as zero.', [SRC.avg, SRC.count, SRC.kAvg, SRC.dAverage]),
+  t('nulls-ignored', 'Nulls ignored by aggregates', 'AVG, SUM, and COUNT(column) skip nulls (KQL avg too, and DAX AVERAGE skips blanks), so a null isn’t treated as zero.', [SRC.avg, SRC.count, SRC.kAvg, SRC.dAverage, SRC.dCountRows]),
   t('null-not-zero', 'Null isn’t zero', 'A missing value stays null (or blank); it isn’t shown as 0 unless the query replaces it.', [SRC.lag, SRC.kNulls, SRC.dDivide]),
   t('count-star-vs-column', 'COUNT(*) vs COUNT(column)', 'COUNT(*) counts rows, including nulls and duplicates. COUNT(column) counts non-null values.', [SRC.count]),
   t('distinct-count', 'Distinct vs total count', 'A distinct count counts each value once; a plain count counts every row.', [SRC.count, SRC.kDistinct, SRC.dDistinctCount]),
@@ -145,7 +146,7 @@ export const traps: Trap[] = [
   t('null-group', 'Nulls in GROUP BY', 'GROUP BY puts all NULL keys into one group; it doesn’t drop them. Replacing NULL with a value merges them with any existing rows that have that value.', [SRC.groupBy, SRC.coalesce]),
   t('union-vs-union-all', 'UNION vs UNION ALL', 'T-SQL UNION removes duplicate rows; UNION ALL keeps them. KQL union returns the rows of all inputs, like UNION ALL.', [SRC.union, SRC.kUnion]),
   t('case-first-match', 'CASE returns the first match', 'CASE evaluates WHEN clauses in order and returns the first one that’s true. A NULL comparison isn’t true, so it falls to ELSE.', [SRC.caseExpr]),
-  t('range-boundary', 'Boundary values', '>= includes the boundary value; > excludes it.', [SRC.where, SRC.kWhere]),
+  t('range-boundary', 'Boundary values', '>= includes the boundary value; > excludes it.', [SRC.where, SRC.having, SRC.kWhere, 'https://learn.microsoft.com/en-us/dax/filter-function-dax']),
   t('max-vs-argmax', 'max() vs arg_max()', 'arg_max returns the other columns from the row with the maximum value. max(column) returns the largest value of that column itself.', [SRC.kArgMax, SRC.kMax]),
   t('bin-rounds-down', 'bin() rounds down', 'bin(value, size) rounds down to a multiple of size; it never rounds to the nearest or up.', [SRC.kBin]),
   t('project-vs-extend', 'project vs extend', 'extend adds a column and keeps the others; project keeps only the columns it lists.', [SRC.kProject, SRC.kExtend]),

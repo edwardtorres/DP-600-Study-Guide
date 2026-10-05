@@ -105,7 +105,7 @@ const roleExplain = {
 const keyChoices: Record<KeyChoice, { label: string; explain: string }> = {
   surrogate: { label: 'Add a generated surrogate key', explain: 'A surrogate key is a single-column unique identifier generated and stored in the dimension. Learn recommends it even when a natural key seems acceptable, and SCD type 2 requires it.' },
   natural: { label: 'Use the source system’s natural key', explain: 'The natural (business) key relates the dimension to its source, but it can repeat once versions are stored and isn’t insulated from source changes.' },
-  'smart-date': { label: 'Use a meaningful date key (for example 20261005)', explain: 'Key values should carry no meaning, except for date and time dimension keys, where a meaningful key is acceptable.' },
+  'smart-date': { label: 'Use a YYYYMMDD integer key (for example 20261005)', explain: 'Learn: the date dimension’s surrogate key should store the date in YYYYMMDD format as an int, the accepted exception where a key value has meaning.' },
 }
 const changeChoices: Record<ChangeChoice, { label: string; explain: string }> = {
   type1: { label: 'SCD type 1 (overwrite)', explain: 'Type 1 overwrites the row: no history is kept, as if the member always had the new value. Use it for most changing attributes and to correct errors.' },
@@ -132,7 +132,7 @@ export function patternPuzzle(s: PatternScenario): Puzzle {
     group: '1 · Grain',
     prompt: 'What is the grain of the fact table?',
     ui: 'buttons',
-    choices: s.grain.choices.map((c, i) => ({ id: `g${i}`, label: c, explain: s.grain.accepted.includes(i) ? s.grain.why : 'This isn’t the level one fact row represents for this requirement.' })),
+    choices: s.grain.choices.map((c, i) => ({ id: `g${i}`, label: c, explain: s.grain.accepted.includes(i) ? s.grain.why : `Not the grain here. ${s.grain.why}` })),
     accepted: s.grain.accepted.map((i) => `g${i}`),
     explain: s.grain.why,
     sources: uniq([FACT, SS]),
@@ -212,7 +212,7 @@ export function fallbackPuzzle(s: FallbackScenario): Puzzle {
   const choices = outcomes.map((o) => ({
     id: o,
     label: outcomeLabel[o],
-    explain: o === r.outcome ? `${r.rule.text}` : `Not here. ${r.rule.text}`,
+    explain: o === r.outcome ? r.rule.text : `${outcomeLabel[o]} isn’t what happens here. ${r.rule.text}`,
   }))
   const facts = [
     { label: 'Table storage mode', value: modeText[s.input.mode] },
@@ -220,7 +220,7 @@ export function fallbackPuzzle(s: FallbackScenario): Puzzle {
     { label: 'Situation', value: s.situationText },
   ]
   return staticPuzzle(metaOf('fallback', { ...s, sources: uniq([...s.sources, r.rule.source]) }), s.story, { kind: 'facts', facts }, [
-    { id: 'outcome', prompt: 'What happens to the query?', ui: 'buttons', choices, accepted: [r.outcome], explain: `${r.rule.id}: ${r.rule.text}`, sources: [r.rule.source] },
+    { id: 'outcome', prompt: 'What happens to the query?', ui: 'buttons', choices, accepted: [r.outcome], explain: r.rule.text, sources: [r.rule.source] },
   ])
 }
 

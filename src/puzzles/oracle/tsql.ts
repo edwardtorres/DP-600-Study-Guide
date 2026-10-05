@@ -20,7 +20,7 @@ const t01: OracleTemplate = {
     machineIds: ['inspection-bench'],
     bulletIds: ['P3.2'],
     difficulty: 2,
-    sources: [SRC.having, SRC.where, SRC.qualify, SRC.groupBy],
+    sources: [SRC.having, SRC.where, SRC.groupBy],
     trapPairId: 'where-having-qualify',
   },
   language: 'tsql',
@@ -393,7 +393,7 @@ const t09: OracleTemplate = {
       distractors: [
         { trap: 'running-total-frame', why: 'It sums the whole partition on every row, as a SUM() OVER () with no ORDER BY would.', table: out(amounts.map(() => grand)) },
         { trap: 'asc-vs-desc', why: 'It accumulates from the latest date backward, as ORDER BY SaleDate DESC would.', table: out(fromEnd) },
-        { trap: 'running-total-frame', why: 'It stops at the previous row (1 PRECEDING), leaving out the current day.', table: out(previous) },
+        { trap: 'running-total-frame', why: 'It sums up to the previous row (ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING), leaving out the current day.', table: out(previous) },
       ],
     }
   },

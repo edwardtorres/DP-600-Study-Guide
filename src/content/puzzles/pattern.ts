@@ -4,8 +4,7 @@ import type { Puzzle } from '../../puzzles/types'
 /**
  * Pattern Draft scenarios: design a star schema from a flat source. Keys are
  * authored from Learn's dimensional modeling and relationship guidance; where
- * Learn allows more than one answer (a date key, a composite design), every
- * allowed answer is accepted.
+ * Learn allows more than one answer, every allowed answer is accepted.
  */
 
 const L = 'https://learn.microsoft.com/en-us/'
@@ -27,7 +26,7 @@ const oneToMany = (from: string, to: string, why = `${from} is a dimension with 
   why,
 })
 const sk = (dimension: string, why = `Learn recommends a surrogate key for every dimension, even when a natural key looks usable.`) => ({ dimension, accepted: ['surrogate' as const], why })
-const dateKey = { dimension: 'Date', accepted: ['surrogate' as const, 'smart-date' as const], why: 'Either works: key values normally carry no meaning, but Learn makes an exception for date and time dimension keys.' }
+const dateKey = { dimension: 'Date', accepted: ['smart-date' as const], why: 'Learn: the date dimension’s surrogate key should store the date in YYYYMMDD format as an int. It’s the accepted exception to keys carrying no meaning, and it’s efficient and sorts numerically.' }
 
 const scenarios: PatternScenario[] = [
   {

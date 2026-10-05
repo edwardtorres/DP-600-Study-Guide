@@ -113,6 +113,7 @@ export interface AccessRule {
 
 export const accessRules: Record<string, AccessRule> = {
   ROLE: { id: 'AC-ROLE', text: 'Workspace roles grant the capabilities in the Fabric workspace roles table (for example, only Admin can update or delete the workspace or connect it to Git; Admin and Member can add members and share; Viewer can’t write or run items but can view run output).', source: ACCESS_SOURCES.roles },
+  SHARE: { id: 'AC-SHARE', text: 'You must be an Admin or Member in the workspace to share an item.', source: ACCESS_SOURCES.warehouseShare },
   CONNECT: { id: 'AC-CONNECT', text: 'To connect to a warehouse or SQL analytics endpoint, a user needs a workspace role or at least the item Read permission.', source: ACCESS_SOURCES.granular },
   READ_ONLY: { id: 'AC-READ', text: 'Read alone only lets a user connect; they can’t query any table or view unless a T-SQL GRANT gives them access.', source: ACCESS_SOURCES.warehouseShare },
   READDATA: { id: 'AC-READDATA', text: 'ReadData (“Read all data using SQL”) lets a user read every table and view with T-SQL, like db_datareader. Every workspace role, Viewer included, has it by default.', source: ACCESS_SOURCES.warehouseShare },
@@ -143,7 +144,15 @@ export function evaluateAccess(setup: AccessSetup, q: AccessQuestion): AccessAns
       if (q.action === 'share-item' && (user.role === 'Contributor' || user.role === 'Viewer') && user.item?.length) {
         throw new Error('Sharing by a contributor or viewer with extra item permissions isn’t settled on Learn')
       }
-      return { kind: 'bool', value: !!user.role && roleTable[q.action].includes(user.role), rules: [R.ROLE!] }
+      const allowed = roleTable[q.action]
+      const who = allowed.length === 4 ? 'every workspace role, Viewer included' : allowed.length === 1 ? `only ${allowed[0]}` : allowed.join(', ')
+      const specific: AccessRule = {
+        id: 'AC-ROLE',
+        text: `In the Fabric workspace roles table, the right to ${actionText[q.action]} belongs to ${who}.${user.role ? ` ${user.name} is ${user.role}.` : ` ${user.name} has no workspace role.`}`,
+        source: ACCESS_SOURCES.roles,
+      }
+      const rules = q.action === 'share-item' ? [specific, R.SHARE!] : [specific]
+      return { kind: 'bool', value: !!user.role && allowed.includes(user.role), rules }
     }
     case 'connect':
       return { kind: 'bool', value: canConnect, rules: [R.CONNECT!] }

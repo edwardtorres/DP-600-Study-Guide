@@ -95,7 +95,7 @@ export const fallbackRules: FallbackRule[] = [
   },
   {
     id: 'FB-6',
-    text: 'Direct Lake on SQL analytics endpoints stays in Direct Lake when every condition holds: no SQL RLS or DDM on the referenced tables, no non-materialized SQL views, no table over a guardrail, and the model was refreshed (framed).',
+    text: 'Direct Lake on SQL analytics endpoints stays in Direct Lake when every condition holds: no SQL RLS, OLS, or DDM on the referenced tables, no non-materialized SQL views, no table over a guardrail, and the model was refreshed (framed).',
     source: FALLBACK_SOURCES.howItWorks,
     applies: (i) => i.mode === 'sql' && i.situation === 'none',
     outcome: 'directlake',

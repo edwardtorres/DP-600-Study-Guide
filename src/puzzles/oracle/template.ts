@@ -80,7 +80,9 @@ export function oracleInstance(template: OracleTemplate, seed: number): PuzzleIn
   const order = shuffled(candidates, mulberry32((seed ^ hashString(template.meta.id)) >>> 0))
   const choices = order.map((x, i) => ({ id: `r${i + 1}`, label: `Result ${letters[i]}`, table: x.table, explain: x.explain }))
   const answer = choices[order.findIndex((x) => x.correct)]!.id
-  const sources = [...new Set([...template.meta.sources, ...c.distractors.flatMap((d) => trapById.get(d.trap)?.sources ?? [])])]
+  // Only cite trap pages in the template's own language (T-SQL, KQL, or DAX).
+  const own = (u: string) => (template.language === 'tsql' ? u.includes('/sql/t-sql/') : template.language === 'kql' ? u.includes('/kusto/') : u.includes('/dax/'))
+  const sources = [...new Set([...template.meta.sources, ...c.distractors.flatMap((d) => (trapById.get(d.trap)?.sources ?? []).filter(own))])]
   return {
     meta: { ...template.meta, type: 'oracle' },
     intro: template.intro,
