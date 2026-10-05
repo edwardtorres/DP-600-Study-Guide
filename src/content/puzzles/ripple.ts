@@ -21,7 +21,7 @@ const base = (id: string, title: string, difficulty: 1 | 2 | 3) => ({
 const scenarios: RippleScenario[] = [
   {
     ...base('RP-01', 'Dropping a lakehouse column', 1),
-    story: 'You plan to drop a column from a table in the Sales lakehouse and open impact analysis on the lakehouse. Tap every item it lists under All downstream items.',
+    story: 'You plan to drop a column from a table in the Sales lakehouse and open impact analysis on the lakehouse. Tap every item it lists under All downstream items. You have access to every workspace shown.',
     nodes: [
       { id: 'nb', label: 'Load Sales notebook', itemType: 'Notebook', workspace: 'Engineering' },
       { id: 'lh', label: 'Sales lakehouse', itemType: 'Lakehouse', workspace: 'Engineering' },
@@ -41,7 +41,7 @@ const scenarios: RippleScenario[] = [
   },
   {
     ...base('RP-02', 'Changing a warehouse view', 2),
-    story: 'A view in the Finance warehouse will change. Impact analysis works at the item level, so you run it on the warehouse. Mark what each tab lists.',
+    story: 'A view in the Finance warehouse will change. Impact analysis works at the item level, so you run it on the warehouse. Mark what each tab lists. You have access to every workspace shown.',
     nodes: [
       { id: 'wh', label: 'Finance warehouse', itemType: 'Warehouse', workspace: 'Finance' },
       { id: 'smA', label: 'Budget model', itemType: 'Semantic model', workspace: 'Finance' },
@@ -63,7 +63,7 @@ const scenarios: RippleScenario[] = [
   },
   {
     ...base('RP-03', 'Renaming a measure in a shared model', 2),
-    story: 'You will rename a measure in the certified Sales model. Reports in two workspaces use it, and another team built a composite model on top of it. Which items does impact analysis list under All downstream items?',
+    story: 'You will rename a measure in the certified Sales model. Reports in two workspaces use it, and another team built a composite model on top of it. Which items does impact analysis list under All downstream items? You have access to every workspace shown.',
     nodes: [
       { id: 'lh', label: 'Sales lakehouse', itemType: 'Lakehouse', workspace: 'Engineering' },
       { id: 'sm', label: 'Sales model', itemType: 'Semantic model', workspace: 'Engineering' },
@@ -86,7 +86,7 @@ const scenarios: RippleScenario[] = [
   },
   {
     ...base('RP-04', 'A lakehouse feeding a dataflow', 3),
-    story: 'The Raw lakehouse will change its schema. A Dataflow Gen2 reads it and writes to a warehouse, which feeds a model and report. Mark what each impact analysis tab lists.',
+    story: 'The Raw lakehouse will change its schema. A Dataflow Gen2 reads it and writes to a warehouse, which feeds a model and report. Mark what each impact analysis tab lists. You have access to every workspace shown.',
     nodes: [
       { id: 'raw', label: 'Raw lakehouse', itemType: 'Lakehouse', workspace: 'Ingest' },
       { id: 'df', label: 'Clean orders dataflow', itemType: 'Dataflow Gen2', workspace: 'Ingest' },
@@ -107,7 +107,7 @@ const scenarios: RippleScenario[] = [
   },
   {
     ...base('RP-05', 'Changing a KQL database table', 2),
-    story: 'A table in the Telemetry KQL database will be renamed. Which items does impact analysis on the KQL database list under All downstream items?',
+    story: 'A table in the Telemetry KQL database will be renamed. Which items does impact analysis on the KQL database list under All downstream items? You have access to every workspace shown.',
     nodes: [
       { id: 'es', label: 'Device eventstream', itemType: 'Eventstream', workspace: 'RTI' },
       { id: 'kd', label: 'Telemetry KQL database', itemType: 'KQL database', workspace: 'RTI' },

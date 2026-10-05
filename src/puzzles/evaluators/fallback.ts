@@ -9,7 +9,16 @@ const L = 'https://learn.microsoft.com/en-us/'
 export const FALLBACK_SOURCES = {
   overview: `${L}fabric/fundamentals/direct-lake-overview`,
   howItWorks: `${L}fabric/fundamentals/direct-lake-how-it-works`,
+  security: `${L}fabric/fundamentals/direct-lake-security-integration`,
 } as const
+
+/**
+ * Not encoded, because Learn pages disagree (Step 5 review):
+ * - SQL analytics endpoint OLS: How Direct Lake works lists it as a fallback
+ *   cause; Integrate Direct Lake security says the query returns an error.
+ * - Direct Lake on OneLake with SQL endpoint RLS: the overview says queries
+ *   succeed without the SQL RLS; the security page says an error is returned.
+ */
 
 export type DirectLakeMode = 'onelake' | 'sql'
 export type DirectLakeBehavior = 'Automatic' | 'DirectLakeOnly' | 'DirectQueryOnly'
@@ -64,13 +73,6 @@ export const fallbackRules: FallbackRule[] = [
     outcome: 'directlake',
   },
   {
-    id: 'FB-2',
-    text: 'When the SQL analytics endpoint enforces row-level security, Direct Lake on OneLake queries still succeed, and the SQL-based RLS isn’t applied (OneLake access doesn’t observe it).',
-    source: FALLBACK_SOURCES.overview,
-    applies: (i) => i.mode === 'onelake' && i.situation === 'sql-rls',
-    outcome: 'directlake',
-  },
-  {
     id: 'FB-3',
     text: 'With Direct Lake on OneLake, queries involving unprocessed tables return an error.',
     source: FALLBACK_SOURCES.overview,
@@ -88,12 +90,12 @@ export const fallbackRules: FallbackRule[] = [
     id: 'FB-5',
     text: 'DirectLakeBehavior = DirectQueryOnly: the query always uses DirectQuery mode.',
     source: FALLBACK_SOURCES.howItWorks,
-    applies: (i) => i.mode === 'sql' && i.behavior === 'DirectQueryOnly',
+    applies: (i) => i.mode === 'sql' && i.behavior === 'DirectQueryOnly' && i.situation !== 'sql-ols',
     outcome: 'directquery',
   },
   {
     id: 'FB-6',
-    text: 'Direct Lake on SQL analytics endpoints stays in Direct Lake when every condition holds: no SQL RLS, OLS, or DDM on the referenced tables, no non-materialized SQL views, no table over a guardrail, and the model was refreshed (framed).',
+    text: 'Direct Lake on SQL analytics endpoints stays in Direct Lake when every condition holds: no SQL RLS or DDM on the referenced tables, no non-materialized SQL views, no table over a guardrail, and the model was refreshed (framed).',
     source: FALLBACK_SOURCES.howItWorks,
     applies: (i) => i.mode === 'sql' && i.situation === 'none',
     outcome: 'directlake',
@@ -102,14 +104,14 @@ export const fallbackRules: FallbackRule[] = [
     id: 'FB-7',
     text: 'DirectLakeBehavior = Automatic (the default): if a Direct Lake condition isn’t met, the query silently falls back to DirectQuery.',
     source: FALLBACK_SOURCES.howItWorks,
-    applies: (i) => i.mode === 'sql' && i.behavior === 'Automatic' && i.situation !== 'none',
+    applies: (i) => i.mode === 'sql' && i.behavior === 'Automatic' && i.situation !== 'none' && i.situation !== 'sql-ols',
     outcome: 'directquery',
   },
   {
     id: 'FB-8',
     text: 'DirectLakeBehavior = DirectLakeOnly: if a Direct Lake condition isn’t met, the query fails with an error.',
     source: FALLBACK_SOURCES.howItWorks,
-    applies: (i) => i.mode === 'sql' && i.behavior === 'DirectLakeOnly' && i.situation !== 'none',
+    applies: (i) => i.mode === 'sql' && i.behavior === 'DirectLakeOnly' && i.situation !== 'none' && i.situation !== 'sql-ols',
     outcome: 'error',
   },
 ]

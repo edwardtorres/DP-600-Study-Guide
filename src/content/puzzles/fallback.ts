@@ -7,7 +7,8 @@ import type { Puzzle } from '../../puzzles/types'
  * from evaluateFallback, which encodes only cases Learn states outright. Per
  * the Step 3 review (DLS-05), no scenario depends on whether a guardrail is
  * evaluated per query or for the whole model: guardrail cases always query the
- * table that is over the limit.
+ * table that is over the limit. SF-05 (OneLake + SQL RLS) and SF-08 (SQL OLS)
+ * were dropped in the Step 5 review because Learn pages disagree on them.
  */
 
 const base = (id: string, title: string, difficulty: 1 | 2 | 3, bullets: string[]) => ({
@@ -46,12 +47,6 @@ const scenarios: FallbackScenario[] = [
     situationText: 'Row-level security is defined on the table at the SQL analytics endpoint.',
   },
   {
-    ...base('SF-05', 'SQL row-level security, Direct Lake on OneLake', 3, ['S2.3', 'S2.4']),
-    story: 'The same warehouse table with a T-SQL security policy, but this model uses Direct Lake on OneLake. The model’s DirectLakeBehavior property still says Automatic from an earlier template.',
-    input: { mode: 'onelake', behavior: 'Automatic', situation: 'sql-rls' },
-    situationText: 'Row-level security is defined on the table at the SQL analytics endpoint.',
-  },
-  {
     ...base('SF-06', 'Measuring DirectQuery performance', 1, ['S2.3']),
     story: 'A developer wants to measure how slow reports would be if every query fell back, so they change the model setting. The tables are clean Delta tables.',
     input: { mode: 'sql', behavior: 'DirectQueryOnly', situation: 'none' },
@@ -62,12 +57,6 @@ const scenarios: FallbackScenario[] = [
     story: 'A column in the queried warehouse table has a dynamic data mask. The model is set to fail rather than fall back.',
     input: { mode: 'sql', behavior: 'DirectLakeOnly', situation: 'sql-ddm' },
     situationText: 'Dynamic data masking is defined on the table at the SQL analytics endpoint.',
-  },
-  {
-    ...base('SF-08', 'Object-level security, default behavior', 2, ['S2.3']),
-    story: 'The warehouse denies some users access to a column through SQL object-level security. A visual queries that table.',
-    input: { mode: 'sql', behavior: 'Automatic', situation: 'sql-ols' },
-    situationText: 'Object-level security is defined on the table at the SQL analytics endpoint.',
   },
   {
     ...base('SF-09', 'Over a guardrail, default behavior', 2, ['S2.3']),
@@ -104,6 +93,18 @@ const scenarios: FallbackScenario[] = [
     story: 'A Direct Lake on OneLake model reads clean Delta tables from two lakehouses. Someone set DirectLakeBehavior to DirectQueryOnly while testing another model.',
     input: { mode: 'onelake', behavior: 'DirectQueryOnly', situation: 'none' },
     situationText: 'Plain Delta tables; every Direct Lake condition holds.',
+  },
+  {
+    ...base('SF-15', 'SQL row-level security, fallback disabled', 2, ['S2.3']),
+    story: 'The warehouse table has a T-SQL security policy, and the developer turned off fallback to catch slow queries early.',
+    input: { mode: 'sql', behavior: 'DirectLakeOnly', situation: 'sql-rls' },
+    situationText: 'Row-level security is defined on the table at the SQL analytics endpoint.',
+  },
+  {
+    ...base('SF-16', 'A SQL view, DirectQuery only', 1, ['S2.3']),
+    story: 'A view-based table again, while a developer measures DirectQuery performance across the whole model.',
+    input: { mode: 'sql', behavior: 'DirectQueryOnly', situation: 'sql-view' },
+    situationText: 'The table is based on a SQL view (not materialized).',
   },
 ]
 

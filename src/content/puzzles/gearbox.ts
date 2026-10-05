@@ -87,7 +87,7 @@ const storageCards: GearboxCard[] = [
   }),
   S('GB-S07', 'direct-lake-shuttle', 3, {
     title: 'Keep answering when a table grows too big',
-    scenario: 'A fast-growing Delta table may cross a capacity guardrail before the team can optimize it. The business would rather have slower reports than reports that stop working.',
+    scenario: 'A fast-growing Delta table may cross a capacity guardrail before the team can optimize it. The business would rather have slower reports than reports that stop working, and the model keeps the default Direct Lake behavior.',
     accepted: ['dl-sql'],
     why: 'When a guardrail is exceeded, Direct Lake on SQL falls back to DirectQuery (if fallback is enabled) and queries still return results. Direct Lake on OneLake behaves like Import: refresh fails and the model can’t be queried until the tables are optimized.',
     sources: [DL],
@@ -97,9 +97,9 @@ const storageCards: GearboxCard[] = [
     title: 'Respect the warehouse’s SQL row-level security',
     scenario: 'A warehouse already defines row-level security in T-SQL. The model should stay in Direct Lake where possible, but report users must be filtered by that SQL security.',
     accepted: ['dl-sql'],
-    why: 'With SQL row-level security at the endpoint, Direct Lake on SQL falls back to DirectQuery, so the SQL rules apply. Direct Lake on OneLake queries succeed without applying SQL-based RLS.',
-    notes: { 'dl-onelake': 'Learn: with Direct Lake on OneLake, queries succeed and SQL-based RLS isn’t applied.' },
-    sources: [DL, DL_HOW],
+    why: 'With SQL row-level security at the endpoint, Direct Lake on SQL falls back to DirectQuery, and the SQL analytics endpoint enforces the rules. Direct Lake on OneLake doesn’t use the SQL analytics endpoint and can’t fall back to DirectQuery, so it can’t hand the query to the SQL rules.',
+    notes: { 'dl-onelake': 'Direct Lake on OneLake doesn’t use the SQL analytics endpoint and doesn’t support DirectQuery fallback, so the SQL-defined RLS isn’t how it secures data.' },
+    sources: [DL_HOW, `${L}fabric/fundamentals/direct-lake-security-integration`],
     trapPairId: 'dl-onelake-vs-sql',
   }),
   S('GB-S09', 'double-loom', 2, {

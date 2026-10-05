@@ -68,7 +68,7 @@ const scenarios: ConveyorScenario[] = [
     bindings: [
       { case: { kind: 'model-to-source', storage: 'directlake-sql', datasourceRule: false }, prompt: 'Without any rule, where does the Direct Lake on SQL model in Test point?' },
       { case: { kind: 'model-to-source', storage: 'directlake-sql', datasourceRule: true }, prompt: 'With Mia’s datasource rule, where does the Direct Lake on SQL model in Test point?' },
-      { case: { kind: 'model-to-source', storage: 'directlake-onelake', datasourceRule: true }, prompt: 'Mia also tries a datasource rule for the Direct Lake on OneLake model. Where does it point in Test?' },
+      { case: { kind: 'model-to-source', storage: 'directlake-onelake', datasourceRule: true }, prompt: 'Mia looks for a datasource rule for the Direct Lake on OneLake model, then deploys it to Test anyway. Where does it point?' },
       { case: { kind: 'model-to-source', storage: 'import', datasourceRule: false }, prompt: 'Where does the Import model in Test get its data after deployment?' },
     ],
   },
@@ -85,7 +85,7 @@ const scenarios: ConveyorScenario[] = [
   },
   {
     ...base('CN-05', 'Dataflows and empty stages', 2),
-    story: 'The Prod stage has no workspace yet. Quinn owns the Orders dataflow.',
+    story: 'The Prod stage has no workspace yet, and everyone here may assign workspaces to the capacity. Quinn owns the Orders dataflow.',
     stages,
     users: [
       { name: 'Pat', pipelineAdmin: true, roles: { Dev: 'Contributor', Test: 'Contributor' } },

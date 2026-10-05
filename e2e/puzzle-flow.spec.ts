@@ -11,7 +11,7 @@ const plays: [machine: string, puzzle: string][] = [
   ['Kusto Tension Meter', 'QO-K01'],
   ['Warp Frame', 'PD-05'],
   ['Direct Lake Shuttle', 'GB-S06'],
-  ['Direct Lake Shuttle', 'SF-05'],
+  ['Direct Lake Shuttle', 'SF-15'],
   ['Thread Sieves', 'AM-04'],
   ['Ripple Map', 'RP-02'],
   ['Conveyor', 'CN-03'],

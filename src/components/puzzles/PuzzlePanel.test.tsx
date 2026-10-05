@@ -5,7 +5,7 @@ import { puzzleById } from '../../content/puzzles'
 import { shuffleForPlay } from '../../puzzles/play'
 import { PuzzlePanel } from './PuzzlePanel'
 
-const ids = ['QO-K01', 'PD-06', 'GB-S09', 'SF-05', 'AM-07', 'RP-02', 'CN-03']
+const ids = ['QO-K01', 'PD-06', 'GB-S09', 'SF-15', 'AM-07', 'RP-02', 'CN-03']
 
 describe('PuzzlePanel', () => {
   it.each(ids)('%s can be solved with the keyboard alone', async (id) => {

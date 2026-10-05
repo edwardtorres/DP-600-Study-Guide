@@ -277,7 +277,9 @@ export function accessPuzzle(s: AccessScenario): Puzzle {
     for (const r of s.setup.modelRls ?? []) add(r.values)
     for (const v of Object.values(s.setup.warehouseRls?.allow ?? {})) add(v)
     const right = JSON.stringify(a.value)
-    const choices = [...candidates.values()].map((vals, j) => ({
+    // Ids follow label order, so an id never hints at the answer.
+    const sets = [...candidates.values()].sort((x, y) => setLabel(x, all).localeCompare(setLabel(y, all)))
+    const choices = sets.map((vals, j) => ({
       id: `s${j}`,
       label: setLabel(vals, all),
       explain: JSON.stringify(vals) === right ? ruleText : `Not this set. ${ruleText}`,
@@ -288,7 +290,7 @@ export function accessPuzzle(s: AccessScenario): Puzzle {
       prompt,
       ui: 'buttons',
       choices,
-      accepted: [choices.find((_, j) => JSON.stringify([...candidates.values()][j]) === right)!.id],
+      accepted: [choices[sets.findIndex((v) => JSON.stringify(v) === right)]!.id],
       explain: ruleText,
       sources,
     }

@@ -209,7 +209,7 @@ const scenarios: PatternScenario[] = [
     ...WF(['S1.3']),
     difficulty: 3,
     sources: [SS, M2M, BIDI],
-    story: 'A bank records account transactions. An account can have several customers (joint accounts), and a customer can have several accounts. Reports must show balances by customer. A bridging table AccountCustomer links accounts and customers.',
+    story: 'A bank records account transactions. An account can have several customers (joint accounts), and a customer can have several accounts. Reports must show balances by customer. A bridging table AccountCustomer links accounts and customers. Customer name changes are corrections; the old spelling isn’t kept.',
     source: {
       name: 'TransactionsExport',
       columns: ['TransactionID', 'TxnDate', 'AccountNumber', 'AccountType', 'CustomerName', 'Amount'],

@@ -9,7 +9,7 @@ describe('Shuttle Fallback evaluator (Direct Lake overview / How Direct Lake wor
 
   it('encodes Learn’s DirectLakeBehavior table for Direct Lake on SQL', () => {
     // Automatic: silently falls back. DirectLakeOnly: fails. DirectQueryOnly: always DirectQuery.
-    for (const s of ['sql-rls', 'sql-ols', 'sql-ddm', 'sql-view', 'unprocessed', 'guardrail'] as const) {
+    for (const s of ['sql-rls', 'sql-ddm', 'sql-view', 'unprocessed', 'guardrail'] as const) {
       expect(run('sql', 'Automatic', s)).toBe('directquery')
       expect(run('sql', 'DirectLakeOnly', s)).toBe('error')
       expect(run('sql', 'DirectQueryOnly', s)).toBe('directquery')
@@ -27,8 +27,6 @@ describe('Shuttle Fallback evaluator (Direct Lake overview / How Direct Lake wor
   it('Direct Lake on OneLake never falls back and ignores DirectLakeBehavior', () => {
     for (const b of ['Automatic', 'DirectLakeOnly', 'DirectQueryOnly'] as const) {
       expect(run('onelake', b, 'none')).toBe('directlake')
-      // SQL RLS isn’t applied: queries succeed in Direct Lake.
-      expect(run('onelake', b, 'sql-rls')).toBe('directlake')
       expect(run('onelake', b, 'unprocessed')).toBe('error')
       expect(run('onelake', b, 'guardrail')).toBe('error')
       expect(['directquery']).not.toContain(run('onelake', b, 'none'))
@@ -37,6 +35,9 @@ describe('Shuttle Fallback evaluator (Direct Lake overview / How Direct Lake wor
 
   it('returns null for combinations Learn doesn’t state outright', () => {
     expect(run('onelake', 'Automatic', 'sql-view')).toBeNull()
+    // Learn pages disagree on these two (Step 5 review).
+    expect(run('onelake', 'Automatic', 'sql-rls')).toBeNull()
+    for (const b of ['Automatic', 'DirectLakeOnly', 'DirectQueryOnly'] as const) expect(run('sql', b, 'sql-ols')).toBeNull()
     expect(run('onelake', 'Automatic', 'sql-ols')).toBeNull()
     expect(run('onelake', 'Automatic', 'sql-ddm')).toBeNull()
   })
