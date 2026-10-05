@@ -35,4 +35,4 @@ export const CODE_REQUIRED = [
  * Floors whose notes are not written yet. Step 2 writes one floor per commit
  * and shrinks this list; it must be empty when Step 2 ends.
  */
-export const NOTES_PENDING: FloorId[] = ['semantic', 'maintain']
+export const NOTES_PENDING: FloorId[] = ['maintain']
