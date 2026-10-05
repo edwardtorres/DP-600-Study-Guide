@@ -24,9 +24,9 @@ The learner has passed PL-300 study (Power BI basics, DAX fundamentals, star sch
 | `npm run check:content` | Fails if the app's structure drifts from `scripts/official-outline.json` |
 | `npm run check:content -- --live` | Also re-fetches the study guide and diffs every bullet |
 | `npm run check:secrets` | Fails on local paths, private links, or token-like strings in the repo |
-| `npm run check:links` | Fetches every Learn URL cited in notes, verified edges, and questions; fails on non-200 |
+| `npm run check:links` | Fetches every URL cited in notes, verified edges, questions, puzzles, and labs; fails on non-200, or on a lab source whose #section is missing |
 | `npm run check` | All of the above except build, `--live`, and `check:links` |
-| `npm run e2e` | Playwright flows (machine, placement) at 1440 px and 390 px, tap-only, against the dev server. Needs a browser, so it's not in `npm test`. Set `PW_CHROMIUM` to a Chromium binary if Playwright's own isn't installed |
+| `npm run e2e` | Playwright flows (machine, placement, puzzle, lab) at 1440 px and 390 px, tap-only, against the dev server. Needs a browser, so it's not in `npm test`. Set `PW_CHROMIUM` to a Chromium binary if Playwright's own isn't installed |
 
 `npm run build` also runs `scripts/check-bundle.ts`, which fails if the dev-only `?seed=` hook (`src/game/seed.ts`, reachable only behind `import.meta.env.DEV`) is in the production bundle.
 
@@ -112,9 +112,21 @@ The free practice assessment shows "the style, wording, and difficulty"; the rea
 - `check:content` validates puzzle schema, links, domains, sources, banned terms, trap pairs, template generation (50 seeds each), and minimum counts (`src/content/puzzles/requirements.ts`). `check:links` includes puzzle and trap sources.
 - Review: `npm run export:puzzles -- <dir>` writes a blind sample (at least 30% of each type, plus every Fallback, Access, and Conveyor scenario) and its key; `scripts/compare-puzzle-review.ts` diffs a reviewer's answers. Log: `docs/reviews/step-5-puzzle-review.md`.
 
+## Labs (Step 6)
+
+- Lab content is typed data in `src/content/labs/` (`prepare.ts`, `semantic.ts`, `maintain.ts`; types in `types.ts`; source helpers in `sources.ts`; `LABS_UNCOVERED` and `LABS_PARTIAL` in `index.ts`). 15 labs, about 19 hours, run in a Fabric trial in two workspaces (DP600-Dev and DP600-Test, made in Lab 1, removed in Lab 15's cleanup).
+- **Sources:** every step cites at least one source, linked to its section (`#anchor`), not a long click path. Lab steps may cite learn.microsoft.com or Microsoft's official lab exercises (microsoftlearning.github.io/mslearn-fabric). The exercises are for **lab steps only**, never for exam facts, notes, or questions.
+- Each lab has a goal, machines, bullets, platform (`browser`, `windows`, `mixed`), minutes, prerequisite labs, numbered steps with data-free checkpoints, "trap you'll see" callouts (a notes don't-confuse `trapPairId`), and cleanup. Optional steps (`optional`) don't block completion. A step needing Power BI Desktop or SSMS is marked `windows`. A cost warning (`cost`) is allowed only on optional steps; no lab needs a paid Azure resource.
+- **Trial limits:** no lab may depend on Copilot, data agents, AI functions or services, or Trusted Workspace Access. `check:content` rejects lab text that mentions them (`TRIAL_UNAVAILABLE`).
+- **Privacy:** never write tenant names, workspace URLs, connection strings, tokens, or emails into the repo. `check:content` rejects lab text that matches `PRIVATE_PATTERNS`. Problem notes the player types stay in localStorage and the save export only.
+- `check:content` (`src/content/labs/validate.ts`) checks schema, ids, machines and bullets, prerequisites (earlier in order, acyclic), allowed source sites, cleanup present, trap pairs, platform consistency (each machine's `labPlatform` must equal its labs' platform), banned and trial-unavailable terms, private patterns, numbers in checkpoints (only trial facts 4, 60, 64), a debrief pool of ≥3 non-case questions, and that every bullet is covered or listed in `LABS_UNCOVERED` with a reason.
+- **Game (`src/game/labs.ts`):** completion is self-reported. It needs every required step and cleanup step ticked, earns a fixed `LAB_XP` (75), and **never certifies** a machine. The debrief draws 3 non-case bank questions on the lab's bullets (`drawDebrief`), opens once the lab is complete, and logs `[id, 0|1, t, 'l']`; `'l'` counts in readiness like an inspection. The trial clock uses the player's `trialStart` (local days, 60-day trial), and `suggestSchedule` spreads the remaining labs in order up to 5 days before the end. **Export lab notes** downloads `fabric-mill-lab-notes-YYYY-MM-DD.txt`.
+- UI: a **Workshop** tab in each machine's panel lists its labs; the header **Labs** button opens the Labs page (trial facts, trial clock and schedule, all labs, export), and the lab view (`src/components/labs/`).
+- Labs are untested until the player runs them. Problems they report come back as exported notes; fix the lab and log it. Review log: `docs/reviews/step-6-lab-review.md`.
+
 ## Platform note
 
-The user works on both Windows and Mac. Fabric runs in the browser, but Power BI Desktop and `.pbip` work are Windows-only. Every hands-on lab must show its platform. `labPlatform` on each machine is `browser`, `windows`, or `tbd`. It's preliminary until Step 6 verifies each lab on Learn. Lab-logistics facts (for example, which desktop tools run on Windows) may be resolved outside Learn; they're recorded in `Machine.labNote`, marked as such, and never used in questions.
+The user works on both Windows and Mac. Fabric runs in the browser, but Power BI Desktop and `.pbip` work are Windows-only. Every hands-on lab must show its platform. `labPlatform` on each machine is `browser`, `windows`, or `mixed`, and must match the platform of the labs that list it (Step 6; enforced by `check:content`). Lab-logistics facts (for example, which desktop tools run on Windows) may be resolved outside Learn; they're recorded in `Machine.labNote`, marked as such, and never used in questions.
 
 ## Save system
 
@@ -133,12 +145,14 @@ src/content/                    notes data, notes types, notes validator, requir
 src/content/questions/          question bank, case studies, question validator
 src/review/                     hidden /review page
 src/data/                       outline loader, machines, edges, floors, graph utils, shared validators
-src/game/                       state derivation, map layout
+src/game/                       state derivation, map layout, draws, scoring, progress, labs
 src/save/                       versioned save
 src/content/puzzles/            puzzle scenarios, puzzle registry, puzzle validator
 src/puzzles/                    puzzle types, builders, play/scoring, Query Oracle engine + templates, evaluators
 src/components/                 MillMap, MachineNode, Threads, MachineDetail, NotesView, Glossary, Header, Legend
 src/components/puzzles/         Puzzle bench, PuzzlePanel, decision inputs
+src/content/labs/               lab content, sources, lab validator, coverage
+src/components/labs/            Workshop tab, Labs page, lab view
 e2e/                            Playwright flows (npm run e2e)
 ```
 
