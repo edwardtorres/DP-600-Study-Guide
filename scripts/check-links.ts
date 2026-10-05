@@ -1,13 +1,18 @@
 /**
- * npm run check:links: fetches every Learn URL cited in notes and verified
- * edges once and reports any that do not return HTTP 200. Needs network.
+ * npm run check:links: fetches every Learn URL cited in notes, verified edges,
+ * and questions (plus the shared question source list) once and reports any that do not return HTTP 200. Needs network.
  */
 import { allNotes } from '../src/content/notes/index.ts'
 import { notesSources } from '../src/content/validate.ts'
 import { edges } from '../src/data/edges.ts'
+import { allQuestions } from '../src/content/questions/index.ts'
+import { S } from '../src/content/questions/sources.ts'
 
 const urls = [
-  ...new Set([...allNotes.flatMap((n) => notesSources(n)), ...edges.flatMap((e) => (e.verified ? [e.verified.source] : []))]),
+  ...new Set([...allNotes.flatMap((n) => notesSources(n)), ...edges.flatMap((e) => (e.verified ? [e.verified.source] : [])),
+    ...allQuestions.flatMap((q) => q.sources),
+    ...Object.values(S),
+  ]),
 ].sort()
 
 const failures: string[] = []

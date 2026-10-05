@@ -24,7 +24,7 @@ The learner has passed PL-300 study (Power BI basics, DAX fundamentals, star sch
 | `npm run check:content` | Fails if the app's structure drifts from `scripts/official-outline.json` |
 | `npm run check:content -- --live` | Also re-fetches the study guide and diffs every bullet |
 | `npm run check:secrets` | Fails on local paths, private links, or token-like strings in the repo |
-| `npm run check:links` | Fetches every Learn URL cited in notes and verified edges; fails on non-200 |
+| `npm run check:links` | Fetches every Learn URL cited in notes, verified edges, and questions; fails on non-200 |
 | `npm run check` | All of the above except build, `--live`, and `check:links` |
 
 ## Git rules

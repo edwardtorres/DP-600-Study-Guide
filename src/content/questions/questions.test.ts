@@ -109,6 +109,18 @@ describe('question bank', () => {
     expect(st.perDomain.get('SEMANTIC')).toBe(2)
   })
 
+  it('requires each case study to have 6–8 questions spanning all domains', () => {
+    const kase = { id: 'k1', company: 'Example Co', title: 'T', summary: 'S', environment: ['e'], requirements: ['r'], constraints: ['c'] }
+    const qs = [single('k-a', { caseStudyId: 'k1' }), single('k-b', { caseStudyId: 'k1', stem: 'Another storage mode scenario for a case. What fits?' })]
+    const errs = validateQuestions(outline, machines, allNotes, qs, [kase], {
+      pending: ['orientation', 'prepare', 'semantic', 'maintain'],
+      casesPending: false,
+    }).join('\n')
+    expect(errs).toMatch(/Case study k1 has 2 questions; needs 6–8/)
+    expect(errs).toMatch(/Case study k1 must span all 3 domains/)
+    expect(errs).toMatch(/Expected 4 case studies, found 1/)
+  })
+
   it('ends Step 3 with nothing pending', () => {
     // Enforced once all floors and case studies are written.
     if (QUESTIONS_PENDING.length === 0 && !CASES_PENDING) {
