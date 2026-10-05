@@ -176,12 +176,33 @@ export function placedCount(save: Save, machines: Machine[]): { placed: number; 
 
 /** How many recent answers per domain feed readiness, and the minimum before a score shows. */
 export const READINESS_WINDOW = 40
+/** At most this many puzzle plays ('z') in a domain's window; the most recent ones are used. */
+export const READINESS_MAX_PUZZLES = 10
 export const READINESS_MIN_ANSWERS = 10
 /**
- * Which answers count toward readiness: inspections, placements, and puzzles.
- * Start-up checks ('s') don't. Step 7 adds the review and mock-exam codes here.
+ * Which answers count toward readiness: inspections, placements, puzzles, and
+ * lab debriefs. Start-up checks ('s') don't. Step 7 adds the review and mock-exam codes here.
  */
-export const READINESS_CODES: readonly AttemptCode[] = ['i', 'p', 'z']
+export const READINESS_CODES: readonly AttemptCode[] = ['i', 'p', 'z', 'l']
+
+/**
+ * The most recent answers for a readiness window: up to `size` entries,
+ * newest first back in time, with at most `maxPuzzles` puzzle plays (older
+ * plays beyond the cap are skipped). Returned in log order.
+ */
+export function readinessWindow(entries: AnswerEntry[], size = READINESS_WINDOW, maxPuzzles = READINESS_MAX_PUZZLES): AnswerEntry[] {
+  const out: AnswerEntry[] = []
+  let puzzles = 0
+  for (let i = entries.length - 1; i >= 0 && out.length < size; i--) {
+    const e = entries[i]!
+    if (e[3] === 'z') {
+      if (puzzles >= maxPuzzles) continue
+      puzzles++
+    }
+    out.push(e)
+  }
+  return out.reverse()
+}
 
 /** The domain of an item's first outline bullet. */
 export function domainOf(bulletIds: string[], outline: Outline): DomainId | null {
@@ -230,7 +251,7 @@ export function readiness(answers: AnswerEntry[], questionsById: Map<string, Sco
       const q = questionsById.get(id)
       return q ? domainOf(q.bulletIds, outline) === d.id : false
     })
-    const recent = inDomain.slice(-READINESS_WINDOW)
+    const recent = readinessWindow(inDomain)
     const right = recent.filter(([, c]) => c === 1).length
     const accuracy = recent.length ? right / recent.length : 0
     const bullets = new Set(inDomain.flatMap(([id]) => questionsById.get(id)?.bulletIds ?? []))

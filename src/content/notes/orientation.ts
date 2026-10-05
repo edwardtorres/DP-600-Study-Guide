@@ -350,7 +350,7 @@ export const orientationNotes: MachineNotes[] = [
         sources: [TRIAL],
       },
       {
-        text: 'The trial capacity is an F4 (4 CUs) or F64 (64 CUs). It comes with a Power BI individual trial if you don’t already have a Premium Per User license, and it allows up to 1 TB of OneLake storage.',
+        text: 'The trial capacity is configured as either an F4 (4 capacity units) or an F64 (64 capacity units). If yours is 4 capacity units, a capacity or tenant administrator may be eligible to increase it to 64 (and back down) on the Trial tab of the capacities page; changing the size doesn’t extend the 60 days. It comes with a Power BI individual trial if you don’t already have a Premium Per User license, and it allows up to 1 TB of OneLake storage.',
         sources: [TRIAL],
       },
       {
@@ -420,10 +420,6 @@ export const orientationNotes: MachineNotes[] = [
       },
     ],
     needsVerification: [
-      {
-        claim: 'The trial capacity size: "F4 or F64" (trial page) vs only "64 capacity units" (licenses page SKU table).',
-        why: 'Raised by the Step 3 question reviewer. Learn pages disagree; no question depends on the trial size until Step 8 resolves it.',
-      },
       {
         claim: 'The trial page lists "Real-Time Analytics" as a workload, while the Fabric overview says "Real-Time Intelligence".',
         why: 'No Learn page found that states the rename explicitly. Confirm in Step 8 before listing it as a renamed feature.',

@@ -21,6 +21,12 @@ export const migrations: Migration[] = [
     from: 2,
     migrate: (old) => ({ ...old }),
   },
+  {
+    // v3 → v4 (Step 6): hands-on lab progress, an optional trial start date, and
+    // answer code 'l' (lab debriefs). Existing data is unchanged.
+    from: 3,
+    migrate: (old) => ({ ...old, labs: {} }),
+  },
 ]
 
 export function runMigrations(

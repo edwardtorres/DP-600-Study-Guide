@@ -623,11 +623,11 @@ export const modelBQuestions: Question[] = [
     difficulty: 2,
     trapPairId: 'dl-onelake-vs-sql',
     stem: 'You are comparing Direct Lake on OneLake with Direct Lake on SQL analytics endpoints. For each statement, select Yes if it is true. Otherwise, select No.',
-    sources: [S.directLake],
+    sources: [S.directLake, S.dlManage],
     statements: [
       { id: 's1', text: 'Direct Lake on OneLake never falls back to DirectQuery.', answer: true, explain: 'Yes. It runs exclusively in DirectLakeOnly mode.' },
       { id: 's2', text: 'Direct Lake on SQL analytics endpoints can combine Delta tables from several Fabric items in one model.', answer: false, explain: 'No. It uses a single Fabric source; multiple sources need Direct Lake on OneLake.' },
-      { id: 's3', text: 'Row-level security defined in the SQL analytics endpoint is enforced for Direct Lake on OneLake models.', answer: false, explain: 'No. On OneLake ignores SQL endpoint security; use semantic model RLS or OneLake security.' },
+      { id: 's3', text: 'Direct Lake on OneLake checks permissions through the SQL analytics endpoint.', answer: false, explain: 'No. Direct Lake on OneLake doesn’t use a SQL analytics endpoint to check permissions; it uses OneLake security, or Read and ReadAll on the item.' },
     ],
   },
   {

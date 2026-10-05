@@ -6,6 +6,7 @@ const STORAGE_MODE = `${L}power-bi/transform-model/desktop-storage-mode`
 const DIRECT_LAKE = `${L}fabric/fundamentals/direct-lake-overview`
 const DL_HOW = `${L}fabric/fundamentals/direct-lake-how-it-works`
 const DL_ANALYZE = `${L}fabric/fundamentals/direct-lake-analyze-query-processing`
+const DL_SECURITY = `${L}fabric/fundamentals/direct-lake-security-integration`
 const COMPOSITE = `${L}power-bi/transform-model/desktop-composite-models`
 const STAR = `${L}power-bi/guidance/star-schema`
 const MANY_TO_MANY = `${L}power-bi/guidance/relationships-many-to-many`
@@ -1030,8 +1031,8 @@ export const semanticNotes: MachineNotes[] = [
             sources: [DL_HOW],
           },
           {
-            text: 'Fallback (Direct Lake on SQL only): a query switches to DirectQuery through the SQL analytics endpoint when the model uses tables with SQL RLS, OLS, or dynamic data masking, unmaterialized SQL views, or any table exceeding a guardrail, or when the model wasn’t reframed after the tables changed. One table over a guardrail prevents Direct Lake for the whole model.',
-            sources: [DL_HOW],
+            text: 'Fallback (Direct Lake on SQL only): a query switches to DirectQuery through the SQL analytics endpoint when it uses tables with SQL RLS, unmaterialized SQL views, or a table over a guardrail, or when the model wasn’t reframed after the tables changed. How Direct Lake works also lists dynamic data masking (only that page does). SQL OLS or CLS also keep a query out of Direct Lake, but Learn pages differ on the result: How Direct Lake works lists OLS as a fallback cause, while Integrate Direct Lake security says the query returns an error.',
+            sources: [DL_HOW, DL_SECURITY],
           },
           {
             text: 'Default fallback behavior: the DirectLakeBehavior property defaults to Automatic, which falls back silently. DirectLakeOnly makes such queries fail; DirectQueryOnly forces DirectQuery, for testing.',
@@ -1076,8 +1077,8 @@ export const semanticNotes: MachineNotes[] = [
             sources: [DIRECT_LAKE],
           },
           {
-            text: 'On OneLake, SQL endpoint RLS doesn’t apply: users need access to the OneLake files. Use semantic model RLS or OneLake security instead.',
-            sources: [DIRECT_LAKE],
+            text: 'On OneLake, permissions aren’t checked through the SQL analytics endpoint: users need access to the OneLake files (or OneLake security roles). Learn pages differ on what a query against a table with SQL endpoint RLS then returns: the overview says it succeeds without the SQL RLS, while Integrate Direct Lake security says it returns an error. Either way, enforce row filters with semantic model RLS or OneLake security.',
+            sources: [DIRECT_LAKE, DL_SECURITY],
           },
         ],
       },
@@ -1120,8 +1121,8 @@ export const semanticNotes: MachineNotes[] = [
             sources: [DL_HOW, DIRECT_LAKE],
           },
           {
-            text: 'SQL views and SQL security: OneLake can’t use non-materialized views and ignores SQL endpoint RLS, OLS, and CLS. SQL can read views and respects SQL RLS by falling back.',
-            sources: [DIRECT_LAKE],
+            text: 'SQL views and SQL security: OneLake can’t use non-materialized views and doesn’t check SQL endpoint security (Learn pages differ on whether such queries succeed or error). SQL can read views and respects SQL RLS by falling back.',
+            sources: [DIRECT_LAKE, DL_SECURITY],
           },
           {
             text: 'Mixing modes: OneLake can mix with Import (and DirectQuery via XMLA tools); SQL can’t mix storage modes in the same model.',
@@ -1203,7 +1204,20 @@ export const semanticNotes: MachineNotes[] = [
         sources: [DIRECT_LAKE],
       },
     ],
-    needsVerification: [],
+    needsVerification: [
+      {
+        claim: 'What a Direct Lake on SQL query returns when it touches a table or column restricted by SQL analytics endpoint OLS or CLS: DirectQuery fallback or an error.',
+        why: 'How Direct Lake works lists SQL OLS as a fallback cause; Integrate Direct Lake security says the query returns an error (Step 5 review). No question or puzzle depends on it.',
+      },
+      {
+        claim: 'What a Direct Lake on OneLake query returns when the SQL analytics endpoint enforces RLS on its table: success without the SQL RLS, or an error.',
+        why: 'The Direct Lake overview says queries succeed and SQL-based RLS isn’t applied; Integrate Direct Lake security says an error is returned (Step 5 review). No question or puzzle depends on it.',
+      },
+      {
+        claim: 'Dynamic data masking at the SQL analytics endpoint as a Direct Lake fallback cause.',
+        why: 'Only How Direct Lake works lists it; the overview and the security page don’t mention it. Puzzle SF-07 relies on it. Confirm in Step 8.',
+      },
+    ],
   },
 
   // ── Batch Winder ─────────────────────────────────────────────────────

@@ -16,6 +16,7 @@ const MODEL_OLS = `${L}fabric/security/service-admin-object-level-security`
 const ENDPOINT = `${L}fabric/data-engineering/lakehouse-sql-analytics-endpoint`
 const DIRECT_LAKE = `${L}fabric/fundamentals/direct-lake-overview`
 const DL_HOW = `${L}fabric/fundamentals/direct-lake-how-it-works`
+const DL_SECURITY = `${L}fabric/fundamentals/direct-lake-security-integration`
 const INFO_PROTECTION = `${L}fabric/governance/information-protection`
 const ENDORSEMENT = `${L}fabric/governance/endorsement-overview`
 const GIT_INTRO = `${L}fabric/cicd/git-integration/intro-to-git-integration`
@@ -337,8 +338,8 @@ export const maintainNotes: MachineNotes[] = [
     ],
     traps: [
       {
-        text: 'SQL RLS, CLS, OLS, and dynamic data masking on the SQL analytics endpoint make Direct Lake on SQL fall back to DirectQuery. Direct Lake on OneLake ignores SQL-based RLS entirely, because it reads the files.',
-        sources: [DL_HOW, DIRECT_LAKE, WH_CLS],
+        text: 'SQL RLS and views on the SQL analytics endpoint make Direct Lake on SQL fall back to DirectQuery (How Direct Lake works also lists dynamic data masking). For SQL OLS and CLS, Learn pages differ: How Direct Lake works lists OLS as a fallback cause, while Integrate Direct Lake security says queries that touch OLS- or CLS-restricted objects return an error. Direct Lake on OneLake doesn’t check SQL-based security at all; Learn pages differ on whether such a query succeeds or returns an error.',
+        sources: [DL_HOW, DIRECT_LAKE, DL_SECURITY, WH_CLS],
       },
       {
         text: 'SQL security on a SQL analytics endpoint only applies to SQL queries. The same data read through Spark is not filtered by it.',
@@ -782,7 +783,7 @@ export const maintainNotes: MachineNotes[] = [
             sources: [PIPELINES_START, PIPELINES_RULES],
           },
           {
-            text: 'Permissions per action: deploy between stages = pipeline admin + at least Contributor on both the source and target workspaces. Deploy to an empty stage = pipeline admin + Contributor on the source workspace. Assign a workspace to a stage = pipeline admin + Admin of that workspace.',
+            text: 'Permissions per action: deploy between stages = pipeline admin + at least Contributor on both the source and target workspaces. Deploy to an empty stage = pipeline admin + Contributor on the source workspace. Assign a workspace to a stage = pipeline admin + Admin of that workspace. Nuance: the same page’s “Granted permissions” table lists workspace Member as the permission to deploy an existing semantic model or paginated report, and dataflow owner for dataflows. The two tables differ for semantic models and paginated reports, so this app doesn’t test a Contributor deploying those.',
             sources: [PIPELINES_PROCESS],
           },
         ],
@@ -868,7 +869,12 @@ export const maintainNotes: MachineNotes[] = [
         sources: [PIPELINES_PROCESS],
       },
     ],
-    needsVerification: [],
+    needsVerification: [
+      {
+        claim: 'Which workspace role is needed to deploy an existing semantic model or paginated report through a deployment pipeline: Contributor (the page’s action table) or Member (its “Granted permissions” item table).',
+        why: 'Both tables are on Understand the deployment process and disagree for these item types (Step 5 review). No question or puzzle tests a Contributor deploying them; confirm in Step 8.',
+      },
+    ],
   },
 
   // ── Ripple Map ───────────────────────────────────────────────────────

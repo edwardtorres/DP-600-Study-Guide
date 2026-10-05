@@ -1,4 +1,4 @@
-export const SAVE_VERSION = 3
+export const SAVE_VERSION = 4
 export const SAVE_KEY = 'fabric-mill:save'
 export const BACKUP_KEY = 'fabric-mill:save:corrupt-backup'
 
@@ -9,9 +9,22 @@ export interface Certification {
   kind: 'inspection' | 'placement'
 }
 
-/** Which kind of attempt an answer came from: start-up check, inspection, placement, or puzzle. */
-export type AttemptCode = 's' | 'i' | 'p' | 'z'
-export const ATTEMPT_CODES: readonly AttemptCode[] = ['s', 'i', 'p', 'z']
+/** Which kind of attempt an answer came from: start-up check, inspection, placement, puzzle, or lab debrief. */
+export type AttemptCode = 's' | 'i' | 'p' | 'z' | 'l'
+export const ATTEMPT_CODES: readonly AttemptCode[] = ['s', 'i', 'p', 'z', 'l']
+
+/** Longest problem note kept per lab step. */
+export const MAX_PROBLEM_NOTE = 2000
+
+/** Self-reported progress on one hands-on lab. Notes stay in localStorage and the save export only. */
+export interface LabProgress {
+  /** Steps ticked as done, by step id. */
+  steps: Record<string, true>
+  /** Problem notes ("this step didn't match what I saw"), by step id. */
+  problems: Record<string, string>
+  /** When the lab was marked complete. */
+  completedAt?: string
+}
 export type AttemptKind = 'startup' | 'inspection' | 'placement'
 export const attemptCode: Record<AttemptKind, AttemptCode> = { startup: 's', inspection: 'i', placement: 'p' }
 
@@ -58,15 +71,28 @@ export interface SaveV3 {
   createdAt: string
   updatedAt: string
   machines: Record<string, MachineProgress>
-  answers: AnswerEntry[]
+  answers: [string, 0 | 1, number, 's' | 'i' | 'p' | 'z'][]
   settings: Record<string, never>
 }
 
-export type Save = SaveV3
+export interface SaveV4 {
+  version: 4
+  createdAt: string
+  updatedAt: string
+  machines: Record<string, MachineProgress>
+  answers: AnswerEntry[]
+  /** Hands-on lab progress, by lab id. */
+  labs: Record<string, LabProgress>
+  /** Local day (YYYY-MM-DD) the Fabric trial started, entered by the player. */
+  trialStart?: string
+  settings: Record<string, never>
+}
+
+export type Save = SaveV4
 
 export function newSave(now: Date = new Date()): Save {
   const iso = now.toISOString()
-  return { version: SAVE_VERSION, createdAt: iso, updatedAt: iso, machines: {}, answers: [], settings: {} }
+  return { version: SAVE_VERSION, createdAt: iso, updatedAt: iso, machines: {}, answers: [], labs: {}, settings: {} }
 }
 
 const isObject = (v: unknown): v is Record<string, unknown> =>
@@ -149,8 +175,23 @@ export function isSaveV2(v: unknown): v is SaveV2 {
   )
 }
 
-/** Structural check for the current save version. */
+/** Structural check for version-3 saves (used by tests and migration fixtures). */
 export function isSaveV3(v: unknown): v is SaveV3 {
   if (!hasSaveShell(v, 3)) return false
+  return Object.values(v.machines).every(isMachineProgress) && v.answers.every((a) => isAnswerEntry(a) && a[3] !== 'l')
+}
+
+function isLabProgress(v: unknown): v is LabProgress {
+  if (!isObject(v) || !isObject(v.steps) || !isObject(v.problems)) return false
+  if (!Object.values(v.steps).every((x) => x === true)) return false
+  if (!Object.values(v.problems).every((x) => typeof x === 'string' && x.length <= MAX_PROBLEM_NOTE)) return false
+  return v.completedAt === undefined || isIsoDate(v.completedAt)
+}
+
+/** Structural check for the current save version. */
+export function isSaveV4(v: unknown): v is SaveV4 {
+  if (!hasSaveShell(v, 4)) return false
+  if (!isObject(v.labs) || !Object.values(v.labs).every(isLabProgress)) return false
+  if (v.trialStart !== undefined && !isDayKey(v.trialStart)) return false
   return Object.values(v.machines).every(isMachineProgress) && v.answers.every(isAnswerEntry)
 }

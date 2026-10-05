@@ -253,7 +253,7 @@ export const lifecycleQuestions: Question[] = [
     bulletIds: ['M2.3'],
     format: 'single',
     difficulty: 2,
-    stem: 'A pipeline admin with no role in the Test workspace tries to deploy content from Development to Test and can’t. What else do they need?',
+    stem: 'A pipeline admin with no role in the Test workspace tries to deploy a notebook from Development to Test and can’t. What else do they need?',
     sources: [S.pipelinesProcess],
     options: [
       { id: 'a', text: 'At least Contributor in both the source and target workspaces', explain: 'Correct. Deploying between stages needs pipeline admin plus Contributor, Member, or Admin on both workspaces.' },
@@ -335,7 +335,7 @@ export const lifecycleQuestions: Question[] = [
     stem: 'Match each deployment pipeline action to the permissions it needs.',
     sources: [S.pipelinesProcess],
     prompts: [
-      { id: 'p1', text: 'Deploy from Development to an existing Test workspace' },
+      { id: 'p1', text: 'Deploy a notebook from Development to an existing Test workspace' },
       { id: 'p2', text: 'Deploy to an empty stage' },
       { id: 'p3', text: 'Assign a workspace to a stage' },
     ],

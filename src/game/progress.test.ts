@@ -4,7 +4,7 @@ import { machines } from '../data/machines'
 import { millGraph } from '../data/mill'
 import { outline } from '../data/outline'
 import { newSave, type AnswerEntry, type Save } from '../save/schema'
-import { badges, domainWeights, levelFor, readiness, streak, totalXp, xpForLevel } from './progress'
+import { badges, domainWeights, levelFor, readiness, readinessWindow, streak, totalXp, xpForLevel } from './progress'
 import { addDays, dayKey } from './time'
 
 const q = (id: string, difficulty: 1 | 2 | 3, bullet = 'P1.1'): Question => ({
@@ -120,6 +120,39 @@ describe('readiness', () => {
     const withPuzzle = readiness([...base, [puzzle.id, 1, 300, 'z']], lookup, outline).domains.find((d) => d.domain === 'PREPARE')!
     expect(withPuzzle.answered).toBe(11)
     expect(withPuzzle.coverage).toBeCloseTo(12 / prepBullets.length, 5)
+  })
+
+  it('caps puzzle plays at the 10 most recent in a domain’s 40-answer window', () => {
+    const prepBullets = outline.domains.find((d) => d.id === 'PREPARE')!.sections.flatMap((s) => s.bullets.map((b) => b.id))
+    const qs = prepBullets.map((b, i) => q(`p${i}`, 1, b))
+    const puzzle = { id: 'QO-T01', difficulty: 2 as const, bulletIds: [prepBullets[0]!] }
+    const lookup = new Map<string, { difficulty: 1 | 2 | 3; bulletIds: string[] }>([...byId(qs), [puzzle.id, puzzle]])
+    // 30 puzzle plays (all right), then 20 inspection answers (all wrong).
+    const log: AnswerEntry[] = [
+      ...Array.from({ length: 30 }, (_, i) => [puzzle.id, 1, i, 'z'] as AnswerEntry),
+      ...Array.from({ length: 20 }, (_, i) => [qs[i % qs.length]!.id, 0, 100 + i, 'i'] as AnswerEntry),
+    ]
+    const w = readinessWindow(log)
+    expect(w.filter((e) => e[3] === 'z')).toHaveLength(10)
+    expect(w.filter((e) => e[3] === 'i')).toHaveLength(20)
+    // The 10 kept plays are the most recent ones, in log order.
+    expect(w.filter((e) => e[3] === 'z').map((e) => e[2])).toEqual([20, 21, 22, 23, 24, 25, 26, 27, 28, 29])
+    const prep = readiness(log, lookup, outline).domains.find((d) => d.domain === 'PREPARE')!
+    expect(prep.accuracy).toBeCloseTo(10 / 30, 5)
+    // Without enough other answers, the window is shorter rather than filled with older plays.
+    expect(readinessWindow(log.slice(0, 30))).toHaveLength(10)
+    // Never more than 40, and interleaved plays beyond the cap are skipped.
+    const mixed: AnswerEntry[] = Array.from({ length: 100 }, (_, i) => [i % 2 ? qs[0]!.id : puzzle.id, 1, i, i % 2 ? 'i' : 'z'] as AnswerEntry)
+    const mw = readinessWindow(mixed)
+    expect(mw).toHaveLength(40)
+    expect(mw.filter((e) => e[3] === 'z')).toHaveLength(10)
+  })
+
+  it('counts lab debrief answers like inspections', () => {
+    const prepBullets = outline.domains.find((d) => d.id === 'PREPARE')!.sections.flatMap((s) => s.bullets.map((b) => b.id))
+    const qs = prepBullets.map((b, i) => q(`p${i}`, 1, b))
+    const log: AnswerEntry[] = qs.slice(0, 12).map((x, i) => [x.id, 1, i, 'l'])
+    expect(readiness(log, byId(qs), outline).domains.find((d) => d.domain === 'PREPARE')!.answered).toBe(12)
   })
 
   it('computes the weighted overall once every domain has a score', () => {
