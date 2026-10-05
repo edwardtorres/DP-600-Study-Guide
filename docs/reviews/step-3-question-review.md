@@ -156,3 +156,25 @@ Reviewer flags from the blind pass:
 - Questions written: 384. Dropped: 2 (DLS-05, SL-09). Kept: **382**.
 - Blind-pass agreement before fixes: 384/384.
 - Source passes: 0 keys unsupported. Every partly supported item was fixed or dropped as listed above.
+
+## Step 4 addendum: Front Office questions FO-13 to FO-32
+
+Five new questions per Orientation machine (decided in Step 4 planning), so every Orientation machine has 8 questions for its start-up check and inspection. A fresh reviewer agent reviewed them.
+
+**Blind pass: 20/20 match.**
+
+| Question | Flag | Resolution |
+|---|---|---|
+| FO-20 | Phase ordinals looked ambiguous (overage protection could count as a stage). | Options now use Learn's stage names: interactive delay, interactive rejection, background rejection. The source pass later noted that the ordinals were also correct. |
+| FO-15 | Governance is also in the platform layer, so "which two" leaned on the option list. | Stem now reads "Which two of the following". |
+| FO-22, FO-13, FO-17 | Easy, difficulty 1. | Kept. |
+
+**Source pass: 19 supported, 1 partly supported, 0 not supported.**
+
+| Question | Finding | Resolution |
+|---|---|---|
+| FO-15 | The Report Server explanation wasn't on the cited page. | Rewritten to state only what the page lists. |
+| FO-27 (minor) | Learn allows other files in silver and gold but recommends Delta. | Explanation now says so. |
+| FO-23 (minor) | The warehouse distractor relied on an uncited page. | Warehouse page added as a source. |
+
+**Dropped: none.**
