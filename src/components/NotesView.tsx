@@ -86,8 +86,8 @@ export function NotesView({ notes }: { notes: MachineNotes }) {
             <div key={e.title} className="space-y-2">
               <p className="font-medium text-mill-50">
                 {e.title}
-                <span className="ml-2 rounded bg-mill-700 px-1.5 py-px text-[10px] uppercase text-mill-200">{languageLabel[e.language]}</span>
-                <span className="ml-1 rounded bg-madder/25 px-1.5 py-px text-[10px] uppercase text-mill-50">Illustrative</span>
+                <span className="ml-2 whitespace-nowrap rounded bg-mill-700 px-1.5 py-px text-[10px] uppercase text-mill-200">{languageLabel[e.language]}</span>
+                <span className="ml-1 whitespace-nowrap rounded bg-madder/25 px-1.5 py-px text-[10px] uppercase text-mill-50">Illustrative</span>
                 {ref(e.sources)}
               </p>
               <ol className="space-y-2">
