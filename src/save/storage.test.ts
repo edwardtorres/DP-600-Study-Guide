@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import type { Migration } from './migrations'
-import { runMigrations } from './migrations'
-import { BACKUP_KEY, SAVE_KEY, SAVE_VERSION, newSave } from './schema'
-import { loadSave, writeSave, type StorageLike } from './storage'
+import { migrations, runMigrations } from './migrations'
+import v1Fixture from './fixtures/save-v1.json'
+import { BACKUP_KEY, SAVE_KEY, SAVE_VERSION, isSaveV1, isSaveV2, newSave } from './schema'
+import { backupSave, exportSave, importSave, loadSave, writeSave, type StorageLike } from './storage'
 
 function memory(initial: Record<string, string> = {}): StorageLike & { data: Record<string, string> } {
   const data = { ...initial }
@@ -12,11 +13,53 @@ function memory(initial: Record<string, string> = {}): StorageLike & { data: Rec
 const now = new Date('2026-10-04T12:00:00Z')
 
 describe('save system', () => {
-  it('starts a fresh version-1 save when nothing is stored', () => {
+  it('starts a fresh version-2 save when nothing is stored', () => {
     const r = loadSave({ storage: memory(), now })
     expect(r.status).toBe('new')
     expect(r.save).toEqual(newSave(now))
-    expect(SAVE_VERSION).toBe(1)
+    expect(SAVE_VERSION).toBe(2)
+    expect(r.save.answers).toEqual([])
+  })
+
+  it('migrates a real version-1 save to version 2 and keeps its progress', () => {
+    expect(isSaveV1(v1Fixture)).toBe(true)
+    const r = loadSave({ storage: memory({ [SAVE_KEY]: JSON.stringify(v1Fixture) }), knownMachineIds: ['founding-charter', 'water-wheel'] })
+    expect(r.status).toBe('loaded')
+    if (r.status !== 'loaded') return
+    expect(r.migratedFrom).toBe(1)
+    expect(isSaveV2(r.save)).toBe(true)
+    expect(r.save.createdAt).toBe(v1Fixture.createdAt)
+    expect(r.save.machines['founding-charter']).toEqual({ startedAt: '2026-10-01T08:20:00.000Z' })
+    expect(r.save.answers).toEqual([])
+  })
+
+  it('validates the answer log and new machine fields', () => {
+    const good = {
+      ...newSave(now),
+      machines: { 'water-wheel': { notesOpenedAt: now.toISOString(), lastDraw: { inspection: ['FO-04'] }, placementDays: ['2026-10-04'] } },
+      answers: [['FO-04', 1, 1759579200, 'i']],
+    }
+    expect(isSaveV2(good)).toBe(true)
+    expect(isSaveV2({ ...good, answers: [['FO-04', 2, 1, 'i']] })).toBe(false)
+    expect(isSaveV2({ ...good, answers: [['FO-04', 1, 1, 'x']] })).toBe(false)
+    expect(isSaveV2({ ...good, machines: { 'water-wheel': { placementDays: ['4 Oct'] } } })).toBe(false)
+    expect(isSaveV2({ ...good, machines: { 'water-wheel': { lastDraw: { review: [] } } } })).toBe(false)
+  })
+
+  it('imports a valid save file, migrating older versions, and rejects bad files without side effects', () => {
+    const save = { ...newSave(now), answers: [['FO-01', 1, 1759579200, 's']] as [string, 0 | 1, number, 's'][] }
+    expect(importSave(exportSave(save))).toEqual({ ok: true, save })
+    const fromV1 = importSave(JSON.stringify(v1Fixture))
+    expect(fromV1.ok && fromV1.migratedFrom).toBe(1)
+    expect(importSave('not json')).toEqual({ ok: false, error: 'The file is not valid JSON' })
+    expect(importSave('[]')).toEqual({ ok: false, error: 'Save is not an object' })
+    expect(importSave(JSON.stringify({ ...save, answers: 'nope' }))).toEqual({ ok: false, error: 'Save failed validation' })
+  })
+
+  it('backs up the current save before a reset', () => {
+    const storage = memory({ [SAVE_KEY]: '{"version":2}' })
+    backupSave(storage)
+    expect(storage.data[BACKUP_KEY]).toBe('{"version":2}')
   })
 
   it('round-trips a save', () => {
@@ -63,11 +106,11 @@ describe('save system', () => {
       }),
     }
     const v0 = { version: 0, created: now.toISOString(), started: ['water-wheel'] }
-    const r = loadSave({ storage: memory({ [SAVE_KEY]: JSON.stringify(v0) }), migrations: [v0toV1] })
+    const r = loadSave({ storage: memory({ [SAVE_KEY]: JSON.stringify(v0) }), migrations: [v0toV1, ...migrations] })
     expect(r).toEqual({
       status: 'loaded',
       migratedFrom: 0,
-      save: { version: 1, createdAt: v0.created, updatedAt: v0.created, machines: { 'water-wheel': { startedAt: v0.created } }, settings: {} },
+      save: { version: 2, createdAt: v0.created, updatedAt: v0.created, machines: { 'water-wheel': { startedAt: v0.created } }, settings: {}, answers: [] },
     })
     expect(() => runMigrations({ version: 0 }, 1, [])).toThrow(/No migration/)
   })

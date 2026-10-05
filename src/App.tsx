@@ -7,7 +7,7 @@ import { MillMap } from './components/MillMap'
 import { edges } from './data/edges'
 import { machineById, machines } from './data/machines'
 import { millGraph } from './data/mill'
-import { allStates, startMachine } from './game/state'
+import { allStates, openNotes } from './game/state'
 import { loadSave, writeSave, type LoadResult } from './save/storage'
 
 export default function App() {
@@ -34,7 +34,7 @@ export default function App() {
   }, [glossaryOpen])
 
   const states = useMemo(() => allStates(millGraph, save), [save])
-  const onStart = useCallback((id: string) => setSave((s) => startMachine(s, id, millGraph)), [])
+  const onStart = useCallback((id: string) => setSave((s) => openNotes(s, id)), [])
   const selected = selectedId ? machineById.get(selectedId) : undefined
 
   return (

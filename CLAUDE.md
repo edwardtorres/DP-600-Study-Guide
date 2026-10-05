@@ -77,6 +77,10 @@ The free practice assessment shows "the style, wording, and difficulty"; the rea
 - **Placement checks for partial-carryover machines must be written in DP-600's tools and terms** (T-SQL in a warehouse, notebooks/PySpark, Dataflow Gen2, pipelines, KQL), never in Power Query-only terms. Passing a Power Query question must not certify a Fabric skill. This applies to Thread Intake, Carding Machine, Twisting Frame, Dye Vat, and Weave Planner, and to any other machine whose PL-300 tag has a caveat.
 - **Verified edges**: an edge whose reason was checked on Learn carries `verified: { source }`, shown as "verified on Microsoft Learn" in the detail panel.
 - **The game never certifies anything without a passed test.** Certification is only written to the save by a passed inspection or placement check.
+- **Lifecycle (Step 4, `src/game/state.ts`):** locked → idle when every prerequisite is certified; idle → running after the notes are opened and a 2-question start-up check is passed (both correct); running → certified by a 5-question inspection at 80% (4 of 5). PL-300 carryover machines also offer a placement check, even while locked: 5 placement-eligible questions, all 5 correct, one attempt per machine per local day; passing certifies the machine as **placed**.
+- **Draws (`src/game/draw.ts`):** a machine's own questions, never case-study questions (reserved for the mock exam). Inspections cover every bullet on the machine, include at least one difficulty-2+ question, and avoid the previous attempt's questions where the pool allows.
+- **Scoring is full credit only (`src/game/score.ts`):** a question counts as correct only if every part is right: both picks of a multi-select, every Yes/No statement, every matching pair, every drop-down slot, the whole ordering. No partial credit anywhere.
+- **Rewards never replace tests.** XP, levels, ranks, streaks, badges, and readiness (`src/game/progress.ts`) are all derived from the answer log and certifications; none of them can certify a machine. Readiness is based on recent accuracy and bullet coverage, weighted by the official domain percentages, never on XP.
 
 ## Notes (Step 2)
 
@@ -101,7 +105,8 @@ The user works on both Windows and Mac. Fabric runs in the browser, but Power BI
 
 ## Save system
 
-- `src/save/schema.ts` (types + validator), `migrations.ts`, `storage.ts`. Current `SAVE_VERSION = 1`, key `fabric-mill:save`.
+- `src/save/schema.ts` (types + validator), `migrations.ts`, `storage.ts`. Current `SAVE_VERSION = 2`, key `fabric-mill:save`. v2 adds a compact answer log (`answers: [questionId, 0|1, unixSeconds, 's'|'i'|'p'][]` for start-up/inspection/placement, kept for Step 7 spaced repetition) and per-machine `notesOpenedAt`, `lastDraw`, and `placementDays`. Migration `{ from: 1 }` adds an empty log; `src/save/fixtures/save-v1.json` is the real v1 save it's tested on.
+- Settings can export the save as JSON, import a save (same parse → migrate → validate path as loading; a bad file changes nothing), and reset progress (the old save is copied to the backup key first).
 - On load: parse → run migrations up to the current version → validate → drop unknown machine ids. If any step fails, the raw save is copied to `fabric-mill:save:corrupt-backup` and a fresh save starts. The UI shows a notice.
 - **To change the save shape:** bump `SAVE_VERSION`, add the new type and validator, append a migration `{ from: n }`, and add a test that loads a real version-n save.
 

@@ -1,5 +1,5 @@
 import { migrations as defaultMigrations, runMigrations, type Migration } from './migrations'
-import { BACKUP_KEY, SAVE_KEY, SAVE_VERSION, isSaveV1, newSave, type Save } from './schema'
+import { BACKUP_KEY, SAVE_KEY, SAVE_VERSION, isSaveV2, newSave, type Save } from './schema'
 
 export interface StorageLike {
   getItem(key: string): string | null
@@ -42,15 +42,8 @@ export function loadSave(
   if (raw === null) return { status: 'new', save: newSave(now) }
 
   try {
-    const parsed: unknown = JSON.parse(raw)
-    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) throw new Error('Save is not an object')
-    const fromVersion = (parsed as Record<string, unknown>).version
-    const migrated = runMigrations(parsed as Record<string, unknown>, SAVE_VERSION, options.migrations ?? defaultMigrations)
-    if (!isSaveV1(migrated)) throw new Error('Save failed validation')
-    const save = pruneUnknownMachines(migrated, options.knownMachineIds)
-    return fromVersion === SAVE_VERSION
-      ? { status: 'loaded', save }
-      : { status: 'loaded', save, migratedFrom: fromVersion as number }
+    const { save, fromVersion } = parseSave(raw, options.knownMachineIds, options.migrations ?? defaultMigrations)
+    return fromVersion === SAVE_VERSION ? { status: 'loaded', save } : { status: 'loaded', save, migratedFrom: fromVersion }
   } catch (err) {
     try {
       storage?.setItem(BACKUP_KEY, raw)
@@ -58,6 +51,52 @@ export function loadSave(
       // Storage is full or blocked; nothing more we can do.
     }
     return { status: 'recovered', save: newSave(now), error: err instanceof Error ? err.message : String(err) }
+  }
+}
+
+/** Parses, migrates, validates, and prunes a raw save. Throws with a readable message on any failure. */
+export function parseSave(
+  raw: string,
+  knownMachineIds?: Iterable<string>,
+  list: Migration[] = defaultMigrations,
+): { save: Save; fromVersion: number } {
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(raw)
+  } catch {
+    throw new Error('The file is not valid JSON')
+  }
+  if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) throw new Error('Save is not an object')
+  const fromVersion = (parsed as Record<string, unknown>).version
+  const migrated = runMigrations(parsed as Record<string, unknown>, SAVE_VERSION, list)
+  if (!isSaveV2(migrated)) throw new Error('Save failed validation')
+  return { save: pruneUnknownMachines(migrated, knownMachineIds), fromVersion: fromVersion as number }
+}
+
+export type ImportResult = { ok: true; save: Save; migratedFrom?: number } | { ok: false; error: string }
+
+/** Validates an imported save file without touching storage. */
+export function importSave(text: string, knownMachineIds?: Iterable<string>): ImportResult {
+  try {
+    const { save, fromVersion } = parseSave(text, knownMachineIds)
+    return fromVersion === SAVE_VERSION ? { ok: true, save } : { ok: true, save, migratedFrom: fromVersion }
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : String(err) }
+  }
+}
+
+/** Pretty JSON for the export file. */
+export function exportSave(save: Save): string {
+  return JSON.stringify(save, null, 2)
+}
+
+/** Copies the current raw save to the backup key (used before a reset). */
+export function backupSave(storage: StorageLike | null = safeStorage()): void {
+  try {
+    const raw = storage?.getItem(SAVE_KEY)
+    if (raw) storage?.setItem(BACKUP_KEY, raw)
+  } catch {
+    // Storage blocked; the reset still proceeds.
   }
 }
 

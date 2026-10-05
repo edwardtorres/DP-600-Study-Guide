@@ -1,14 +1,23 @@
 import type { Graph } from '../data/graph'
-import type { MachineState } from '../data/types'
-import type { Save } from '../save/schema'
+import type { Machine, MachineState } from '../data/types'
+import { attemptCode, type AnswerEntry, type AttemptKind, type MachineProgress, type Save } from '../save/schema'
+import { INSPECTION_SIZE, PLACEMENT_SIZE, STARTUP_SIZE } from './draw'
+import { dayKey, localTimeZone } from './time'
+
+/** Inspections certify at 80% or more (4 of 5). */
+export const INSPECTION_PASS = 0.8
 
 export function isCertified(save: Save, id: string): boolean {
   return save.machines[id]?.certification !== undefined
 }
 
+export function isPlaced(save: Save, id: string): boolean {
+  return save.machines[id]?.certification?.kind === 'placement'
+}
+
 /**
  * Certified needs a passed test recorded in the save; nothing else certifies.
- * A machine is locked until every prerequisite is certified.
+ * A machine is locked until every prerequisite is certified (by inspection or placement).
  */
 export function machineState(id: string, graph: Graph, save: Save): MachineState {
   if (isCertified(save, id)) return 'certified'
@@ -21,13 +30,96 @@ export function allStates(graph: Graph, save: Save): Map<string, MachineState> {
   return new Map(graph.ids.map((id) => [id, machineState(id, graph, save)]))
 }
 
-/** Idle → running. Returns the same save when the machine cannot start. */
-export function startMachine(save: Save, id: string, graph: Graph, now: Date = new Date()): Save {
-  if (machineState(id, graph, save) !== 'idle') return save
-  const iso = now.toISOString()
+function updateMachine(save: Save, id: string, patch: Partial<MachineProgress>, now: Date): Save {
   return {
     ...save,
-    updatedAt: iso,
-    machines: { ...save.machines, [id]: { ...save.machines[id], startedAt: iso } },
+    updatedAt: now.toISOString(),
+    machines: { ...save.machines, [id]: { ...save.machines[id], ...patch } },
   }
+}
+
+/** Opening the machine panel shows its notes; the first time is recorded (needed before the start-up check). */
+export function openNotes(save: Save, id: string, now: Date = new Date()): Save {
+  if (save.machines[id]?.notesOpenedAt) return save
+  return updateMachine(save, id, { notesOpenedAt: now.toISOString() }, now)
+}
+
+export type AttemptAvailability = { ok: true } | { ok: false; reason: string }
+
+/** Whether an attempt of this kind may start now. */
+export function canAttempt(
+  kind: AttemptKind,
+  machine: Machine,
+  graph: Graph,
+  save: Save,
+  now: Date = new Date(),
+  timeZone: string = localTimeZone(),
+): AttemptAvailability {
+  const state = machineState(machine.id, graph, save)
+  const progress = save.machines[machine.id]
+  if (kind === 'startup') {
+    if (state !== 'idle') return { ok: false, reason: 'The start-up check is for idle machines.' }
+    if (!progress?.notesOpenedAt) return { ok: false, reason: 'Open the notes first.' }
+    return { ok: true }
+  }
+  if (kind === 'inspection') {
+    return state === 'running' ? { ok: true } : { ok: false, reason: 'Start the machine first.' }
+  }
+  if (!machine.pl300) return { ok: false, reason: 'Placement checks are only for PL-300 carryover machines.' }
+  if (state === 'certified') return { ok: false, reason: 'Already certified.' }
+  if (progress?.placementDays?.includes(dayKey(now, timeZone))) {
+    return { ok: false, reason: 'One placement attempt per day. Try again tomorrow.' }
+  }
+  return { ok: true }
+}
+
+export interface AttemptResult {
+  machineId: string
+  kind: AttemptKind
+  questionIds: string[]
+  correct: boolean[]
+}
+
+export type AttemptOutcome = 'passed' | 'failed' | 'rejected'
+
+const requiredSize: Record<AttemptKind, number> = { startup: STARTUP_SIZE, inspection: INSPECTION_SIZE, placement: PLACEMENT_SIZE }
+
+export function passes(kind: AttemptKind, correct: boolean[]): boolean {
+  const right = correct.filter(Boolean).length
+  if (kind === 'inspection') return correct.length === INSPECTION_SIZE && right / correct.length >= INSPECTION_PASS
+  // Start-up (2) and placement (5) need every answer right.
+  return correct.length === requiredSize[kind] && right === correct.length
+}
+
+/**
+ * Records a submitted attempt: logs every answer, remembers the draw, and
+ * applies the only transitions the game allows. Start-up → running,
+ * inspection ≥ 80% → certified, placement 5/5 → certified (placed).
+ * An attempt that isn't allowed right now changes nothing.
+ */
+export function recordAttempt(
+  save: Save,
+  attempt: AttemptResult,
+  machine: Machine,
+  graph: Graph,
+  now: Date = new Date(),
+  timeZone: string = localTimeZone(),
+): { save: Save; outcome: AttemptOutcome } {
+  if (machine.id !== attempt.machineId || attempt.questionIds.length !== attempt.correct.length) return { save, outcome: 'rejected' }
+  if (!canAttempt(attempt.kind, machine, graph, save, now, timeZone).ok) return { save, outcome: 'rejected' }
+
+  const at = Math.floor(now.getTime() / 1000)
+  const entries: AnswerEntry[] = attempt.questionIds.map((id, i) => [id, attempt.correct[i] ? 1 : 0, at, attemptCode[attempt.kind]])
+  const prev = save.machines[machine.id] ?? {}
+  const patch: Partial<MachineProgress> = { lastDraw: { ...prev.lastDraw, [attempt.kind]: attempt.questionIds } }
+  if (attempt.kind === 'placement') patch.placementDays = [...(prev.placementDays ?? []), dayKey(now, timeZone)]
+
+  const passed = passes(attempt.kind, attempt.correct)
+  if (passed) {
+    const score = attempt.correct.filter(Boolean).length / attempt.correct.length
+    if (attempt.kind === 'startup') patch.startedAt = now.toISOString()
+    else patch.certification = { passedAt: now.toISOString(), score, kind: attempt.kind === 'placement' ? 'placement' : 'inspection' }
+  }
+  const next = updateMachine({ ...save, answers: [...save.answers, ...entries] }, machine.id, patch, now)
+  return { save: next, outcome: passed ? 'passed' : 'failed' }
 }

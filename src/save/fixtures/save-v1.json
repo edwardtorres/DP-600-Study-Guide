@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "createdAt": "2026-10-01T08:15:00.000Z",
+  "updatedAt": "2026-10-03T19:42:10.000Z",
+  "machines": {
+    "founding-charter": { "startedAt": "2026-10-01T08:20:00.000Z" },
+    "water-wheel": {}
+  },
+  "settings": {}
+}

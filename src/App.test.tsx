@@ -29,17 +29,17 @@ describe('mill map', () => {
     expect(within(panel).queryByRole('button', { name: 'Start machine' })).toBeNull()
   })
 
-  it('starts an idle machine and saves it, without certifying it', async () => {
+  it('records opening the notes in a version-2 save, without starting or certifying', async () => {
     const user = userEvent.setup()
     render(<App />)
     await user.click(screen.getByRole('button', { name: /^Founding Charter:/ }))
     await user.click(screen.getByRole('button', { name: 'Start machine' }))
-    expect(screen.getByRole('button', { name: /^Founding Charter:.*Running\.$/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^Founding Charter:.*Idle\.$/ })).toBeInTheDocument()
     const saved = JSON.parse(localStorage.getItem(SAVE_KEY)!)
-    expect(saved.version).toBe(1)
-    expect(saved.machines['founding-charter'].startedAt).toBeTruthy()
+    expect(saved.version).toBe(2)
+    expect(saved.machines['founding-charter'].notesOpenedAt).toBeTruthy()
+    expect(saved.machines['founding-charter'].startedAt).toBeUndefined()
     expect(saved.machines['founding-charter'].certification).toBeUndefined()
-    expect(screen.getByRole('button', { name: /Inspection.*Step 4/ })).toBeDisabled()
   })
 
   it('recovers from a corrupt save with a notice', () => {

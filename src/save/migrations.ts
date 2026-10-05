@@ -8,8 +8,14 @@ export interface Migration {
   migrate: (old: Record<string, unknown>) => Record<string, unknown>
 }
 
-/** Version 1 is the first released schema, so there is nothing to migrate yet. */
-export const migrations: Migration[] = []
+export const migrations: Migration[] = [
+  {
+    // v1 → v2 (Step 4): add the answer log. Machine progress keeps its shape;
+    // the new per-machine fields (notesOpenedAt, lastDraw, placementDays) are optional.
+    from: 1,
+    migrate: (old) => ({ ...old, answers: [] }),
+  },
+]
 
 export function runMigrations(
   data: Record<string, unknown>,
