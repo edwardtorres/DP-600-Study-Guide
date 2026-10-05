@@ -6,6 +6,10 @@ import { edges } from '../src/data/edges.ts'
 import { machines } from '../src/data/machines.ts'
 import { outline } from '../src/data/outline.ts'
 import { validateAll } from '../src/data/validate.ts'
+import { floors } from '../src/data/floors.ts'
+import { allNotes, notesByMachine } from '../src/content/notes/index.ts'
+import { NOTES_PENDING } from '../src/content/requirements.ts'
+import { notesSources, notesWordCount, validateNotes } from '../src/content/validate.ts'
 
 const decode = (s: string) =>
   s
@@ -49,8 +53,24 @@ function recordedLines(): string[] {
   )
 }
 
+function printNotesSummary() {
+  console.log('Notes by floor:')
+  for (const floor of floors) {
+    const onFloor = machines.filter((m) => m.floor === floor.id)
+    const written = onFloor.map((m) => notesByMachine.get(m.id)).filter((n) => n !== undefined)
+    const words = written.reduce((sum, n) => sum + notesWordCount(n), 0)
+    const sources = new Set(written.flatMap((n) => notesSources(n)))
+    const pending = NOTES_PENDING.includes(floor.id) ? '  (pending)' : ''
+    console.log(`  ${floor.name}: ${written.length}/${onFloor.length} machines, ${words} words, ${sources.size} sources${pending}`)
+  }
+  const nv = allNotes.flatMap((n) => n.needsVerification.map((v) => `${n.machineId}: ${v.claim} (${v.why})`))
+  console.log(`Needs verification (${nv.length}):`)
+  for (const v of nv) console.log(`  ? ${v}`)
+  if (NOTES_PENDING.length > 0) console.warn(`⚠ Notes still pending for: ${NOTES_PENDING.join(', ')}`)
+}
+
 async function main() {
-  const errors = validateAll(outline, machines, edges)
+  const errors = [...validateAll(outline, machines, edges), ...validateNotes(machines, allNotes)]
 
   if (process.argv.includes('--live')) {
     const res = await fetch(outline.source)
@@ -72,6 +92,7 @@ async function main() {
     for (const e of errors) console.error(`  ✗ ${e}`)
     process.exit(1)
   }
+  printNotesSummary()
   const bullets = machines.reduce((n, m) => n + m.bulletIds.length, 0)
   console.log(
     `Content check passed: ${outline.domains.length} domains, ` +

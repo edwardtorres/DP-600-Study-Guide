@@ -5,13 +5,23 @@ import type { Machine, MachineState } from '../data/types'
 interface Props {
   machines: Machine[]
   states: Map<string, MachineState>
+  onOpenGlossary: () => void
 }
 
-export function Header({ machines, states }: Props) {
+export function Header({ machines, states, onOpenGlossary }: Props) {
   return (
     <header className="mb-5">
       <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brass-400">DP-600 · Fabric Analytics Engineer</p>
-      <h1 className="font-display text-3xl font-bold text-mill-50 sm:text-4xl">Fabric Mill</h1>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <h1 className="font-display text-3xl font-bold text-mill-50 sm:text-4xl">Fabric Mill</h1>
+        <button
+          type="button"
+          onClick={onOpenGlossary}
+          className="rounded-lg border border-brass-500/70 px-3 py-1.5 text-sm font-medium text-brass-300 hover:bg-brass-500/15"
+        >
+          Pattern Dictionary
+        </button>
+      </div>
       <p className="mt-1 max-w-2xl text-sm text-mill-200">
         Weave raw data threads into finished analytics fabric. Each machine is an exam skill. Certify a machine by passing its
         inspection to unlock the machines it feeds.

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Glossary } from './components/Glossary'
 import { Header } from './components/Header'
 import { Legend } from './components/Legend'
 import { MachineDetail } from './components/MachineDetail'
@@ -13,6 +14,7 @@ export default function App() {
   const [initial] = useState<LoadResult>(() => loadSave({ knownMachineIds: machineById.keys() }))
   const [save, setSave] = useState(initial.save)
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [glossaryOpen, setGlossaryOpen] = useState(false)
   const [notice, setNotice] = useState(
     initial.status === 'recovered' ? 'Your saved progress could not be read, so a new mill was opened. The old save was kept as a backup.' : null,
   )
@@ -22,17 +24,21 @@ export default function App() {
   }, [save])
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setSelectedId(null)
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      if (glossaryOpen) setGlossaryOpen(false)
+      else setSelectedId(null)
+    }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [])
+  }, [glossaryOpen])
 
   const states = useMemo(() => allStates(millGraph, save), [save])
   const onStart = useCallback((id: string) => setSave((s) => startMachine(s, id, millGraph)), [])
   const selected = selectedId ? machineById.get(selectedId) : undefined
 
   return (
-    <div className={`min-h-screen px-4 py-6 sm:px-8 ${selected ? 'md:pr-[452px]' : ''}`}>
+    <div className={`min-h-screen px-4 py-6 sm:px-8 ${selected ? 'md:pr-[472px] lg:pr-[592px]' : ''}`}>
       {notice && (
         <div role="status" className="mb-4 flex items-start justify-between gap-3 rounded-lg border border-madder/60 bg-madder/15 p-3 text-sm text-mill-50">
           {notice}
@@ -41,7 +47,7 @@ export default function App() {
           </button>
         </div>
       )}
-      <Header machines={machines} states={states} />
+      <Header machines={machines} states={states} onOpenGlossary={() => setGlossaryOpen(true)} />
       <MillMap machines={machines} edges={edges} graph={millGraph} states={states} selectedId={selectedId} onSelect={setSelectedId} />
       <Legend />
       {selected && (
@@ -55,6 +61,15 @@ export default function App() {
           onStart={onStart}
           onSelect={setSelectedId}
           onClose={() => setSelectedId(null)}
+        />
+      )}
+      {glossaryOpen && (
+        <Glossary
+          onClose={() => setGlossaryOpen(false)}
+          onSelect={(id) => {
+            setGlossaryOpen(false)
+            setSelectedId(id)
+          }}
         />
       )}
     </div>

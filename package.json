@@ -13,7 +13,8 @@
     "test:watch": "vitest",
     "check:content": "tsx scripts/check-content.ts",
     "check:secrets": "tsx scripts/check-secrets.ts",
-    "check": "npm run typecheck && npm run lint && npm test && npm run check:content && npm run check:secrets"
+    "check": "npm run typecheck && npm run lint && npm test && npm run check:content && npm run check:secrets",
+    "check:links": "tsx scripts/check-links.ts"
   },
   "dependencies": {
     "react": "^19.2.8",

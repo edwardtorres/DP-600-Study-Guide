@@ -1,5 +1,8 @@
 import type { Machine } from './types'
 
+export const PREPARE_CARRYOVER_CAVEAT =
+  'The concept carries over from Power Query; DP-600 tests it in Fabric tools (T-SQL in a warehouse, notebooks, Dataflow Gen2, pipelines).'
+
 /**
  * The mill's machines. Every outline bullet belongs to exactly one machine
  * (enforced by tests and `npm run check:content`).
@@ -59,7 +62,7 @@ export const machines: Machine[] = [
     themedName: 'Thread Intake',
     skillName: 'Connect to and ingest data',
     bulletIds: ['P1.1', 'P1.3'],
-    pl300: { overlaps: ['Identify and connect to data sources or a shared semantic model'] },
+    pl300: { overlaps: ['Identify and connect to data sources or a shared semantic model'], caveat: PREPARE_CARRYOVER_CAVEAT },
     labPlatform: 'browser',
     notes: null,
   },
@@ -101,6 +104,7 @@ export const machines: Machine[] = [
         'Resolve inconsistencies, unexpected or null values, and data quality issues',
         'Select appropriate column data types',
       ],
+      caveat: PREPARE_CARRYOVER_CAVEAT,
     },
     labPlatform: 'browser',
     notes: null,
@@ -111,7 +115,7 @@ export const machines: Machine[] = [
     themedName: 'Twisting Frame',
     skillName: 'Merge, join, and aggregate data',
     bulletIds: ['P2.5', 'P2.6'],
-    pl300: { overlaps: ['Group and aggregate rows', 'Merge and append queries'] },
+    pl300: { overlaps: ['Group and aggregate rows', 'Merge and append queries'], caveat: PREPARE_CARRYOVER_CAVEAT },
     labPlatform: 'browser',
     notes: null,
   },
@@ -126,6 +130,7 @@ export const machines: Machine[] = [
         'Create and transform columns',
         'Identify use cases for calculated columns and calculated tables',
       ],
+      caveat: PREPARE_CARRYOVER_CAVEAT,
     },
     labPlatform: 'browser',
     notes: null,
@@ -136,7 +141,7 @@ export const machines: Machine[] = [
     themedName: 'Weave Planner',
     skillName: 'Star schema and denormalization in a lakehouse or warehouse',
     bulletIds: ['P2.3', 'P2.4'],
-    pl300: { overlaps: ['Create fact tables and dimension tables'] },
+    pl300: { overlaps: ['Create fact tables and dimension tables'], caveat: PREPARE_CARRYOVER_CAVEAT },
     labPlatform: 'browser',
     notes: null,
   },

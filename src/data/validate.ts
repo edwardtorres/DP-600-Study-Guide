@@ -15,6 +15,8 @@ export const EXPECTED = {
   maxOrientation: 4,
 } as const
 
+export const isLearnUrl = (url: string) => /^https:\/\/learn\.microsoft\.com\/[^\s]*$/.test(url)
+
 export function validateOutline(outline: Outline): string[] {
   const errors: string[] = []
   if (outline.version !== EXPECTED.version) errors.push(`Outline version is "${outline.version}"`)
@@ -102,6 +104,7 @@ export function validateGraph(machines: Machine[], edges: Edge[]): string[] {
     if (seen.has(key)) errors.push(`Duplicate edge ${key}`)
     seen.add(key)
     if (!e.reason.trim()) errors.push(`Edge ${key} has no reason`)
+    if (e.verified && !isLearnUrl(e.verified.source)) errors.push(`Edge ${key} verified source is not on learn.microsoft.com`)
   }
   if (errors.length > 0) return errors
 

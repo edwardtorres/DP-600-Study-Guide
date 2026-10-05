@@ -24,7 +24,8 @@ The learner has passed PL-300 study (Power BI basics, DAX fundamentals, star sch
 | `npm run check:content` | Fails if the app's structure drifts from `scripts/official-outline.json` |
 | `npm run check:content -- --live` | Also re-fetches the study guide and diffs every bullet |
 | `npm run check:secrets` | Fails on local paths, private links, or token-like strings in the repo |
-| `npm run check` | All of the above except build and `--live` |
+| `npm run check:links` | Fetches every Learn URL cited in notes and verified edges; fails on non-200 |
+| `npm run check` | All of the above except build, `--live`, and `check:links` |
 
 ## Git rules
 
@@ -72,8 +73,17 @@ The free practice assessment shows "the style, wording, and difficulty"; the rea
 - **Machines** = skill-tree nodes. Each non-orientation machine owns 1–3 related outline bullets; every bullet belongs to exactly one machine. A machine always shows its themed name **and** its real skill name. Data: `src/data/machines.ts`.
 - **States**: locked (a prerequisite isn't certified), idle, running (started), certified.
 - **Prerequisite threads** (`src/data/edges.ts`): each edge has a one-line reason. Tests require the graph to be acyclic, fully reachable from the start node, and free of redundant edges (no edge already implied by others).
-- **Tags**: `orientation`; `pl300` (overlaps PL-300). Each PL-300 tag quotes the PL-300 study-guide bullets it overlaps (skills measured as of April 20, 2026). A `caveat` notes when the overlap is partial. PL-300 machines get a placement check (Step 4), and their notes focus on what DP-600 adds.
+- **Tags**: `orientation`; `pl300` (overlaps PL-300). Each PL-300 tag quotes the PL-300 study-guide bullets it overlaps (skills measured as of April 20, 2026). A `caveat` marks a partial overlap and the chip reads "PL-300 · partial". PL-300 machines get a placement check (Step 4), and their notes open with "What DP-600 adds beyond PL-300".
+- **Placement checks for partial-carryover machines must be written in DP-600's tools and terms** (T-SQL in a warehouse, notebooks/PySpark, Dataflow Gen2, pipelines, KQL), never in Power Query-only terms. Passing a Power Query question must not certify a Fabric skill. This applies to Thread Intake, Carding Machine, Twisting Frame, Dye Vat, and Weave Planner, and to any other machine whose PL-300 tag has a caveat.
+- **Verified edges**: an edge whose reason was checked on Learn carries `verified: { source }`, shown as "verified on Microsoft Learn" in the detail panel.
 - **The game never certifies anything without a passed test.** Certification is only written to the save by a passed inspection or placement check.
+
+## Notes (Step 2)
+
+- Notes are typed data in `src/content/notes/<floor>.ts` (types in `src/content/types.ts`). Every statement is a `Cited` item with at least one `learn.microsoft.com` URL.
+- **Writing workflow:** fetch the Learn page, extract the exact sentences you rely on (kept outside the repo), then write the note in your own words and cite the page. Never fill gaps from memory. If Learn doesn't confirm a fact, put it in that machine's `needsVerification` list (the Step 8 queue) and don't state it as fact. If a needed Learn page is unreachable, stop and tell the user.
+- Each machine has: overview; per-bullet tools, key concepts, and how-to; worked examples (marked illustrative, one explanation per step) where the skill involves code; exam traps; "don't confuse" pairs; renamed features (old → new, which name the exam likely uses, based on the current study guide's wording); Preview labels; dated upcoming changes; glossary terms (each term defined once across the app).
+- `check:content` enforces all of this (`src/content/validate.ts`, `src/content/requirements.ts`). `npm run check:links` fetches every cited URL (network needed).
 
 ## Platform note
 
@@ -91,10 +101,11 @@ The user works on both Windows and Mac. Fabric runs in the browser, but Power BI
 scripts/official-outline.json   verbatim outline
 scripts/check-content.ts        content check (+ --live)
 scripts/check-secrets.ts        secrets/paths check
+src/content/                    notes data, notes types, notes validator, requirements
 src/data/                       outline loader, machines, edges, floors, graph utils, shared validators
 src/game/                       state derivation, map layout
 src/save/                       versioned save
-src/components/                 MillMap, MachineNode, Threads, MachineDetail, Header, Legend
+src/components/                 MillMap, MachineNode, Threads, MachineDetail, NotesView, Glossary, Header, Legend
 ```
 
 ## Roadmap

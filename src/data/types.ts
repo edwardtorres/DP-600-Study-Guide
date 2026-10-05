@@ -66,4 +66,6 @@ export interface Edge {
   /** The machine it unlocks. */
   to: string
   reason: string
+  /** Set when the reason has been checked against a Microsoft Learn page. */
+  verified?: { source: string }
 }

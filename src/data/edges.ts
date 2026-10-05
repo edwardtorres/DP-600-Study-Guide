@@ -44,13 +44,24 @@ export const edges: Edge[] = [
   { from: 'gate-keys', to: 'item-locks', reason: 'Item permissions are layered on top of workspace roles.' },
   { from: 'item-locks', to: 'thread-sieves', reason: 'Row-, column-, and object-level security narrow access that item permissions already grant.' },
   { from: 'item-locks', to: 'seal-and-stamp', reason: 'Labeling and endorsing need the right item permissions.' },
-  { from: 'gate-keys', to: 'pattern-ledger', reason: 'Connecting a workspace to Git needs the workspace Admin role.' },
+  {
+    from: 'gate-keys',
+    to: 'pattern-ledger',
+    reason: 'Connecting a workspace to Git needs the workspace Admin role.',
+    verified: { source: 'https://learn.microsoft.com/en-us/fabric/cicd/git-integration/git-integration-process' },
+  },
   { from: 'pattern-ledger', to: 'draft-table', reason: 'A .pbip project is the source-control format for Power BI items.' },
-  { from: 'pattern-ledger', to: 'conveyor', reason: 'Deployment pipelines work alongside Git integration in the lifecycle.' },
+  { from: 'pattern-ledger', to: 'conveyor', reason: "Taught after Git integration so you can compare the two lifecycle tools; deployment pipelines don't require Git." },
   { from: 'thread-intake', to: 'ripple-map', reason: 'Impact analysis traces items fed by connections, dataflows, and stores.' },
   { from: 'loom-gearbox', to: 'ripple-map', reason: 'Semantic models are the downstream items impact analysis most often flags.' },
   { from: 'warp-frame', to: 'remote-loom-control', reason: 'You deploy and manage a semantic model’s tables and relationships over XMLA.' },
-  { from: 'gate-keys', to: 'remote-loom-control', reason: 'XMLA write access depends on workspace permissions.' },
+  {
+    from: 'gate-keys',
+    to: 'remote-loom-control',
+    reason:
+      "XMLA write needs Contributor or higher on the workspace, and the capacity's XMLA Endpoint setting set to Read Write (the default is read-only).",
+    verified: { source: 'https://learn.microsoft.com/en-us/fabric/enterprise/powerbi/service-premium-connect-tools' },
+  },
   { from: 'warp-frame', to: 'pattern-book', reason: 'Shared semantic models and templates reuse a model you have built.' },
   { from: 'thread-intake', to: 'pattern-book', reason: 'A .pbids file packages a data connection.' },
 ]

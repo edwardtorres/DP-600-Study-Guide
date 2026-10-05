@@ -1,9 +1,11 @@
 import { useEffect, useRef, type ReactNode } from 'react'
 import type { Graph } from '../data/graph'
+import { notesByMachine } from '../content/notes'
 import { findBullet } from '../data/outline'
 import type { Edge, Machine, MachineState } from '../data/types'
 import { CloseIcon } from './icons'
 import { stateBadge, stateLabel } from './stateStyles'
+import { NotesView } from './NotesView'
 import { Tags } from './Tags'
 
 interface Props {
@@ -37,7 +39,7 @@ export function MachineDetail({ machine, state, graph, edges, machinesById, stat
   const heading = useRef<HTMLHeadingElement>(null)
   useEffect(() => heading.current?.focus(), [machine.id])
 
-  const reasonFor = (from: string, to: string) => edges.find((e) => e.from === from && e.to === to)?.reason
+  const reasonFor = (from: string, to: string) => edges.find((e) => e.from === from && e.to === to)
   const prereqs = graph.prereqs.get(machine.id) ?? []
   const unlocks = graph.unlocks.get(machine.id) ?? []
 
@@ -56,7 +58,7 @@ export function MachineDetail({ machine, state, graph, edges, machinesById, stat
   return (
     <aside
       aria-labelledby="machine-detail-title"
-      className="fixed inset-x-0 bottom-0 z-20 max-h-[75vh] overflow-y-auto rounded-t-2xl border-t border-mill-600 bg-mill-900 px-5 pb-8 pt-4 shadow-2xl md:inset-y-0 md:left-auto md:right-0 md:max-h-none md:w-[420px] md:rounded-none md:border-l md:border-t-0"
+      className="fixed inset-x-0 bottom-0 z-20 max-h-[75vh] overflow-y-auto rounded-t-2xl border-t border-mill-600 bg-mill-900 px-5 pb-8 pt-4 shadow-2xl md:inset-y-0 md:left-auto md:right-0 md:max-h-none md:w-[440px] lg:w-[560px] md:rounded-none md:border-l md:border-t-0"
     >
       <div className="flex items-start justify-between gap-3">
         <div>
@@ -113,9 +115,13 @@ export function MachineDetail({ machine, state, graph, edges, machinesById, stat
         </Section>
       )}
 
-      <Section title="Notes">
-        <p className="text-sm italic text-mill-400">Learn-sourced notes arrive in Step 2.</p>
-      </Section>
+      {notesByMachine.get(machine.id) ? (
+        <NotesView notes={notesByMachine.get(machine.id)!} />
+      ) : (
+        <Section title="Notes">
+          <p className="text-sm italic text-mill-400">Notes for this floor are still being written.</p>
+        </Section>
+      )}
 
       {machine.pl300 && (
         <Section title="PL-300 carryover">
@@ -137,7 +143,17 @@ export function MachineDetail({ machine, state, graph, edges, machinesById, stat
             {prereqs.map((p) => (
               <li key={p}>
                 {link(p)}
-                <p className="mt-0.5 text-xs text-mill-400">{reasonFor(p, machine.id)}</p>
+                <p className="mt-0.5 text-xs text-mill-400">{reasonFor(p, machine.id)?.reason}</p>
+                {reasonFor(p, machine.id)?.verified && (
+                  <a
+                    href={reasonFor(p, machine.id)!.verified!.source}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-[11px] text-brass-300 hover:underline"
+                  >
+                    ✓ verified on Microsoft Learn
+                  </a>
+                )}
               </li>
             ))}
           </ul>
