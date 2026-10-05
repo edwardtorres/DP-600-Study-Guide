@@ -12,6 +12,7 @@ interface Props {
   graph: Graph
   states: Map<string, MachineState>
   selectedId: string | null
+  placedIds?: Set<string>
   onSelect: (id: string) => void
 }
 
@@ -22,7 +23,7 @@ const bandTint: Record<string, string> = {
   maintain: 'bg-[#22261d]/70',
 }
 
-export function MillMap({ machines, edges, graph, states, selectedId, onSelect }: Props) {
+export function MillMap({ machines, edges, graph, states, selectedId, placedIds, onSelect }: Props) {
   const layout = useMemo(() => layoutMill(machines, graph), [machines, graph])
 
   return (
@@ -55,6 +56,7 @@ export function MillMap({ machines, edges, graph, states, selectedId, onSelect }
               x={pos.x}
               y={pos.y}
               selected={selectedId === m.id}
+              placed={placedIds?.has(m.id) ?? false}
               onSelect={onSelect}
             />
           )

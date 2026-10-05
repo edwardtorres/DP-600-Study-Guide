@@ -3,6 +3,8 @@ import type { Graph } from '../data/graph'
 import { notesByMachine } from '../content/notes'
 import { findBullet } from '../data/outline'
 import type { Edge, Machine, MachineState } from '../data/types'
+import type { AttemptAvailability } from '../game/state'
+import type { AttemptKind } from '../save/schema'
 import { CloseIcon } from './icons'
 import { stateBadge, stateLabel } from './stateStyles'
 import { NotesView } from './NotesView'
@@ -15,7 +17,12 @@ interface Props {
   edges: Edge[]
   machinesById: Map<string, Machine>
   states: Map<string, MachineState>
-  onStart: (id: string) => void
+  placed: boolean
+  availability: Record<AttemptKind, AttemptAvailability>
+  /** Lowest-level counts used in the action text. */
+  poolSizes: { inspection: number; placement: number }
+  focusPairId?: string | null
+  onAttempt: (kind: AttemptKind) => void
   onSelect: (id: string) => void
   onClose: () => void
 }
@@ -35,9 +42,21 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   )
 }
 
-export function MachineDetail({ machine, state, graph, edges, machinesById, states, onStart, onSelect, onClose }: Props) {
+export function MachineDetail({ machine, state, graph, edges, machinesById, states, placed, availability, poolSizes, focusPairId, onAttempt, onSelect, onClose }: Props) {
   const heading = useRef<HTMLHeadingElement>(null)
-  useEffect(() => heading.current?.focus(), [machine.id])
+  const panel = useRef<HTMLElement>(null)
+  useEffect(() => {
+    if (focusPairId) return
+    heading.current?.focus()
+  }, [machine.id, focusPairId])
+  useEffect(() => {
+    if (!focusPairId) return
+    const el = panel.current?.querySelector<HTMLElement>(`#pair-${CSS.escape(focusPairId)}`)
+    if (!el) return
+    el.closest('details')?.setAttribute('open', '')
+    el.scrollIntoView({ block: 'start' })
+    el.focus()
+  }, [machine.id, focusPairId])
 
   const reasonFor = (from: string, to: string) => edges.find((e) => e.from === from && e.to === to)
   const prereqs = graph.prereqs.get(machine.id) ?? []
@@ -57,12 +76,14 @@ export function MachineDetail({ machine, state, graph, edges, machinesById, stat
 
   return (
     <aside
+      ref={panel}
       aria-labelledby="machine-detail-title"
       className="fixed inset-x-0 bottom-0 z-20 max-h-[75vh] overflow-y-auto rounded-t-2xl border-t border-mill-600 bg-mill-900 px-5 pb-8 pt-4 shadow-2xl md:inset-y-0 md:left-auto md:right-0 md:max-h-none md:w-[440px] lg:w-[560px] md:rounded-none md:border-l md:border-t-0"
     >
       <div className="flex items-start justify-between gap-3">
         <div>
           <span className={`inline-block rounded px-2 py-0.5 text-xs font-semibold uppercase ${stateBadge[state]}`}>{stateLabel[state]}</span>
+          {placed && <span className="ml-1 inline-block rounded bg-weld px-2 py-0.5 text-xs font-semibold uppercase text-mill-950">Placed</span>}
           <h2 id="machine-detail-title" ref={heading} tabIndex={-1} className="mt-2 font-display text-2xl font-bold text-mill-50 outline-none">
             {machine.themedName}
           </h2>
@@ -76,21 +97,48 @@ export function MachineDetail({ machine, state, graph, edges, machinesById, stat
         </button>
       </div>
 
-      <div className="my-4 flex flex-col gap-2">
-        {state === 'idle' && (
-          <button type="button" onClick={() => onStart(machine.id)} className="rounded-lg bg-brass-400 px-4 py-2 font-semibold text-mill-950 hover:bg-brass-300">
-            Start machine
-          </button>
-        )}
+      <div className="my-4 flex flex-col gap-2" data-testid="machine-actions">
         {state === 'locked' && <p className="text-sm text-mill-400">Certify every prerequisite below to unlock this machine.</p>}
-        {state === 'running' && <p className="text-sm text-indigo-200">Running. Study the notes, then pass the inspection to certify.</p>}
-        <button type="button" disabled className="cursor-not-allowed rounded-lg border border-mill-600 px-4 py-2 text-sm text-mill-400">
-          Inspection (5 questions, 80% to certify) arrives in Step 4
-        </button>
-        {machine.pl300 && (
-          <button type="button" disabled className="cursor-not-allowed rounded-lg border border-mill-600 px-4 py-2 text-sm text-mill-400">
-            PL-300 placement check arrives in Step 4
-          </button>
+        {state === 'idle' && (
+          <>
+            <button
+              type="button"
+              onClick={() => onAttempt('startup')}
+              disabled={!availability.startup.ok}
+              className="rounded-lg bg-brass-400 px-4 py-2 font-semibold text-mill-950 hover:bg-brass-300 disabled:opacity-40"
+            >
+              Start-up check (2 questions)
+            </button>
+            <p className="text-xs text-mill-400">Read the notes below, then get both start-up questions right to start the machine.</p>
+          </>
+        )}
+        {state === 'running' && (
+          <>
+            <button type="button" onClick={() => onAttempt('inspection')} className="rounded-lg bg-indigo-thread px-4 py-2 font-semibold text-mill-950 hover:bg-indigo-200">
+              Take the inspection (5 questions, 4 to pass)
+            </button>
+            <p className="text-xs text-mill-400">Drawn from {poolSizes.inspection} questions on this machine; every exam skill on it is covered.</p>
+          </>
+        )}
+        {state === 'certified' && (
+          <p className="text-sm text-brass-300">{placed ? 'Placed out with a perfect placement check.' : 'Certified by inspection.'}</p>
+        )}
+        {machine.pl300 && state !== 'certified' && (
+          <>
+            <button
+              type="button"
+              onClick={() => onAttempt('placement')}
+              disabled={!availability.placement.ok}
+              className="rounded-lg border border-weld/70 px-4 py-2 text-sm font-semibold text-weld hover:bg-weld/10 disabled:opacity-40"
+            >
+              PL-300 placement check (5 questions, all 5 to pass)
+            </button>
+            <p className="text-xs text-mill-400">
+              {availability.placement.ok
+                ? `Tests what DP-600 adds beyond PL-300 (${poolSizes.placement} questions in the pool). One attempt per day, available even while locked.`
+                : availability.placement.reason}
+            </p>
+          </>
         )}
       </div>
 

@@ -10,6 +10,7 @@ interface Props {
   x: number
   y: number
   selected: boolean
+  placed?: boolean
   onSelect: (id: string) => void
 }
 
@@ -21,14 +22,15 @@ function StateIcon({ state }: { state: MachineState }) {
   return <IdleIcon className={`${cls} text-brass-400`} />
 }
 
-export function MachineNode({ machine, state, x, y, selected, onSelect }: Props) {
+export function MachineNode({ machine, state, x, y, selected, placed = false, onSelect }: Props) {
   return (
     <button
       type="button"
       onClick={() => onSelect(machine.id)}
       aria-pressed={selected}
-      aria-label={`${machine.themedName}: ${machine.skillName}. ${stateLabel[state]}.`}
+      aria-label={`${machine.themedName}: ${machine.skillName}. ${stateLabel[state]}${placed ? ' (placed)' : ''}.`}
       data-state={state}
+      data-placed={placed || undefined}
       className={`absolute flex flex-col gap-1 rounded-lg border-2 p-2.5 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brass-300 ${stateCard[state]} ${selected ? 'ring-2 ring-mill-50' : ''}`}
       style={{ left: x, top: y, width: CARD_W, height: CARD_H }}
     >
@@ -40,6 +42,7 @@ export function MachineNode({ machine, state, x, y, selected, onSelect }: Props)
         </span>
       </span>
       <span className="mt-auto flex flex-wrap gap-1">
+        {placed && <span className="rounded bg-weld px-1.5 py-px text-[10px] font-semibold uppercase text-mill-950">Placed</span>}
         <Tags machine={machine} />
       </span>
     </button>

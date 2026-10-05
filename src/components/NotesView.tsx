@@ -2,6 +2,8 @@ import type { ReactNode } from 'react'
 import { notesSources } from '../content/validate'
 import type { Cited, FabricTool, MachineNotes } from '../content/types'
 import { findBullet } from '../data/outline'
+import { Highlighted } from './code/CodeBlock'
+import type { CodeLanguage } from './code/highlight'
 
 const toolLabel: Record<FabricTool, string> = {
   lakehouse: 'Lakehouse',
@@ -94,7 +96,7 @@ export function NotesView({ notes }: { notes: MachineNotes }) {
                 {e.steps.map((s, i) => (
                   <li key={i}>
                     <pre className="overflow-x-auto rounded-md bg-mill-950 p-2 font-mono text-xs text-mill-50">
-                      <code>{s.code}</code>
+                      <code>{e.language === 'tsql' || e.language === 'kql' || e.language === 'dax' ? <Highlighted code={s.code} language={e.language as CodeLanguage} /> : s.code}</code>
                     </pre>
                     <p className="mt-1 text-xs text-mill-400">
                       <span className="font-semibold text-mill-200">Step {i + 1}.</span> {s.explain}
@@ -123,7 +125,7 @@ export function NotesView({ notes }: { notes: MachineNotes }) {
       {notes.dontConfuse.length > 0 && (
         <Block title="Don't confuse">
           {notes.dontConfuse.map((d) => (
-            <div key={d.pairId} className="rounded-lg border border-mill-600 p-3">
+            <div key={d.pairId} id={`pair-${d.pairId}`} tabIndex={-1} className="scroll-mt-4 rounded-lg border border-mill-600 p-3 outline-none focus:border-indigo-thread">
               <p className="mb-1 font-semibold text-mill-50">
                 {d.a} <span className="text-mill-400">vs</span> {d.b}
               </p>
