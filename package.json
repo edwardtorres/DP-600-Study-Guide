@@ -16,7 +16,8 @@
     "check:secrets": "tsx scripts/check-secrets.ts",
     "check": "npm run typecheck && npm run lint && npm test && npm run check:content && npm run check:secrets",
     "check:links": "tsx scripts/check-links.ts",
-    "export:questions": "tsx scripts/export-questions.ts"
+    "export:questions": "tsx scripts/export-questions.ts",
+    "export:puzzles": "tsx scripts/export-puzzles.ts"
   },
   "dependencies": {
     "react": "^19.2.8",

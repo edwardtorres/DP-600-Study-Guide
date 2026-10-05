@@ -102,6 +102,16 @@ The free practice assessment shows "the style, wording, and difficulty"; the rea
 - Each floor's questions are checked by an **independent reviewer agent** that answers blind (`npm run export:questions -- <floor> <dir>` writes blind and keyed JSON outside the repo; `scripts/compare-review.ts` diffs answers), then checks each key against its sources. Disagreements are fixed or dropped and logged in `docs/reviews/step-3-question-review.md`.
 - Hidden review page: `/review` (or `#/review`). Not linked from the game. **Step 9 must add an SPA fallback** so `/review` serves `index.html` in production.
 
+## Puzzles (Step 5)
+
+- Puzzles are practice. A play logs one `[puzzleId, 0|1, t, 'z']` entry (correct = at least 80% of its decisions right; single-decision puzzles must be right). They earn XP (10/20/30 by difficulty, 25% on repeats) and feed readiness, and **never certify** a machine (`src/game/puzzles.ts` only appends to the log). Each puzzle sits on one or more machines' **Puzzle bench**, which opens once the machine is unlocked. Each puzzle's bullets must sit in one domain. Puzzle ids must not collide with question ids (they share the log).
+- Every puzzle is a list of scored **decisions** (`src/puzzles/types.ts`): `buttons` (radio group), `select` (native drop-down), or `toggle`. All work by tap and keyboard at 390 px. Choices with more than 2 options are shuffled per play (`src/puzzles/play.ts`).
+- **Query Oracle** (`src/puzzles/oracle/`): seeded templates (T-SQL, KQL, DAX; at least 12 each). Each template generates 5–10-row tables, then computes the correct result and three distractors with the reference engine (`engine.ts`). Each distractor applies one named trap from `traps.ts` (each trap cites Learn). **Answers are never hand-written.** A variant that makes two candidates identical or ambiguous is rejected and the next variant is used.
+- **Evaluators** (`src/puzzles/evaluators/`): Shuttle Fallback (Direct Lake), Access Matrix (roles, item permissions, RLS/CLS/OLS/DDM), Ripple (impact analysis), Conveyor (pipeline permissions, autobinding). Each rule cites its Learn page. A case Learn doesn't settle returns null or throws, so `check:content` rejects a scenario that uses it. Scenarios for these types (`src/content/puzzles/`) store inputs only.
+- Pattern Draft and Gearbox keys are authored from Learn guidance, with every Learn-allowed answer accepted.
+- `check:content` validates puzzle schema, links, domains, sources, banned terms, trap pairs, template generation (50 seeds each), and minimum counts (`src/content/puzzles/requirements.ts`). `check:links` includes puzzle and trap sources.
+- Review: `npm run export:puzzles -- <dir>` writes a blind sample (at least 30% of each type, plus every Fallback, Access, and Conveyor scenario) and its key; `scripts/compare-puzzle-review.ts` diffs a reviewer's answers. Log: `docs/reviews/step-5-puzzle-review.md`.
+
 ## Platform note
 
 The user works on both Windows and Mac. Fabric runs in the browser, but Power BI Desktop and `.pbip` work are Windows-only. Every hands-on lab must show its platform. `labPlatform` on each machine is `browser`, `windows`, or `tbd`. It's preliminary until Step 6 verifies each lab on Learn. Lab-logistics facts (for example, which desktop tools run on Windows) may be resolved outside Learn; they're recorded in `Machine.labNote`, marked as such, and never used in questions.
@@ -125,16 +135,20 @@ src/review/                     hidden /review page
 src/data/                       outline loader, machines, edges, floors, graph utils, shared validators
 src/game/                       state derivation, map layout
 src/save/                       versioned save
+src/content/puzzles/            puzzle scenarios, puzzle registry, puzzle validator
+src/puzzles/                    puzzle types, builders, play/scoring, Query Oracle engine + templates, evaluators
 src/components/                 MillMap, MachineNode, Threads, MachineDetail, NotesView, Glossary, Header, Legend
+src/components/puzzles/         Puzzle bench, PuzzlePanel, decision inputs
+e2e/                            Playwright flows (npm run e2e)
 ```
 
 ## Roadmap
 
 1. ✅ Outline + content check, skill tree data + tests, mill map UI, save v1, this file.
-2. Learn-sourced notes for every machine: worked SQL/KQL/DAX examples, glossary, "don't confuse" pairs (e.g. Direct Lake on OneLake vs on SQL analytics endpoint; import vs DirectQuery vs Direct Lake).
-3. Question bank covering every bullet, weighted to the domain percentages, using the formats above.
-4. Core game loop: XP, levels, streaks, badges, 5-question machine inspections (80% to certify), PL-300 placement checks.
-5. Puzzles: SQL/KQL/DAX predict-the-result, star schema builder, storage-mode picker, Direct Lake fallback scenarios.
+2. ✅ Learn-sourced notes for every machine: worked SQL/KQL/DAX examples, glossary, "don't confuse" pairs (e.g. Direct Lake on OneLake vs on SQL analytics endpoint; import vs DirectQuery vs Direct Lake).
+3. ✅ Question bank covering every bullet, weighted to the domain percentages, using the formats above.
+4. ✅ Core game loop: XP, levels, streaks, badges, 5-question machine inspections (80% to certify), PL-300 placement checks.
+5. ✅ Puzzles: Query Oracle (T-SQL/KQL/DAX predict-the-result), Pattern Draft, Gearbox Picker, Shuttle Fallback, Gatehouse Access Matrix, Ripple & Conveyor.
 6. Hands-on Fabric trial labs (label Windows-only ones).
 7. Spaced repetition and a timed mock exam with a case study. Also raise the difficulty-3 share of the question bank to about 25% (17% after Step 3) with new scenario questions, concentrated in Prepare data and Semantic models.
 8. Fact-check all content against Microsoft Learn.
