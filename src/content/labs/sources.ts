@@ -67,4 +67,8 @@ export const P = {
   largeModels: 'fabric/enterprise/powerbi/service-premium-large-models',
   xmla: 'fabric/enterprise/powerbi/service-premium-connect-tools',
   smOneLake: 'fabric/enterprise/powerbi/onelake-integration-overview',
+  webModel: 'fabric/fundamentals/direct-lake-web-modeling',
+  editModels: 'power-bi/transform-model/service-edit-data-models',
+  comparePipeline: 'fabric/cicd/deployment-pipelines/compare-pipeline-content',
+  shortcuts: 'fabric/onelake/onelake-shortcuts',
 } as const

@@ -14,7 +14,7 @@ export const semanticLabs: Lab[] = [
     platform: 'browser',
     minutes: 90,
     prereqs: ['L01'],
-    before: `Work in DP600-Dev. Skip the exercise’s workspace creation and its optional section that needs AI features (the trial doesn’t include them). Name the model ${MODEL}; Labs 8 to 15 use it.`,
+    before: `Work in DP600-Dev. Models open in the browser in Viewing mode: switch to Editing mode before you change anything. Skip the exercise’s workspace creation and its optional section that needs AI features (the trial doesn’t include them). Name the model ${MODEL}; Labs 8 to 15 use it.`,
     steps: [
       {
         id: 's1',
@@ -33,15 +33,15 @@ export const semanticLabs: Lab[] = [
         id: 's3',
         text: `Open the lakehouse’s SQL analytics endpoint and choose New semantic model. Name it ${MODEL}, pick the exercise’s four tables, and choose Direct Lake on OneLake if the dialog asks. (The exercise starts from the lakehouse explorer instead; Learn shows both entry points.)`,
         sources: [learn(P.dlDevelop, 'create-the-model'), ex('15-design-semantic-model-scale', 'create-a-semantic-model')],
-        checkpoint: 'The model opens in the browser’s model editor with the four tables.',
+        checkpoint: 'The model opens in the browser’s model editor with the four tables. If it says tables don’t exist or can’t refresh, wait a few minutes for the tables to sync and try again.',
         trapPairId: 'dl-onelake-vs-sql',
         trapNote: 'Starting from the SQL analytics endpoint doesn’t make the model Direct Lake on SQL; the dialog choice decides.',
       },
       {
         id: 's4',
-        text: 'Create the three many-to-one relationships from the fact table to the dimensions, single direction, as the exercise lists.',
-        sources: [ex('15-design-semantic-model-scale', 'design-star-schema-relationships')],
-        checkpoint: 'The diagram shows the fact table joined to each dimension, with a one-side and a many-side marker on each line.',
+        text: 'Create the exercise’s four relationships: three active many-to-one relationships from the fact table to the dimensions, and a fourth on the ship date key to the date table with “Make this relationship active” cleared.',
+        sources: [ex('15-design-semantic-model-scale', 'design-star-schema-relationships'), learn(P.editModels, 'create-a-relationship')],
+        checkpoint: 'The relationships list shows four relationships, and the ship-date one is inactive.',
         trapPairId: 'regular-vs-limited',
         trapNote: 'These are regular one-to-many relationships within one source group.',
       },
@@ -59,7 +59,7 @@ export const semanticLabs: Lab[] = [
       },
       {
         id: 's7',
-        text: 'Create a report from the model and build the bar chart, card, and year slicer from the exercise. Skip the calculation group step; that’s in Lab 9.',
+        text: 'Create a report from the model and build the bar chart, card, and year slicer from the exercise. Skip the calculation group step; that’s in Lab 9. Save the report as Sales Report in DP600-Dev: Labs 9 to 11 use it.',
         sources: [ex('15-design-semantic-model-scale', 'validate-the-model-with-a-report')],
         checkpoint: 'The order-date and ship-date measures show different values for at least one slicer range.',
       },
@@ -67,8 +67,8 @@ export const semanticLabs: Lab[] = [
     cleanup: [
       {
         id: 'c1',
-        text: `Close the report (save it if you want to reuse it). Keep ${MODEL} and its lakehouse for Labs 8 to 15. Skip the exercise’s query scale-out setting.`,
-        sources: [ex('15-design-semantic-model-scale', 'configure-settings-for-scale')],
+        text: `Stop the notebook’s Spark session. Keep ${MODEL}, Sales Report, the lakehouse, and the notebook for Labs 8 to 15. Skip the exercise’s query scale-out setting.`,
+        sources: [ex('02-analyze-spark', 'clean-up-resources'), ex('15-design-semantic-model-scale', 'configure-settings-for-scale')],
       },
     ],
   },
@@ -86,7 +86,7 @@ export const semanticLabs: Lab[] = [
     steps: [
       {
         id: 's1',
-        text: 'In the lakehouse’s SQL analytics endpoint, create a view over the fact table joined to the product dimension (any columns you like).',
+        text: 'In the lakehouse’s SQL analytics endpoint, create a view over the fact table joined to the product dimension. Include the product key column so step 7 can relate it, plus any other columns you like.',
         sources: [learn(P.createView), learn(P.sqlEditor, 'sql-query-editor-in-the-fabric-portal')],
         checkpoint: 'The view appears under Views and returns rows.',
       },
@@ -100,15 +100,15 @@ export const semanticLabs: Lab[] = [
       },
       {
         id: 's3',
-        text: 'Open DAX query view for Sales Model SQL in the browser and run EVALUATE TABLETRAITS().',
-        sources: [learn(P.dlHow, 'diagnose-fallback'), learn(P.daxQueryView, 'dax-query-view-in-web')],
+        text: 'Writing DAX queries in the browser needs the workspace setting “User can edit data models in the Power BI service (preview)”; turn it on in DP600-Dev’s settings if it’s off. Then choose Write DAX queries from Sales Model SQL’s menu and run EVALUATE TABLETRAITS().',
+        sources: [learn(P.dlHow, 'diagnose-fallback'), learn(P.daxQueryView, 'dax-query-view-in-web'), learn(P.daxQueryView, 'considerations-and-limitations')],
         checkpoint: 'The DirectLakeFallbackInfo column shows None for the dimension table and a fallback reason for the view.',
         trapPairId: 'dl-fallback',
         trapNote: 'Queries on the view table fall back to DirectQuery; the plain table stays in Direct Lake.',
       },
       {
         id: 's4',
-        text: 'In model view, change the model’s Direct Lake behavior from Automatic to Direct Lake only, then query the view table again. Change it back to Automatic afterwards.',
+        text: 'Open Sales Model SQL in Editing mode and, in model view, change its Direct Lake behavior from Automatic to Direct Lake only (the setting applies only to Direct Lake on SQL). Query the view table again, then change it back to Automatic.',
         sources: [learn(P.dlHow, 'control-fallback-with-directlakebehavior')],
         checkpoint: 'With Direct Lake only, a query on the view table returns an error instead of falling back.',
       },
@@ -122,8 +122,8 @@ export const semanticLabs: Lab[] = [
       },
       {
         id: 's6',
-        text: `Open ${MODEL} (Direct Lake on OneLake) in the browser model editor and add your SQL view as an Import table.`,
-        sources: [learn(P.composite, 'create-composite-models-in-web-modeling'), learn(P.dlDevelop, 'model-tables')],
+        text: `Open ${MODEL} (Direct Lake on OneLake) in Editing mode, choose Get data on the ribbon, and add your SQL view from the SQL analytics endpoint as an Import table. Only the model’s owner can use Get data, and you may be asked to set credentials. The connection shows a server name from your tenant: don’t paste it into a problem note.`,
+        sources: [learn(P.webModel, 'composite-semantic-models-with-direct-lake-and-import-storage-mode-tables'), learn(P.editModels, 'get-data'), learn(P.editModels, 'permissions'), learn(P.composite, 'create-composite-models-in-web-modeling')],
         checkpoint: 'The new table shows Import storage mode while the others show Direct Lake.',
         trapPairId: 'storage-modes',
         trapNote: 'Direct Lake plus Import in one model is a composite model; Direct Lake on SQL tables can’t join one.',
@@ -139,7 +139,7 @@ export const semanticLabs: Lab[] = [
       {
         id: 'c1',
         text: `Delete Sales Model SQL. Remove the Import table from ${MODEL} so Labs 9 and 10 start from Direct Lake only. Keep the view.`,
-        sources: [learn(P.dlDevelop, 'model-tables')],
+        sources: [ex('15-design-semantic-model-scale', 'configure-settings-for-scale'), learn(P.webModel, 'composite-semantic-models-with-direct-lake-and-import-storage-mode-tables')],
       },
     ],
   },
@@ -169,16 +169,16 @@ export const semanticLabs: Lab[] = [
       },
       {
         id: 's3',
-        text: 'In a report, put the calculation group’s column in a bar chart legend.',
+        text: 'In Sales Report, put the calculation group’s column in the bar chart’s legend.',
         sources: [ex('15-design-semantic-model-scale', 'validate-the-model-with-a-report'), learn(P.calcGroups, 'using-the-calculation-group-in-reports')],
-        checkpoint: 'The chart shows one bar per calculation item for each category.',
+        checkpoint: 'The legend lists the six calculation items.',
         trapPairId: 'calcgroup-vs-fieldparam',
         trapNote: 'A calculation group changes how measures are calculated; a field parameter (step 8) swaps which fields a visual shows.',
       },
       {
         id: 's4',
-        text: 'Give the Profit Margin measure a dynamic format string (for example, fewer decimals when the value is large).',
-        sources: [learn(P.dfs, 'create-dynamic-format-strings')],
+        text: 'Give the Profit Margin measure a dynamic format string: select the measure, set its format to Dynamic, and enter a DAX expression that returns a format string, for example IF([Profit Margin] < 0.1, "0.00%", "0.0%"). The browser’s labels may differ from Learn’s Desktop ribbon. With a calculation group in the model, Learn warns that measures become variant and some dynamic format strings can show errors; if that happens, report it.',
+        sources: [learn(P.dfs, 'create-dynamic-format-strings'), learn(P.calcGroups, 'model-measures-change-to-variant-data-type')],
         checkpoint: 'The measure still sorts as a number in a table visual, and its display format changes.',
         trapPairId: 'dfs-vs-format',
         trapNote: 'A dynamic format string keeps the number type; FORMAT() turns the value into text.',
@@ -193,8 +193,8 @@ export const semanticLabs: Lab[] = [
       {
         id: 's6',
         windows: true,
-        text: 'Create the calculated table, the Date table, and its calculated columns, then mark it as a date table.',
-        sources: [ex('14-create-dax-calculations', 'create-the-salesperson-calculated-table'), ex('14-create-dax-calculations', 'create-the-date-table'), ex('14-create-dax-calculations', 'create-calculated-columns'), ex('14-create-dax-calculations', 'mark-the-date-table')],
+        text: 'Create the calculated table, the Date table and its calculated columns, complete the Date table (hierarchy and relationships), then mark it as a date table.',
+        sources: [ex('14-create-dax-calculations', 'create-the-salesperson-calculated-table'), ex('14-create-dax-calculations', 'create-the-date-table'), ex('14-create-dax-calculations', 'create-calculated-columns'), ex('14-create-dax-calculations', 'complete-the-date-table'), ex('14-create-dax-calculations', 'mark-the-date-table')],
         checkpoint: 'The Date table appears with a calendar icon in the Data pane.',
       },
       {
@@ -236,7 +236,7 @@ export const semanticLabs: Lab[] = [
     steps: [
       {
         id: 's1',
-        text: `Open a report on ${MODEL} in edit mode, open the Performance analyzer pane, start recording, and refresh the visuals.`,
+        text: 'Open Sales Report in edit mode, open the Performance analyzer pane, start recording, and refresh the visuals.',
         sources: [learn(P.perfAnalyzer, 'display-the-performance-analyzer-pane-in-the-web'), learn(P.perfAnalyzer, 'use-performance-analyzer')],
         checkpoint: 'Each visual shows a duration, split into categories.',
         trapPairId: 'perf-categories',
@@ -244,7 +244,7 @@ export const semanticLabs: Lab[] = [
       },
       {
         id: 's2',
-        text: 'Copy one visual’s query and paste it into a new DAX query view tab for the model. Run it.',
+        text: 'Copy one visual’s query. Choose Write DAX queries from the model’s menu (it needs the workspace setting from Lab 8 step 3), paste the query into a new tab, and run it.',
         sources: [learn(P.perfAnalyzer, 'dax-queries-in-visuals'), learn(P.daxQueryView, 'dax-query-view-in-web')],
         checkpoint: 'The results grid returns the same numbers the visual shows.',
       },
@@ -265,7 +265,7 @@ export const semanticLabs: Lab[] = [
       {
         id: 's5',
         text: 'Back in the report, select a bar or slicer value while recording, and compare the new entries in Performance analyzer.',
-        sources: [learn(P.perfAnalyzer, 'refreshing-visuals')],
+        sources: [learn(P.perfAnalyzer, 'use-performance-analyzer')],
         checkpoint: 'Performance analyzer logs a new entry for the interaction.',
       },
       {

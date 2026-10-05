@@ -163,7 +163,7 @@ e2e/                            Playwright flows (npm run e2e)
 3. ✅ Question bank covering every bullet, weighted to the domain percentages, using the formats above.
 4. ✅ Core game loop: XP, levels, streaks, badges, 5-question machine inspections (80% to certify), PL-300 placement checks.
 5. ✅ Puzzles: Query Oracle (T-SQL/KQL/DAX predict-the-result), Pattern Draft, Gearbox Picker, Shuttle Fallback, Gatehouse Access Matrix, Ripple & Conveyor.
-6. Hands-on Fabric trial labs (label Windows-only ones).
+6. ✅ Hands-on Fabric trial labs (label Windows-only ones).
 7. Spaced repetition and a timed mock exam with a case study. Also raise the difficulty-3 share of the question bank to about 25% (17% after Step 3) with new scenario questions, concentrated in Prepare data and Semantic models.
 8. Fact-check all content against Microsoft Learn.
 9. Deploy to dp600.edwardtorres.dev.

@@ -27,13 +27,13 @@ export const prepareLabs: Lab[] = [
       },
       {
         id: 's2',
-        text: 'Enter the trial start date on this app’s Labs page so the trial clock and schedule match your trial.',
+        text: 'Enter the day you started the trial on this app’s Labs page. The Account manager shows days remaining, not the start date, so use the day you did step 1.',
         sources: [learn(P.trial, 'get-the-status-of-your-trial')],
         checkpoint: 'The Labs page shows days left out of 60.',
       },
       {
         id: 's3',
-        text: 'Check whether your trial capacity has 4 or 64 capacity units. If it has 4 and you’re a capacity or tenant admin, you may be able to raise it to 64; this doesn’t add days.',
+        text: 'Check whether your trial capacity has 4 or 64 capacity units, on the Trial tab of the capacities page (Learn gives the path). If it has 4 and you’re a capacity or tenant admin, you may be able to raise it to 64; this doesn’t add days.',
         sources: [learn(P.trial, 'increase-trial-capacity')],
         checkpoint: 'You know your trial capacity’s size (4 or 64 capacity units).',
       },
@@ -44,8 +44,8 @@ export const prepareLabs: Lab[] = [
       },
       {
         id: 's5',
-        text: 'Create a workspace named DP600-Dev and, under Advanced, choose the Trial workspace type so it runs on your trial capacity.',
-        sources: [learn(P.workspaces, 'workspace-type')],
+        text: 'Create a workspace named DP600-Dev and, under Advanced, choose a license mode or workspace type that uses your trial capacity (Trial).',
+        sources: [learn(P.workspaces, 'workspace-type'), ex('21-implement-cicd', 'create-workspaces')],
         checkpoint: 'The workspace opens empty, and its settings show it on a trial capacity.',
         trapPairId: 'capacity-vs-workspace',
         trapNote: 'The capacity supplies compute; the workspace is the container you assign to it.',
@@ -53,7 +53,7 @@ export const prepareLabs: Lab[] = [
       {
         id: 's6',
         text: 'Create a second workspace named DP600-Test the same way. Lab 13 deploys from Dev to Test.',
-        sources: [learn(P.workspaces, 'workspace-type')],
+        sources: [learn(P.workspaces, 'workspace-type'), ex('21-implement-cicd', 'create-workspaces')],
         checkpoint: 'Both workspaces appear in your Workspaces list.',
       },
       {
@@ -114,7 +114,7 @@ export const prepareLabs: Lab[] = [
       },
       {
         id: 's5',
-        text: 'Create a Dataflow Gen2 that gets the exercise’s sample data, then add the lakehouse as its data destination and publish.',
+        text: 'Create a Dataflow Gen2 that gets the exercise’s sample data, add the lakehouse as its data destination, then Save & run.',
         sources: [ex('05-dataflows-gen2', 'create-a-dataflow-gen2-to-ingest-data'), ex('05-dataflows-gen2', 'add-data-destination-for-dataflow')],
         checkpoint: 'After the dataflow runs, a new table from it appears in the lakehouse.',
       },
@@ -126,7 +126,7 @@ export const prepareLabs: Lab[] = [
       },
       {
         id: 's7',
-        text: 'Create a pipeline with a Copy data activity that copies the exercise’s file from HTTP into the lakehouse, then run it.',
+        text: 'Create a pipeline with a Copy data activity that copies the exercise’s file from HTTP into the lakehouse, using the exercise’s destination folder and file name (so it doesn’t overwrite your step 2 upload), then run it.',
         sources: [ex('04-ingest-pipeline', 'create-a-pipeline'), ex('04-ingest-pipeline', 'configure-the-source'), ex('04-ingest-pipeline', 'configure-the-destination'), ex('04-ingest-pipeline', 'run-the-pipeline')],
         checkpoint: 'The pipeline run shows a Succeeded status.',
         trapPairId: 'dataflow-pipeline-notebook',
@@ -135,7 +135,7 @@ export const prepareLabs: Lab[] = [
       {
         id: 's8',
         optional: true,
-        text: 'Add your dataflow as an activity in a pipeline, so the pipeline runs it.',
+        text: 'Add your dataflow as an activity in a pipeline, so the pipeline runs it. Running the dataflow again appends its rows again (its destination uses Append), so expect duplicates.',
         sources: [ex('05-dataflows-gen2', 'add-a-dataflow-to-a-pipeline')],
         checkpoint: 'The pipeline canvas shows a Dataflow activity.',
       },
@@ -157,7 +157,7 @@ export const prepareLabs: Lab[] = [
       },
       {
         id: 's11',
-        text: 'Read the data store decision guide’s scenarios. For each, decide whether a lakehouse, warehouse, or eventhouse fits, and why. You build a warehouse in Lab 4 and an eventhouse in Lab 6.',
+        text: 'Read the data store decision guide’s scenarios. For each, decide which store fits (lakehouse, warehouse, eventhouse, or SQL database) and why, then compare with the guide’s answer. You build a warehouse in Lab 4 and an eventhouse in Lab 6.',
         sources: [learn(P.dataStoreGuide, 'scenarios')],
         trapPairId: 'stores',
         trapNote: 'Lakehouse: Spark and files. Warehouse: T-SQL writes. Eventhouse: KQL on events.',
@@ -167,11 +167,11 @@ export const prepareLabs: Lab[] = [
       {
         id: 'c1',
         text: 'Delete the Mill_Shortcuts lakehouse. Deleting a shortcut doesn’t delete the target data.',
-        sources: [learn(P.shortcut)],
+        sources: [learn(P.shortcuts, 'how-do-shortcuts-handle-deletions')],
       },
       {
         id: 'c2',
-        text: 'If you scheduled the pipeline, turn the schedule off. Keep Mill_Lakehouse, the dataflow, and the pipeline for Lab 13. ' + KEEP,
+        text: 'If you set a schedule on the pipeline, remove it so it doesn’t run on its own. Keep Mill_Lakehouse and the Copy pipeline from step 7 (name it Copy_Sales) for Lab 13; you can delete the dataflow and any second pipeline from step 8. ' + KEEP,
         sources: [learn(P.pipeline, 'run-and-schedule-your-pipeline')],
       },
     ],
@@ -200,8 +200,6 @@ export const prepareLabs: Lab[] = [
         text: 'Run the shape-and-clean cells. Note how the query removes the duplicate row, replaces the null, and adds a calculated and a conditional column.',
         sources: [ex('26c-transform-data-notebooks', 'shape-and-clean-the-sales-data')],
         checkpoint: 'The result has fewer rows than the raw table, and no null remains in the cleaned column.',
-        trapPairId: 'where-having-qualify',
-        trapNote: 'Filtering rows before grouping (WHERE) isn’t the same as filtering groups after it (HAVING).',
       },
       {
         id: 's3',
@@ -225,7 +223,7 @@ export const prepareLabs: Lab[] = [
       },
       {
         id: 's6',
-        text: 'In a new cell, load the raw sales table into a pandas DataFrame and open Data Wrangler on it.',
+        text: 'In a new cell, load the raw sales table into a DataFrame (for example df = spark.sql("SELECT * FROM raw_sales")) and run the cell, then open Data Wrangler on df. Data Wrangler works with pandas and Spark DataFrames.',
         sources: [learn(P.dataWrangler, 'launching-data-wrangler')],
         checkpoint: 'Data Wrangler opens with a Summary panel that reports missing values.',
       },
@@ -246,7 +244,7 @@ export const prepareLabs: Lab[] = [
       {
         id: 'c1',
         text: 'Stop the notebook’s Spark session if it’s still running, then delete the notebook and Spin_Lakehouse. ' + KEEP,
-        sources: [ex('26c-transform-data-notebooks', 'clean-up-resources')],
+        sources: [ex('26c-transform-data-notebooks', 'clean-up-resources'), ex('02-analyze-spark', 'clean-up-resources')],
       },
     ],
   },
@@ -312,9 +310,9 @@ export const prepareLabs: Lab[] = [
       {
         id: 's8',
         optional: true,
-        text: 'In a separate warehouse, work through the slowly changing dimension sections of the dimensional modeling exercise.',
-        sources: [ex('26-design-dimensional-models', 'simulate-an-scd-type-2-change'), ex('26-design-dimensional-models', 'simulate-an-scd-type-1-change')],
-        checkpoint: 'After the type 2 change, the customer has more than one row, and only one is marked current.',
+        text: 'In a separate warehouse, run the dimensional modeling exercise from “Create the fact table” through “Load sample data”, then its two slowly changing dimension sections.',
+        sources: [ex('26-design-dimensional-models', 'create-the-fact-table'), ex('26-design-dimensional-models', 'load-sample-data'), ex('26-design-dimensional-models', 'simulate-an-scd-type-2-change'), ex('26-design-dimensional-models', 'simulate-an-scd-type-1-change')],
+        checkpoint: 'After the type 2 change, the changed product has more than one row, and only one is marked current.',
         trapPairId: 'scd1-vs-scd2',
         trapNote: 'Type 1 overwrites the old value; type 2 keeps history in a new row.',
       },
@@ -401,7 +399,7 @@ export const prepareLabs: Lab[] = [
       {
         id: 's1',
         text: 'Create the sample eventhouse from the Real-Time Intelligence workload, as the exercise describes.',
-        sources: [ex('12-query-data-in-kql-database', 'create-an-eventhouse'), learn(P.createEventhouse, 'create-an-eventhouse-1')],
+        sources: [ex('12-query-data-in-kql-database', 'create-an-eventhouse')],
         checkpoint: 'The eventhouse has a KQL database with a sample table.',
       },
       {
@@ -434,7 +432,7 @@ export const prepareLabs: Lab[] = [
       },
       {
         id: 's6',
-        text: 'Turn on OneLake availability for the KQL database (or one table).',
+        text: 'Turn on OneLake availability for the sample table, or for the KQL database with “Apply to existing tables” selected (otherwise only new tables are included).',
         sources: [learn(P.ehOneLake, 'turn-on-onelake-availability-for-a-kql-database-or-table')],
         checkpoint: 'The database details show OneLake availability as on.',
         trapPairId: 'onelake-availability-vs-integration',
@@ -442,21 +440,21 @@ export const prepareLabs: Lab[] = [
       },
       {
         id: 's7',
-        text: 'Look at the table’s Delta files in OneLake. They can take a while to appear after you turn availability on.',
+        text: 'Look at the table’s Delta files in OneLake. Learn says files can take up to a few hours to appear, so come back later if they aren’t there yet.',
         sources: [learn(P.ehOneLake, 'view-delta-lake-files-in-onelake')],
         checkpoint: 'You can see a Delta folder for the table, or a note that files are still being written.',
       },
       {
         id: 's8',
         optional: true,
-        text: 'Query the table’s Delta data from a notebook, as Learn describes.',
+        text: 'Query the table’s Delta data from a notebook, as Learn describes, then stop the Spark session. The OneLake path contains ids from your tenant: don’t paste it into a problem note.',
         sources: [learn(P.ehOneLake, 'query-delta-tables-from-a-fabric-notebook')],
         checkpoint: 'The notebook returns rows from the table.',
       },
       {
         id: 's9',
         text: 'Open the Real-Time hub and browse its streams and sources. Don’t connect a new source.',
-        sources: [learn(P.rtHub), ex('07-real-time-Intelligence', 'create-an-eventstream')],
+        sources: [learn(P.rtHub)],
         checkpoint: 'The Real-Time hub page opens and lists streams or data sources.',
         trapPairId: 'catalog-vs-rthub',
         trapNote: 'Real-Time hub: streams and events. OneLake catalog: items such as lakehouses and models.',

@@ -1176,6 +1176,11 @@ export const maintainNotes: MachineNotes[] = [
         sources: [SHARED_MODELS],
       },
     ],
-    needsVerification: [],
+    needsVerification: [
+      {
+        claim: 'Whether Power BI Desktop’s Export PBIDS (Data source settings) works for a Fabric warehouse source.',
+        why: 'Learn’s PBIDS examples show the tds (SQL Server) protocol but no Fabric warehouse example (Step 6 lab review). Lab 14 asks the player to report it; no question depends on it.',
+      },
+    ],
   },
 ]

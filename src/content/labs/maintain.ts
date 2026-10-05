@@ -14,9 +14,9 @@ export const maintainLabs: Lab[] = [
     bulletIds: ['M1.1', 'M1.2', 'M1.3'],
     platform: 'browser',
     minutes: 90,
-    prereqs: ['L02', 'L07'],
+    prereqs: ['L02', 'L04', 'L07'],
     before:
-      'Work in DP600-Dev. Create a new warehouse named Secure_Warehouse for the T-SQL parts, so Mill_Warehouse stays clean. Steps marked optional need a second account; you can finish the lab without them. Never put a real user name or email in a problem note.',
+      'Work in DP600-Dev. Step 9 is an optional Windows step; the rest runs in a browser. Create a new warehouse named Secure_Warehouse for the T-SQL parts, so Mill_Warehouse stays clean. Steps marked optional need a second account; you can finish the lab without them. Never put a real user name or email in a problem note.',
     steps: [
       {
         id: 's1',
@@ -35,7 +35,7 @@ export const maintainLabs: Lab[] = [
       },
       {
         id: 's3',
-        text: 'Open Manage permissions on a warehouse and look at the share options (Read, ReadData, ReadAll). Optional: share it with a second user with ReadData only.',
+        text: 'Open Manage permissions on Mill_Warehouse (Lab 4) and look at the share options (Read, ReadData, ReadAll). Optional: share it with a second user with ReadData only.',
         sources: [ex('19-secure-data-access', 'apply-item-access-control'), learn(P.whShare, 'share-a-warehouse')],
         checkpoint: 'The share dialog lists the additional permissions you can grant.',
         trapPairId: 'access-layers',
@@ -70,15 +70,15 @@ export const maintainLabs: Lab[] = [
       },
       {
         id: 's8',
-        text: `In Sales Model, create a role whose DAX filter keeps one product category, then use Test as role in the service.`,
-        sources: [learn(P.smRls, 'define-roles-and-rules-in-power-bi-desktop'), learn(P.smRls, 'validate-the-role-within-the-power-bi-service')],
-        checkpoint: 'While testing as the role, the report shows only the category you kept.',
+        text: 'Open Sales Model in Editing mode, choose Manage roles, and create a role whose filter keeps one product category. Then, from the model’s Security page, use Test as role.',
+        sources: [learn(P.editModels, 'define-row-level-security-roles-and-rules'), learn(P.smRls, 'validate-the-role-within-the-power-bi-service')],
+        checkpoint: 'While testing as the role, Sales Report shows only the category you kept.',
       },
       {
         id: 's9',
         optional: true,
         windows: true,
-        text: 'Open the model security exercise’s starter file in Power BI Desktop, create one of its static roles, and use TMDL view to secure a column for that role with object-level security.',
+        text: 'Open the model security exercise’s starter file in Power BI Desktop and create one of its static roles. Then, in TMDL view, add object-level security for one column to a new role (not the static one: a createOrReplace script replaces the whole role, including its row filter).',
         sources: [ex('17-enforce-model-security', 'set-up-the-environment'), ex('17-enforce-model-security', 'create-static-roles'), learn(P.smOls, 'configure-object-level-security-by-using-tmdl-view')],
         checkpoint: 'With View as on that role, a visual that uses the secured column no longer shows its data.',
       },
@@ -92,7 +92,7 @@ export const maintainLabs: Lab[] = [
       {
         id: 'c2',
         text: 'Delete the RLS role from Sales Model, and remove any second user you added to the workspace or items.',
-        sources: [learn(P.smRls, 'remove-members-from-an-rls-role'), learn(P.workspaces, 'give-users-access-to-your-workspace')],
+        sources: [learn(P.editModels, 'define-row-level-security-roles-and-rules'), learn(P.workspaces, 'give-users-access-to-your-workspace')],
       },
     ],
   },
@@ -123,7 +123,7 @@ export const maintainLabs: Lab[] = [
       },
       {
         id: 's3',
-        text: 'Read how certification works. Try Certified only if your admin made you an authorized reviewer.',
+        text: 'Read how certification works. Try Certified only if your admin made you an authorized reviewer, and don’t send a certification request.',
         sources: [learn(P.endorse, 'certify-items')],
         checkpoint: 'You can tell whether the Certified option is available to you.',
       },
@@ -145,11 +145,11 @@ export const maintainLabs: Lab[] = [
         id: 's6',
         text: 'Open the workspace’s lineage view and highlight the lakehouse’s lineage.',
         sources: [learn(P.lineage, 'open-lineage-view'), learn(P.lineage, 'highlight-an-items-lineage'), ex('19b-govern-analytics-data', 'view-lineage-and-run-impact-analysis')],
-        checkpoint: 'Arrows run from the lakehouse through its SQL analytics endpoint to Sales Model.',
+        checkpoint: 'Arrows connect the lakehouse to Sales Model, directly or through its SQL analytics endpoint.',
       },
       {
         id: 's7',
-        text: 'Open impact analysis for the lakehouse. Don’t use Notify contacts; it sends real emails.',
+        text: 'Open impact analysis for the lakehouse and look at the All downstream items tab. Don’t use Notify contacts; it sends real emails.',
         sources: [learn(P.impact, 'open-impact-analysis-for-an-item'), learn(P.impact, 'impact-analysis-pane')],
         checkpoint: 'The pane counts downstream items and lists Sales Model among them.',
         trapPairId: 'lineage-vs-impact',
@@ -185,20 +185,14 @@ export const maintainLabs: Lab[] = [
       },
       {
         id: 's2',
-        text: 'Create a private, empty GitHub repository and a fine-grained token with Contents read and write on that repository only.',
+        text: 'Create a private GitHub repository with a README (so it has a main branch) and a fine-grained token with Contents read and write on that repository only. Don’t paste the repository URL or the token into a problem note.',
         sources: [learn(P.git, 'git-prerequisites')],
         checkpoint: 'The token page lists your repository with Contents: read and write.',
       },
       {
         id: 's3',
-        text: 'Connect DP600-Dev to the repository and a branch from workspace settings.',
-        sources: [learn(P.git, 'connect-to-a-git-repo')],
-        checkpoint: 'The workspace shows a Git status column and a source control icon.',
-      },
-      {
-        id: 's4',
-        text: 'Commit the workspace items to the branch.',
-        sources: [learn(P.git, 'commit-changes-to-git')],
+        text: 'Connect DP600-Dev to the repository’s main branch from workspace settings. Because the branch has no Fabric items, the first sync copies every workspace item into Git for you.',
+        sources: [learn(P.git, 'connect-to-a-git-repo'), learn(P.git, 'connect-to-a-workspace')],
         checkpoint: 'Each item shows Synced, and the repository has a folder per item.',
       },
       {
@@ -231,22 +225,21 @@ export const maintainLabs: Lab[] = [
       },
       {
         id: 's9',
-        text: 'Select only Mill_Lakehouse and the Lab 2 pipeline, and deploy them to Test.',
+        text: 'Select only Mill_Lakehouse and the Copy_Sales pipeline from Lab 2, and deploy them to Test.',
         sources: [learn(P.deployStart, 'step-5---deploy-to-an-empty-stage'), ex('21-implement-cicd', 'deploy-content-between-stages')],
         checkpoint: 'The deployed items appear in DP600-Test, and the stage comparison shows them as matching.',
       },
       {
         id: 's10',
-        text: 'Change the pipeline in Dev (for example, its description), then compare the stages before deploying again.',
-        sources: [learn(P.deployStart, 'step-6---deploy-content-from-one-stage-to-another')],
+        text: 'Change the pipeline in Dev (for example, rename its Copy activity) and save it, then compare the stages before deploying again.',
+        sources: [learn(P.comparePipeline, 'compare-stages'), learn(P.deployStart, 'step-6---deploy-content-from-one-stage-to-another')],
         checkpoint: 'The comparison marks the changed item as different until you deploy.',
       },
       {
         id: 's11',
         optional: true,
-        text: 'Read the deployment rules page and, if one fits an item you deployed, create a rule for the Test stage.',
+        text: 'Read which item types support deployment rules. A lakehouse and a pipeline aren’t among them, so there’s nothing to create here; note which items you would use rules for.',
         sources: [learn(P.deployRules, 'create-a-deployment-rule'), learn(P.deployRules, 'considerations-and-limitations')],
-        checkpoint: 'The rule appears in the Test stage’s deployment rules.',
       },
     ],
     cleanup: [
@@ -271,7 +264,7 @@ export const maintainLabs: Lab[] = [
     bulletIds: ['M2.2', 'M2.6'],
     platform: 'windows',
     minutes: 75,
-    prereqs: ['L07'],
+    prereqs: ['L04', 'L07'],
     before:
       'Needs Power BI Desktop on Windows, except step 7. The .pbids file names your warehouse’s server: keep it on your computer and never paste its contents into a problem note.',
     steps: [
@@ -287,9 +280,9 @@ export const maintainLabs: Lab[] = [
       {
         id: 's2',
         windows: true,
-        text: 'Open the project folder and find the .Report and .SemanticModel folders and the model’s TMDL files.',
+        text: 'Open the project folder and find the .Report and .SemanticModel folders. If the model is saved in TMDL format, its definition folder holds a tables subfolder with one .tmdl file per table.',
         sources: [learn(P.pbip, 'navigate-to-files'), learn(P.pbipModel, 'semantic-model-files')],
-        checkpoint: 'The definition folder holds .tmdl files, one per table.',
+        checkpoint: 'You can find the model definition files (TMDL files, or a single model file in the older format).',
       },
       {
         id: 's3',
@@ -309,7 +302,7 @@ export const maintainLabs: Lab[] = [
       {
         id: 's5',
         windows: true,
-        text: 'In a new Desktop file, connect to Mill_Warehouse and load one table. Then export a .pbids file from Data source settings, close the file, and open the .pbids.',
+        text: 'In a new Desktop file, connect to Mill_Warehouse and load one table. Then export a .pbids file from Data source settings, close the file, and open the .pbids. Learn doesn’t confirm Export PBIDS for this connector: if it isn’t offered, report it and skip to step 6.',
         sources: [learn(P.whConnect, 'connect-using-power-bi'), learn(P.pbids, 'how-to-create-a-pbids-connection-file')],
         checkpoint: 'Opening the .pbids prompts for credentials if needed, then opens the Navigator for that warehouse without asking you to pick a connector.',
       },
@@ -344,21 +337,21 @@ export const maintainLabs: Lab[] = [
     bulletIds: ['S2.5', 'S1.6', 'M2.5', 'P1.5'],
     platform: 'windows',
     minutes: 105,
-    prereqs: ['L04'],
+    prereqs: ['L02', 'L04'],
     before:
       'Needs Power BI Desktop and SQL Server Management Studio (SSMS) on Windows. The workspace connection URL is private to your tenant: never paste it into a problem note.',
     steps: [
       {
         id: 's1',
         windows: true,
-        text: 'In Power BI Desktop, connect to Mill_Warehouse in Import mode and choose the staging orders table.',
+        text: 'In Power BI Desktop, connect to Mill_Warehouse in Import mode and choose the staging orders table. Its sample orders are dated in the first half of 2026.',
         sources: [learn(P.whConnect, 'connect-using-power-bi')],
         checkpoint: 'Power Query Editor shows the orders table.',
       },
       {
         id: 's2',
         windows: true,
-        text: 'Change the order date column’s type to Date/Time, then create the RangeStart and RangeEnd parameters.',
+        text: 'Learn expects a Date/Time column; this table’s order date is a date, so change its type to Date/Time in Power Query first. Then create RangeStart and RangeEnd with values a few months apart inside the first half of 2026. If the incremental refresh slider later stays disabled, report it.',
         sources: [learn(P.incremental, 'filter-data'), learn(P.incremental, 'create-parameters')],
         checkpoint: 'Both parameters appear in the Queries pane with the Date/Time type.',
       },
@@ -372,11 +365,17 @@ export const maintainLabs: Lab[] = [
       {
         id: 's4',
         windows: true,
-        text: 'Define an incremental refresh policy on the table with an archive period and a shorter refresh period.',
+        text: 'Define an incremental refresh policy on the table: archive at least 1 year (so the 2026 orders are kept) and refresh a shorter period.',
         sources: [learn(P.incremental, 'define-policy')],
         checkpoint: 'The policy dialog’s summary describes both periods.',
         trapPairId: 'archive-vs-refresh-period',
         trapNote: 'The archive (store) period is how much history the model keeps; the refresh period is what each refresh reloads.',
+      },
+      {
+        id: 's6',
+        text: 'Before you publish, set DP600-Dev’s default storage format to large semantic model storage format, so the model gets it from its first refresh (Learn advises enabling it before the first refresh).',
+        sources: [learn(P.workspaces, 'default-storage-format'), learn(P.largeModels, 'set-default-storage-format'), learn(P.incremental, 'save-and-publish-to-the-service')],
+        checkpoint: 'After you publish, the model’s settings show large semantic model storage format as on.',
       },
       {
         id: 's5',
@@ -384,12 +383,6 @@ export const maintainLabs: Lab[] = [
         text: 'Publish to DP600-Dev, then refresh the model in the service.',
         sources: [learn(P.incremental, 'save-and-publish-to-the-service'), learn(P.incremental, 'refresh-model')],
         checkpoint: 'The refresh history shows a completed refresh.',
-      },
-      {
-        id: 's6',
-        text: 'Turn on large semantic model storage format in the model’s settings, and look at the workspace’s default storage format setting.',
-        sources: [learn(P.largeModels, 'enable-large-semantic-models'), learn(P.workspaces, 'default-storage-format')],
-        checkpoint: 'The model settings show large semantic model storage format as on.',
       },
       {
         id: 's7',
@@ -416,7 +409,7 @@ export const maintainLabs: Lab[] = [
       },
       {
         id: 's10',
-        text: 'Turn on OneLake integration in the model’s settings, then refresh the model.',
+        text: 'Turn on OneLake integration in the model’s settings, then refresh the model. Learn lists Premium P and Fabric F SKUs and needs the tenant setting “Semantic models can export data to OneLake”; if the option is missing or greyed out, report it.',
         sources: [learn(P.smOneLake, 'enable-onelake-integration'), learn(P.smOneLake, 'refresh-model')],
         checkpoint: 'The refresh history shows an entry on the OneLake integration tab.',
         trapPairId: 'onelake-availability-vs-integration',
@@ -424,7 +417,7 @@ export const maintainLabs: Lab[] = [
       },
       {
         id: 's11',
-        text: 'Create a shortcut in a lakehouse to the model’s exported Delta tables.',
+        text: 'In Mill_Lakehouse, create a shortcut to the model’s exported Delta tables.',
         sources: [learn(P.smOneLake, 'shortcuts'), learn(P.smOneLake, 'explore-export-files')],
         checkpoint: 'The shortcut shows the exported tables.',
       },
