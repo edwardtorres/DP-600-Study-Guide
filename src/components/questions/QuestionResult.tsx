@@ -50,7 +50,7 @@ function Body({ q, r }: { q: Question; r: Response }) {
                 </p>
                 <p className="mt-0.5 text-xs text-mill-200">
                   <span className="font-semibold">Answer: {s.answer ? 'Yes' : 'No'}</span>
-                  {given !== undefined && <span> · you said {given ? 'Yes' : 'No'}</span>}. {s.explain}
+                  {given !== undefined && <span> · you said {given ? 'Yes' : 'No'}</span>}. {s.explain.replace(/^(Yes|No)\.\s*/, '')}
                 </p>
               </li>
             )
