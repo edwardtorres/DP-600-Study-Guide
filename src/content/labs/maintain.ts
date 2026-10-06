@@ -24,7 +24,7 @@ export const maintainLabs: Lab[] = [
         sources: [learn(P.workspaces, 'give-users-access-to-your-workspace'), learn(P.roles)],
         checkpoint: 'You’re listed with the Admin role.',
         trapPairId: 'member-vs-contributor',
-        trapNote: 'Member can add people and share; Contributor can create and edit content but can’t share or manage access.',
+        trapNote: 'Member can add people and share; Contributor can create and edit content but can’t manage access, and can share an item only with Reshare permission.',
       },
       {
         id: 's2',
@@ -78,7 +78,7 @@ export const maintainLabs: Lab[] = [
         id: 's9',
         optional: true,
         windows: true,
-        text: 'Open the model security exercise’s starter file in Power BI Desktop and create one of its static roles. Then, in TMDL view, add object-level security for one column to a new role (not the static one: a createOrReplace script replaces the whole role, including its row filter).',
+        text: 'Open the model security exercise’s starter file in Power BI Desktop and create one of its static roles. Then, in TMDL view, add object-level security for one column to a new role, so the static role you just made stays as it is.',
         sources: [ex('17-enforce-model-security', 'set-up-the-environment'), ex('17-enforce-model-security', 'create-static-roles'), learn(P.smOls, 'configure-object-level-security-by-using-tmdl-view')],
         checkpoint: 'With View as on that role, a visual that uses the secured column no longer shows its data.',
       },
@@ -86,7 +86,7 @@ export const maintainLabs: Lab[] = [
     cleanup: [
       {
         id: 'c1',
-        text: 'Delete Secure_Warehouse (this removes its masks, security policy, and grants). Delete the OneLake security role.',
+        text: 'Delete Secure_Warehouse. Delete the OneLake security role.',
         sources: [ex('06d-secure-data-warehouse', 'clean-up-resources')],
       },
       {
@@ -185,15 +185,15 @@ export const maintainLabs: Lab[] = [
       },
       {
         id: 's2',
-        text: 'Create a private GitHub repository with a README (so it has a main branch) and a fine-grained token with Contents read and write on that repository only. Don’t paste the repository URL or the token into a problem note.',
+        text: 'Create a private GitHub repository with a README and a fine-grained token with Contents read and write on that repository only. Don’t paste the repository URL or the token into a problem note.',
         sources: [learn(P.git, 'git-prerequisites')],
         checkpoint: 'The token page lists your repository with Contents: read and write.',
       },
       {
         id: 's3',
-        text: 'Connect DP600-Dev to the repository’s main branch from workspace settings. Because the branch has no Fabric items, the first sync copies every workspace item into Git for you.',
-        sources: [learn(P.git, 'connect-to-a-git-repo'), learn(P.git, 'connect-to-a-workspace')],
-        checkpoint: 'Each item shows Synced, and the repository has a folder per item.',
+        text: 'Connect DP600-Dev to the repository’s main branch from workspace settings, and type a new folder name so the Git side starts empty. During the initial sync, content is copied from the nonempty side to the empty one; item types Git integration doesn’t support are ignored.',
+        sources: [learn(P.git, 'connect-to-a-git-repo'), learn(P.git, 'connect-to-a-workspace'), learn(P.gitIntro, 'supported-items')],
+        checkpoint: 'Each supported item shows Synced, and the new folder in the repository has a folder per item.',
       },
       {
         id: 's5',
@@ -207,7 +207,7 @@ export const maintainLabs: Lab[] = [
         id: 's6',
         text: 'Disconnect the workspace from Git.',
         sources: [learn(P.git, 'disconnect-a-workspace-from-git')],
-        checkpoint: 'The Git status column is gone.',
+        checkpoint: 'Workspace settings > Git integration shows the workspace isn’t connected.',
       },
       {
         id: 's7',
@@ -227,7 +227,7 @@ export const maintainLabs: Lab[] = [
         id: 's9',
         text: 'Select only Mill_Lakehouse and the Copy_Sales pipeline from Lab 2, and deploy them to Test.',
         sources: [learn(P.deployStart, 'step-5---deploy-to-an-empty-stage'), ex('21-implement-cicd', 'deploy-content-between-stages')],
-        checkpoint: 'The deployed items appear in DP600-Test, and the stage comparison shows them as matching.',
+        checkpoint: 'The deployed items appear in DP600-Test and show Same as source in the comparison (the stage may still show a difference for items you didn’t deploy).',
       },
       {
         id: 's10',
@@ -365,7 +365,7 @@ export const maintainLabs: Lab[] = [
       {
         id: 's4',
         windows: true,
-        text: 'Define an incremental refresh policy on the table: archive at least 1 year (so the 2026 orders are kept) and refresh a shorter period.',
+        text: 'Define an incremental refresh policy on the table: archive at least 2 years (so the 2026 orders are kept) and refresh a shorter period.',
         sources: [learn(P.incremental, 'define-policy')],
         checkpoint: 'The policy dialog’s summary describes both periods.',
         trapPairId: 'archive-vs-refresh-period',
@@ -403,7 +403,7 @@ export const maintainLabs: Lab[] = [
         id: 's9',
         optional: true,
         windows: true,
-        text: 'Script the model or one table as TMSL from SSMS and read it. Don’t run changes you don’t understand.',
+        text: 'Script the model or one table as TMSL from SSMS and read it. Scripting metadata needs the XMLA endpoint set to Read Write (read-only is the default); if scripting fails, note it. Don’t run changes you don’t understand.',
         sources: [learn(P.xmla, 'connect-with-ssms'), learn(P.xmla, 'enable-xmla-read-write')],
         checkpoint: 'A query window opens with the TMSL script.',
       },
@@ -430,7 +430,7 @@ export const maintainLabs: Lab[] = [
       },
       {
         id: 'c2',
-        text: 'Course cleanup, when every lab you plan to do is finished: remove DP600-Test and DP600-Dev (Workspace settings, then remove the workspace). Items in a trial capacity become inactive when the trial ends anyway.',
+        text: 'Course cleanup, when every lab you plan to do is finished: remove DP600-Test and DP600-Dev (Workspace settings, then remove the workspace). When the trial ends, its workspaces move to Pro and non-Power BI Fabric items such as lakehouses, notebooks, and pipelines become inactive.',
         sources: [ex('21-implement-cicd', 'clean-up'), learn(P.trial, 'when-your-fabric-trial-ends')],
       },
     ],

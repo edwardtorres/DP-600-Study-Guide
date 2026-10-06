@@ -107,7 +107,7 @@ export const prepareLabs: Lab[] = [
       {
         id: 's4',
         text: 'Switch to the lakehouse’s SQL analytics endpoint and run a SELECT query on the new table.',
-        sources: [ex('01-lakehouse', 'use-sql-to-query-tables')],
+        sources: [ex('01-lakehouse', 'use-sql-to-query-tables'), learn(P.decideLhWh, 'evaluate-each-service')],
         checkpoint: 'The query returns rows in the results pane.',
         trapPairId: 'endpoint-vs-warehouse',
         trapNote: 'The SQL analytics endpoint reads the lakehouse’s Delta tables; you can’t INSERT or UPDATE through it.',
@@ -143,7 +143,7 @@ export const prepareLabs: Lab[] = [
         id: 's9',
         text: 'Create a second lakehouse named Mill_Shortcuts and add a OneLake shortcut in its Tables folder that points to a table in Mill_Lakehouse.',
         sources: [learn(P.shortcut, 'create-a-shortcut'), ex('25-discover-onelake', 'create-a-shortcut-to-access-data-from-another-workspace')],
-        checkpoint: 'The shortcut table shows a shortcut icon and returns the same rows as the original.',
+        checkpoint: 'The shortcut appears in Mill_Shortcuts’ Tables folder and returns the same rows as the original.',
         trapPairId: 'shortcut-mirror-copy',
         trapNote: 'A shortcut references the data in place; the Copy activity in step 7 made a copy.',
       },
@@ -204,7 +204,7 @@ export const prepareLabs: Lab[] = [
       {
         id: 's3',
         text: 'Run the join and aggregate cells.',
-        sources: [ex('26c-transform-data-notebooks', 'join-and-aggregate-the-data')],
+        sources: [ex('26c-transform-data-notebooks', 'join-and-aggregate-the-data'), learn(P.union, 'arguments')],
         checkpoint: 'The summary has one row per region.',
         trapPairId: 'merge-vs-append',
         trapNote: 'A join adds columns from another table; a union stacks rows.',

@@ -25,7 +25,7 @@ export const semanticLabs: Lab[] = [
       {
         id: 's2',
         text: 'Read when to choose Direct Lake on OneLake versus Direct Lake on SQL. This lab uses Direct Lake on OneLake; Lab 8 builds the other kind.',
-        sources: [learn(P.dlDevelop, 'choose-the-right-storage-mode')],
+        sources: [learn(P.dlDevelop, 'choose-the-right-storage-mode'), learn(P.dlOverview, 'comparison-of-storage-modes')],
         trapPairId: 'storage-modes',
         trapNote: 'Direct Lake reads Delta tables in OneLake; Import copies data into the model; DirectQuery queries the source each time.',
       },
@@ -33,7 +33,7 @@ export const semanticLabs: Lab[] = [
         id: 's3',
         text: `Open the lakehouse’s SQL analytics endpoint and choose New semantic model. Name it ${MODEL}, pick the exercise’s four tables, and choose Direct Lake on OneLake if the dialog asks. (The exercise starts from the lakehouse explorer instead; Learn shows both entry points.)`,
         sources: [learn(P.dlDevelop, 'create-the-model'), ex('15-design-semantic-model-scale', 'create-a-semantic-model')],
-        checkpoint: 'The model opens in the browser’s model editor with the four tables. If it says tables don’t exist or can’t refresh, wait a few minutes for the tables to sync and try again.',
+        checkpoint: 'The model opens in the browser’s model editor with the four tables. If it says tables don’t exist or can’t refresh, wait a few minutes for the tables to sync, delete the model, and create it again.',
         trapPairId: 'dl-onelake-vs-sql',
         trapNote: 'Starting from the SQL analytics endpoint doesn’t make the model Direct Lake on SQL; the dialog choice decides.',
       },
@@ -204,7 +204,7 @@ export const semanticLabs: Lab[] = [
         windows: true,
         text: 'Create the calculated table, the Date table and its calculated columns, complete the Date table (hierarchy and relationships), then mark it as a date table.',
         sources: [ex('14-create-dax-calculations', 'create-the-salesperson-calculated-table'), ex('14-create-dax-calculations', 'create-the-date-table'), ex('14-create-dax-calculations', 'create-calculated-columns'), ex('14-create-dax-calculations', 'complete-the-date-table'), ex('14-create-dax-calculations', 'mark-the-date-table')],
-        checkpoint: 'The Date table appears with a calendar icon in the Data pane.',
+        checkpoint: 'Mark as date table shows On, with the Date column selected.',
       },
       {
         id: 's7',

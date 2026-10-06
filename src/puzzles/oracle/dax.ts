@@ -53,7 +53,7 @@ const catOf = (products: Row[], name: string | number | null) => products.find((
 
 // ── QO-D01 SUMMARIZECOLUMNS drops all-blank rows ──────────────────────
 const d01: OracleTemplate = {
-  meta: daxScale('QO-D01', 'Revenue and orders by category', 1, [SRC.dSummarizeColumns, SRC.dSum, SRC.dCountRows]),
+  meta: daxScale('QO-D01', 'Revenue and orders by category', 1, [SRC.dSummarizeColumns, SRC.dSum, SRC.dCountRows, SRC.dIf]),
   language: 'dax',
   intro: `One product category has no sales yet. ${REL}`,
   traps: ['summarizecolumns-blank', 'filter-context', 'distinct-count'],
@@ -68,9 +68,9 @@ const d01: OracleTemplate = {
     const grand = sum(sales.map((s) => s.Amount!))
     return {
       tables: [table('Product', ['Product', 'Category'], products), table('Sales', ['OrderID', 'Product', 'Amount'], sales)],
-      query: `EVALUATE\nSUMMARIZECOLUMNS (\n    'Product'[Category],\n    "Revenue", SUM ( Sales[Amount] ),\n    "Orders", COUNTROWS ( Sales )\n)\nORDER BY 'Product'[Category]`,
+      query: `EVALUATE\nSUMMARIZECOLUMNS (\n    'Product'[Category],\n    "Revenue", IF ( COUNTROWS ( Sales ) > 0, SUM ( Sales[Amount] ) ),\n    "Orders", COUNTROWS ( Sales )\n)\nORDER BY 'Product'[Category]`,
       correct: result(cols, listed.map((c) => row(c, g.get(c)!))),
-      explain: `Each category’s row is evaluated in its own filter context, flowing to Sales through the relationship. ${empty} has no sales, so both expressions are blank and SUMMARIZECOLUMNS leaves the row out.`,
+      explain: `Each category’s row is evaluated in its own filter context, flowing to Sales through the relationship. ${empty} has no sales: COUNTROWS of its empty Sales table is blank, and the IF with no false branch returns BLANK, so both expressions are blank and SUMMARIZECOLUMNS leaves the row out.`,
       distractors: [
         { trap: 'summarizecolumns-blank', why: `It keeps ${empty} with blank values, but rows where every expression is blank are removed.`, table: result(cols, cats.map((c) => row(c, g.get(c) ?? []))) },
         { trap: 'filter-context', why: 'It shows the grand totals on every row, as if the category didn’t filter Sales.', table: result(cols, listed.map((c) => ({ [cols[0]!]: c, [cols[1]!]: grand, [cols[2]!]: sales.length }))) },
