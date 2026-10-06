@@ -316,6 +316,13 @@ export const prepareLabs: Lab[] = [
         trapPairId: 'scd1-vs-scd2',
         trapNote: 'Type 1 overwrites the old value; type 2 keeps history in a new row.',
       },
+      {
+        id: 's9',
+        optional: true,
+        text: 'Build a many-to-many case for Lab 7: create a bridge table between the customer and product dimensions with CTAS from the fact table you loaded, for example CREATE TABLE dbo.bridge_customer_product AS SELECT DISTINCT customer_key, product_key FROM fact.sales (the dbo schema already exists). Each row says a customer bought a product, so one customer can link to many products and one product to many customers. If you reload fact.sales later, drop and re-create the bridge.',
+        sources: [learn(P.ctas, 'syntax-1'), learn(P.m2m, 'relate-many-to-many-dimensions'), ex('26d-transform-data-tsql', 'create-and-load-dimensional-tables')],
+        checkpoint: 'The bridge table appears under the dbo schema with two key columns and returns rows.',
+      },
     ],
     cleanup: [
       {

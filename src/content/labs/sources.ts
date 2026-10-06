@@ -71,4 +71,9 @@ export const P = {
   editModels: 'power-bi/transform-model/service-edit-data-models',
   comparePipeline: 'fabric/cicd/deployment-pipelines/compare-pipeline-content',
   shortcuts: 'fabric/onelake/onelake-shortcuts',
+  m2m: 'power-bi/guidance/relationships-many-to-many',
+  relationships: 'power-bi/transform-model/desktop-relationships-understand',
+  ctas: 'sql/t-sql/statements/create-table-as-select-azure-sql-data-warehouse?view=fabric',
+  whModels: 'fabric/data-warehouse/semantic-models',
+  whCreateModel: 'fabric/data-warehouse/create-semantic-model',
 } as const

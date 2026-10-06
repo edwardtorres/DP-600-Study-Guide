@@ -63,11 +63,20 @@ export const semanticLabs: Lab[] = [
         sources: [ex('15-design-semantic-model-scale', 'validate-the-model-with-a-report')],
         checkpoint: 'The order-date and ship-date measures show different values for at least one slicer range.',
       },
+      {
+        id: 's8',
+        optional: true,
+        text: 'Needs Lab 4 step 9. Open Mill_Warehouse, select New semantic model, name it Bridge Model, pick the customer dimension, the bridge table, the product dimension, and the sales fact table, then Confirm and switch to Editing mode. Relate customer to bridge and product to bridge as one-to-many on the key columns, and product to the fact table as one-to-many. Don’t relate the customer dimension to the fact (that would give a second, ambiguous filter path), and don’t relate the two dimensions with a many-to-many relationship. Set the product-to-bridge relationship’s cross-filter direction to Both so a customer filter reaches the fact table, then hide the bridge table and the key columns, including the fact’s customer key. Note what the result means: a customer’s value is the sales of the products that customer bought, by any customer, not the customer’s own purchases. A real bridge is needed when the fact doesn’t carry the other key, as in Learn’s accounts-and-customers example.',
+        sources: [learn(P.whCreateModel, 'create-a-new-power-bi-semantic-model-in-direct-lake-mode'), learn(P.m2m, 'relate-many-to-many-dimensions-guidance'), learn(P.m2m, 'relate-many-to-many-dimensions'), learn(P.relationships, 'cross-filter-direction'), learn(P.relationships, 'resolve-relationship-path-ambiguity'), learn(P.editModels, 'create-a-relationship')],
+        checkpoint: 'In a table of customer name and the sum of the sales amount, values differ per customer, and the customer rows can add up to more than the total: they’re non-additive, as Learn’s bank-account example explains.',
+        trapPairId: 'regular-vs-limited',
+        trapNote: 'One-to-many relationships between tables from one source stay regular relationships; Learn advises against relating the two dimensions with a many-to-many relationship.',
+      },
     ],
     cleanup: [
       {
         id: 'c1',
-        text: `Stop the notebook’s Spark session. Keep ${MODEL}, Sales Report, the lakehouse, and the notebook for Labs 8 to 15. Skip the exercise’s query scale-out setting.`,
+        text: `Stop the notebook’s Spark session. If you did step 8, delete Bridge Model (keep the bridge table in Mill_Warehouse). Keep ${MODEL}, Sales Report, the lakehouse, and the notebook for Labs 8 to 15. Skip the exercise’s query scale-out setting.`,
         sources: [ex('02-analyze-spark', 'clean-up-resources'), ex('15-design-semantic-model-scale', 'configure-settings-for-scale')],
       },
     ],

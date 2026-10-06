@@ -20,7 +20,6 @@ export const LABS_UNCOVERED: Record<string, string> = {}
  */
 export const LABS_PARTIAL: Record<string, string> = {
   'M1.4': 'Applying a label needs Microsoft Purview sensitivity labels published in your tenant. Lab 12 asks you to record it if none are available.',
-  'S1.3': 'Lab 7 builds one-to-many and inactive relationships. No lab builds a bridge table or a many-to-many relationship, because the lab data has none.',
   'M1.3': 'Testing CLS and what another user sees needs a second account in your organization; those steps are optional. Semantic model OLS needs Power BI Desktop (Windows).',
   'M1.2': 'Sharing an item with someone else needs a second account; without one, Lab 11 only shows the share options.',
 }
