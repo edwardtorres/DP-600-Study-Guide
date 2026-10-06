@@ -1,0 +1,69 @@
+{
+  "version": 4,
+  "createdAt": "2026-10-06T00:55:42.779Z",
+  "updatedAt": "2026-10-06T00:55:49.346Z",
+  "machines": {
+    "founding-charter": {
+      "notesOpenedAt": "2026-10-06T00:55:43.076Z",
+      "lastDraw": {
+        "startup": [
+          "FO-01",
+          "FO-03"
+        ]
+      },
+      "startedAt": "2026-10-06T00:55:44.501Z"
+    }
+  },
+  "answers": [
+    [
+      "FO-01",
+      1,
+      1791248144,
+      "s"
+    ],
+    [
+      "FO-03",
+      1,
+      1791248144,
+      "s"
+    ],
+    [
+      "FO-20",
+      1,
+      1791248149,
+      "l"
+    ],
+    [
+      "FO-10",
+      0,
+      1791248149,
+      "l"
+    ],
+    [
+      "FO-06",
+      1,
+      1791248149,
+      "l"
+    ]
+  ],
+  "labs": {
+    "L01": {
+      "steps": {
+        "s1": true,
+        "s2": true,
+        "s3": true,
+        "s4": true,
+        "s5": true,
+        "s6": true,
+        "s7": true,
+        "c1": true
+      },
+      "problems": {
+        "s3": "Capacities page looked different"
+      },
+      "completedAt": "2026-10-06T00:55:47.666Z"
+    }
+  },
+  "settings": {},
+  "trialStart": "2026-10-01"
+}

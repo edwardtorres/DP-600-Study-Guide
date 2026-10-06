@@ -180,10 +180,10 @@ export const READINESS_WINDOW = 40
 export const READINESS_MAX_PUZZLES = 10
 export const READINESS_MIN_ANSWERS = 10
 /**
- * Which answers count toward readiness: inspections, placements, puzzles, and
- * lab debriefs. Start-up checks ('s') don't. Step 7 adds the review and mock-exam codes here.
+ * Which answers count toward readiness: inspections, placements, puzzles, lab
+ * debriefs, daily reviews, and mock exams. Start-up checks ('s') don't.
  */
-export const READINESS_CODES: readonly AttemptCode[] = ['i', 'p', 'z', 'l']
+export const READINESS_CODES: readonly AttemptCode[] = ['i', 'p', 'z', 'l', 'r', 'm']
 
 /**
  * The most recent answers for a readiness window: up to `size` entries,
@@ -236,7 +236,7 @@ export function domainWeights(outline: Outline): Map<DomainId, number> {
 }
 
 /**
- * Readiness is accuracy, never XP. Only inspection, placement, puzzle, and lab-debrief answers
+ * Readiness is accuracy, never XP. Only inspection, placement, puzzle, lab-debrief, review, and mock answers
  * count (READINESS_CODES); start-up checks don't. For each domain: accuracy over
  * the most recent 40 counted answers in that domain, multiplied by coverage
  * (distinct bullets answered ÷ bullets in the domain, capped at 1). Overall is the

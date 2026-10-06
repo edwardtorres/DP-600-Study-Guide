@@ -47,7 +47,7 @@ function Stats({ level, streak, readiness, badgesEarned, onOpenBadges }: Pick<Pr
       </div>
       <div
         className="rounded-lg border border-mill-700 bg-mill-900 p-3"
-        title="Readiness is your accuracy on your most recent 40 inspection, placement, lab-debrief, and puzzle answers in each domain (at most 10 of them puzzle plays, the most recent), scaled by how many of that domain's exam skills you've answered. Start-up checks don't count, and neither does XP. Overall weights the domains by the official exam percentages."
+        title="Readiness is your accuracy on your most recent 40 inspection, placement, lab-debrief, review, mock, and puzzle answers in each domain (at most 10 of them puzzle plays, the most recent), scaled by how many of that domain's exam skills you've answered. Start-up checks don't count, and neither does XP. Overall weights the domains by the official exam percentages."
       >
         <p className="text-sm font-semibold text-mill-50">
           Readiness {readiness.overall === null ? '—' : `${readiness.overall}%`}
@@ -59,7 +59,7 @@ function Stats({ level, streak, readiness, badgesEarned, onOpenBadges }: Pick<Pr
             </li>
           ))}
         </ul>
-        <p className="mt-1 text-[11px] text-mill-400">Recent inspection, placement, lab-debrief, and puzzle accuracy (at most 10 puzzle plays) × skills covered, weighted by exam percentages. Start-up checks don't count.</p>
+        <p className="mt-1 text-[11px] text-mill-400">Recent inspection, placement, lab-debrief, review, mock, and puzzle accuracy (at most 10 puzzle plays) × skills covered, weighted by exam percentages. Start-up checks don't count.</p>
       </div>
     </div>
   )

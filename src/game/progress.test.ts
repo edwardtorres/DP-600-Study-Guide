@@ -155,6 +155,15 @@ describe('readiness', () => {
     expect(readiness(log, byId(qs), outline).domains.find((d) => d.domain === 'PREPARE')!.answered).toBe(12)
   })
 
+  it("counts daily review ('r') and mock ('m') answers in readiness and XP, with the repeat rule", () => {
+    const prepBullets = outline.domains.find((d) => d.id === 'PREPARE')!.sections.flatMap((s) => s.bullets.map((b) => b.id))
+    const qs = prepBullets.map((b, i) => q(`p${i}`, 2, b))
+    const log: AnswerEntry[] = [...qs.slice(0, 6).map((x, i): AnswerEntry => [x.id, 1, i, 'r']), ...qs.slice(0, 6).map((x, i): AnswerEntry => [x.id, 1, 10 + i, 'm'])]
+    expect(readiness(log, byId(qs), outline).domains.find((d) => d.domain === 'PREPARE')!.answered).toBe(12)
+    // First correct answer earns full XP (20 at difficulty 2), repeats earn 25% (5).
+    expect(totalXp(log, byId(qs))).toBe(6 * 20 + 6 * 5)
+  })
+
   it('computes the weighted overall once every domain has a score', () => {
     const all = outline.domains.flatMap((d) => d.sections.flatMap((s) => s.bullets.map((b) => q(`${b.id}`, 1, b.id))))
     const log: AnswerEntry[] = all.map((x, i) => [x.id, x.bulletIds[0]!.startsWith('P') ? 1 : 0, i, 'i'])

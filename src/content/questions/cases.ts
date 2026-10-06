@@ -1,8 +1,9 @@
 import { S } from './sources'
 import type { CaseStudy, Question } from './types'
+import { moreCaseQuestions, moreCaseStudies } from './cases2'
 
 /** Fictional companies. Each case's questions span all three exam domains. */
-export const caseStudies: CaseStudy[] = [
+const firstCaseStudies: CaseStudy[] = [
   {
     id: 'case-fernhollow',
     company: 'Fernhollow Outfitters',
@@ -102,7 +103,7 @@ const c = 'case-quillmere'
 const t = 'case-saltmarsh'
 const b = 'case-lumenvale'
 
-export const caseQuestions: Question[] = [
+const firstCaseQuestions: Question[] = [
   // ── Fernhollow Outfitters ─────────────────────────────────────────
   {
     id: 'CS1-01',
@@ -655,3 +656,6 @@ export const caseQuestions: Question[] = [
     answer: 'a',
   },
 ]
+
+export const caseStudies: CaseStudy[] = [...firstCaseStudies, ...moreCaseStudies]
+export const caseQuestions: Question[] = [...firstCaseQuestions, ...moreCaseQuestions]

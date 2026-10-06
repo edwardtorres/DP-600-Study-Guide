@@ -12,7 +12,7 @@ export const MAX_MULTI_POSITION_SHARE = 0.6
 export const YES_SHARE = { min: 0.4, max: 0.6 }
 /** Distribution rules apply once a bank has at least this many items. */
 export const MIN_FOR_DISTRIBUTION = 10
-export const CASE_STUDY_COUNT = 4
+export const CASE_STUDY_COUNT = 6
 export const MIN_CASE_QUESTIONS = 6
 export const MAX_CASE_QUESTIONS = 8
 

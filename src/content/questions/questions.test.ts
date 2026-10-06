@@ -118,7 +118,7 @@ describe('question bank', () => {
     }).join('\n')
     expect(errs).toMatch(/Case study k1 has 2 questions; needs 6–8/)
     expect(errs).toMatch(/Case study k1 must span all 3 domains/)
-    expect(errs).toMatch(/Expected 4 case studies, found 1/)
+    expect(errs).toMatch(/Expected 6 case studies, found 1/)
   })
 
   it('flags skewed multi-select positions and Yes/No shares', () => {
@@ -148,10 +148,10 @@ describe('question bank', () => {
     expect(errs).toMatch(/Yes\/No statements: Yes is the answer for 12\/12/)
   })
 
-  it('ends Step 3 with nothing pending', () => {
+  it('has every case study written and nothing pending (6 since Step 7)', () => {
     // Enforced once all floors and case studies are written.
     if (QUESTIONS_PENDING.length === 0 && !CASES_PENDING) {
-      expect(caseStudies).toHaveLength(4)
+      expect(caseStudies).toHaveLength(6)
     }
   })
 })

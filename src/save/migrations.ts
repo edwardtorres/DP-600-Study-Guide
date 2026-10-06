@@ -27,6 +27,12 @@ export const migrations: Migration[] = [
     from: 3,
     migrate: (old) => ({ ...old, labs: {} }),
   },
+  {
+    // v4 → v5 (Step 7): mock exam history and an optional mock in progress, plus
+    // answer codes 'r' (daily review) and 'm' (mock exam). Existing data is unchanged.
+    from: 4,
+    migrate: (old) => ({ ...old, mocks: [] }),
+  },
 ]
 
 export function runMigrations(
