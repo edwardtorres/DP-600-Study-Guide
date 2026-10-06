@@ -26,9 +26,9 @@ The learner has passed PL-300 study (Power BI basics, DAX fundamentals, star sch
 | `npm run check:secrets` | Fails on local paths, private links, or token-like strings in the repo |
 | `npm run check:links` | Fetches every URL cited in notes, verified edges, questions, puzzles, and labs; fails on non-200, or on a lab source whose #section is missing |
 | `npm run check` | All of the above except build, `--live`, and `check:links` |
-| `npm run e2e` | Playwright flows (machine, placement, puzzle, lab) at 1440 px and 390 px, tap-only, against the dev server. Needs a browser, so it's not in `npm test`. Set `PW_CHROMIUM` to a Chromium binary if Playwright's own isn't installed |
+| `npm run e2e` | Playwright flows (machine, placement, puzzle, lab, review, mock) at 1440 px and 390 px, tap-only, against the dev server. Needs a browser, so it's not in `npm test`. Set `PW_CHROMIUM` to a Chromium binary if Playwright's own isn't installed |
 
-`npm run build` also runs `scripts/check-bundle.ts`, which fails if the dev-only `?seed=` hook (`src/game/seed.ts`, reachable only behind `import.meta.env.DEV`) is in the production bundle.
+`npm run build` also runs `scripts/check-bundle.ts`, which fails if a dev-only hook is in the production bundle: `?seed=` (`src/game/seed.ts`) or `?mock=short` (`src/game/mockShort.ts`), both reachable only behind `import.meta.env.DEV`.
 
 ## Git rules
 
@@ -48,6 +48,11 @@ The learner has passed PL-300 study (Power BI basics, DAX fundamentals, star sch
 Sources: the certification page (https://learn.microsoft.com/en-us/credentials/certifications/fabric-analytics-engineer-associate/), "Exam duration and exam experience" (https://learn.microsoft.com/en-us/credentials/support/exam-duration-exam-experience), and "Practice Assessments for Microsoft Certifications" (https://learn.microsoft.com/en-us/credentials/certifications/practice-assessments-for-microsoft-certifications).
 
 - 100 minutes, proctored. Passing score is 700. "You may have interactive components to complete as part of this exam."
+- Rechecked 2026-10-06 for the mock exam (Step 7):
+  - **Time:** the certification page says "You will have 100 minutes to complete this assessment". The exam duration page lists 100 minutes (120 minutes seat time) for associate role-based exams without labs.
+  - **Question count:** "Most Microsoft Certification exams typically contain between 40-60 questions"; no DP-600-specific count is published.
+  - **Scoring:** "Exam scoring and score reports" (https://learn.microsoft.com/en-us/credentials/certifications/exam-scoring-reports) says scores are on a scale of 1 to 1,000 and 700 passes: "As this is a scaled score, it may not equal 70% of the points."
+  - **Practice:** Microsoft's free DP-600 practice assessment is linked from the certification page (practice/assessment?assessmentId=90).
 - The English version updates on October 19, 2026.
 - Microsoft Learn is available inside the exam in a split screen (no extra time). Q&A, practice assessments, and your profile are blocked.
 - Most questions cover GA features. Preview features may appear if commonly used.
@@ -83,7 +88,7 @@ The free practice assessment shows "the style, wording, and difficulty"; the rea
 - **Lifecycle (Step 4, `src/game/state.ts`):** locked → idle when every prerequisite is certified; idle → running after the notes are opened and a 2-question start-up check is passed (both correct); running → certified by a 5-question inspection at 80% (4 of 5). The first failed inspection can be retried at once (new draw); after a second failure on the same machine in one local day, its inspections lock until the next day, with a message saying why. PL-300 carryover machines also offer a placement check, even while locked: 5 placement-eligible questions, all 5 correct, one attempt per machine per local day (the attempt is used when it starts, so the pool can't be previewed); passing certifies the machine as **placed**.
 - **Draws (`src/game/draw.ts`):** a machine's own questions, never case-study questions (reserved for the mock exam). Inspections cover every bullet on the machine, include at least one difficulty-2+ question, and avoid the previous attempt's questions where the pool allows.
 - **Scoring is full credit only (`src/game/score.ts`):** a question counts as correct only if every part is right: both picks of a multi-select, every Yes/No statement, every matching pair, every drop-down slot, the whole ordering. No partial credit anywhere.
-- **Rewards never replace tests.** XP, levels, ranks, streaks, badges, and readiness (`src/game/progress.ts`) are all derived from the answer log and certifications; none of them can certify a machine. Readiness is based on recent accuracy and bullet coverage, weighted by the official domain percentages, never on XP. It counts only inspection, placement, lab-debrief, and puzzle answers (`READINESS_CODES`; Step 7 adds review and mock); start-up checks don't count. A domain's 40-answer window holds at most the 10 most recent puzzle plays (`readinessWindow`).
+- **Rewards never replace tests.** XP, levels, ranks, streaks, badges, and readiness (`src/game/progress.ts`) are all derived from the answer log and certifications; none of them can certify a machine. Readiness is based on recent accuracy and bullet coverage, weighted by the official domain percentages, never on XP. It counts only inspection, placement, puzzle, lab-debrief, daily-review, and mock answers (`READINESS_CODES = i, p, z, l, r, m`); start-up checks don't count. A domain's 40-answer window holds at most the 10 most recent puzzle plays (`readinessWindow`).
 
 ## Notes (Step 2)
 
@@ -94,12 +99,12 @@ The free practice assessment shows "the style, wording, and difficulty"; the rea
 
 ## Question bank (Step 3)
 
-- Questions are typed data in `src/content/questions/<floor>.ts` plus `cases.ts` (types in `types.ts`, rules in `requirements.ts`, checks in `validate.ts`). Formats: `single`, `multi` ("choose two/three"), `yesno` statement sets, `order`, `match`, `dropdown` (T-SQL/KQL/DAX code completion).
+- Questions are typed data in `src/content/questions/<floor>.ts` (Step 7's difficulty-3 additions are in each floor's `hard.ts`) plus `cases.ts` and `cases2.ts` (6 case studies) (types in `types.ts`, rules in `requirements.ts`, checks in `validate.ts`). Formats: `single`, `multi` ("choose two/three"), `yesno` statement sets, `order`, `match`, `dropdown` (T-SQL/KQL/DAX code completion).
 - Every question has: id, machineId, bulletIds, format, difficulty 1–3, a scenario-style stem, a key, an explanation for **every** option/statement/item/pair/slot option, at least one learn.microsoft.com source that confirms the key, optional `trapPairId` (a notes "don't confuse" pair), `preview`, `placement`, `caseStudyId`.
 - Rules enforced by `check:content`: ≥6 questions per bullet; domain shares inside the official ranges; ≤35% of 4-option answers in any one position; correct option strictly longest ≤40%; no near-duplicate stems (Jaccard ≥ 0.8); Preview ≤5%; every PL-300 carryover machine has ≥8 placement-eligible questions; placement questions on partial-carryover machines are never keyed to Power Query; no "all/none of the above"; no phrases tied to open needs-verification items (`BANNED_TERMS`).
 - Answer order is controlled twice. In the bank, `arrange()` rotates single-choice answers, multi-select sources are balanced (no position correct in more than 60% of questions with that option count), and Yes/No statements are 40–60% "Yes"; `check:content` enforces and prints all three. At render time, `src/game/shuffle.ts` shuffles every format with a seeded PRNG: stable within one attempt, new per attempt, and ordering items start with at least half of them (rounded up) out of place.
 - **Never write a question whose answer depends on a needs-verification item** or anything not confirmed on Learn.
-- Each floor's questions are checked by an **independent reviewer agent** that answers blind (`npm run export:questions -- <floor> <dir>` writes blind and keyed JSON outside the repo; `scripts/compare-review.ts` diffs answers), then checks each key against its sources. Disagreements are fixed or dropped and logged in `docs/reviews/step-3-question-review.md`.
+- Each floor's questions are checked by an **independent reviewer agent** that answers blind (`npm run export:questions -- <floor|cases|all> <dir> [idPattern]` writes blind and keyed JSON outside the repo; `scripts/compare-review.ts` diffs answers), then checks each key against its sources. Disagreements are fixed or dropped and logged in `docs/reviews/step-3-question-review.md` (Step 7: `step-7-question-review.md`).
 - Hidden review page: `/review` (or `#/review`). Not linked from the game. **Step 9 must add an SPA fallback** so `/review` serves `index.html` in production.
 
 ## Puzzles (Step 5)
@@ -111,6 +116,31 @@ The free practice assessment shows "the style, wording, and difficulty"; the rea
 - Pattern Draft and Gearbox keys are authored from Learn guidance, with every Learn-allowed answer accepted.
 - `check:content` validates puzzle schema, links, domains, sources, banned terms, trap pairs, template generation (50 seeds each), and minimum counts (`src/content/puzzles/requirements.ts`). `check:links` includes puzzle and trap sources.
 - Review: `npm run export:puzzles -- <dir>` writes a blind sample (at least 30% of each type, plus every Fallback, Access, and Conveyor scenario) and its key; `scripts/compare-puzzle-review.ts` diffs a reviewer's answers. Log: `docs/reviews/step-5-puzzle-review.md`.
+
+## Spaced review, Weak Spots, and the mock exam (Step 7)
+
+- **Daily review (`src/game/review.ts`):** derived from the answer log; no stored schedule.
+  - Every answered bank question has a streak of correct answers in a row; a miss resets it to 0.
+  - It is due on the day of its last answer plus `INTERVALS[streak]` = 1, 2, 4, 7, 14, then 30 days. A miss comes back the next day.
+  - The session lists due questions (most overdue first, then shortest streak), capped at `DAILY_CAP = 20` review answers per local day. If fewer are due, it tops up from the weakest bullets (round-robin, unseen questions first), with the top-up order seeded by the day.
+  - Case-study questions are excluded. Answers log as `'r'`, count in readiness, earn normal XP (with the repeat rule), and never certify.
+- **Maintenance:** a certified machine needs maintenance when its last `MAINT_WINDOW = 8` review or mock answers (at least `MAINT_MIN = 5`) score below `MAINT_THRESHOLD = 60%`.
+  - The map shows a mark, and the machine panel and the Daily review page offer a 5-question maintenance set (recent misses first).
+  - It never removes a certification.
+- **Weak Spots (`src/game/weak.ts`):** bullets ranked by accuracy over their last `WEAK_WINDOW = 20` answers (codes i, p, l, r, m), with the answer count each rests on. Bullets with fewer than 3 answers are listed as "not enough data".
+  - It also lists the "don't confuse" pairs missed most (wrong answers on questions with that `trapPairId`).
+  - Each weak bullet links to its machine's notes, a puzzle (if the machine is unlocked), and a lab.
+- **Mock exam (`src/game/mock.ts`):** `MOCK_MINUTES = 100` and `MOCK_SIZE = 50`, from Microsoft's stated time and its general 40–60 range.
+  - **Section 1:** one case study not used in any previous mock (the least recently used one once all six have been seen).
+  - **Section 2:** the rest, allocated so the whole mock follows the official domain midpoints (counting the case questions), spread round-robin over bullets. It avoids the last mock's questions and prefers questions not answered in the last 14 days, then the least recently answered. Orientation-only questions are never drawn.
+  - **Timer and saving:** the timer runs from `activeMock.startedAt` in the save, so it survives reloads; at zero the mock submits itself. Responses, marks, and the seed are saved as you go.
+  - **Case lock:** leaving the case study (after a warning) sets `caseLocked`, and its questions can't be opened again.
+  - **During the exam:** no feedback until the end. Mark for review and a review screen come before submitting.
+  - **Scoring:** full credit only, and unanswered questions count as wrong. Results show raw percentages overall, by domain, and by bullet, every question with its explanation and sources, the trap pairs fallen for, the history, and the scaled-score note.
+  - **Logging:** answers log as `'m'`, count in readiness, earn XP, and never certify.
+  - **Dev-only short mode:** `?mock=short` gives 6 main questions plus the case study and 10 minutes, for e2e.
+- **Ready to book:** shown only when the two most recent full (not short) mocks each score at least 80% overall with every domain at least 70% (`readyToBook`). It links to Microsoft's free practice assessment as an outside check. This is a raw-percentage signal; Microsoft's 700 is a scaled score.
+- UI: header buttons Daily review (with the due count), Weak Spots, and Mock exam (`src/components/review/`, `weak/`, `mock/`).
 
 ## Labs (Step 6)
 
@@ -130,7 +160,7 @@ The user works on both Windows and Mac. Fabric runs in the browser, but Power BI
 
 ## Save system
 
-- `src/save/schema.ts` (types + validator), `migrations.ts`, `storage.ts`. Current `SAVE_VERSION = 4`, key `fabric-mill:save`. v2 added a compact answer log (`answers: [id, 0|1, unixSeconds, code][]`, kept for Step 7 spaced repetition) and per-machine `notesOpenedAt`, `lastDraw`, and `placementDays`. v3 adds code `'z'` (one entry per puzzle play) next to `'s'|'i'|'p'` (start-up/inspection/placement), and per-machine `inspectionFails` (local days of failed inspections). v4 adds code `'l'` (lab debrief answers), `labs` (per-lab step checks, problem notes up to 2,000 characters, completion time) and an optional `trialStart` day. Migrations `{ from: 1 }` (adds an empty log), `{ from: 2 }` (no data change), and `{ from: 3 }` (adds `labs: {}`) are tested on real saves: `src/save/fixtures/save-v1.json`, `save-v2.json` (captured from the Step 4 app), and `save-v3.json` (captured from the Step 5 app).
+- `src/save/schema.ts` (types + validator), `migrations.ts`, `storage.ts`. Current `SAVE_VERSION = 5`, key `fabric-mill:save`. v2 added a compact answer log (`answers: [id, 0|1, unixSeconds, code][]`, kept for Step 7 spaced repetition) and per-machine `notesOpenedAt`, `lastDraw`, and `placementDays`. v3 adds code `'z'` (one entry per puzzle play) next to `'s'|'i'|'p'` (start-up/inspection/placement), and per-machine `inspectionFails` (local days of failed inspections). v4 adds code `'l'` (lab debrief answers), `labs` (per-lab step checks, problem notes up to 2,000 characters, completion time) and an optional `trialStart` day. v5 adds codes `'r'` (daily review) and `'m'` (mock exam), `mocks` (finished mocks: ids in exam order, per-question correct, responses, timing) and an optional `activeMock` (start time, sections, responses, marks, seed, `caseLocked`). Migrations `{ from: 1 }` (adds an empty log), `{ from: 2 }` (no data change), `{ from: 3 }` (adds `labs: {}`), and `{ from: 4 }` (adds `mocks: []`) are tested on real saves: `src/save/fixtures/save-v1.json`, `save-v2.json` (captured from the Step 4 app), `save-v3.json` (Step 5 app), and `save-v4.json` (Step 6 app).
 - Settings can export the save as JSON, import a save (same parse → migrate → validate path as loading; a bad file changes nothing), and reset progress (the old save is copied to the backup key first).
 - On load: parse → run migrations up to the current version → validate → drop unknown machine ids. If any step fails, the raw save is copied to `fabric-mill:save:corrupt-backup` and a fresh save starts. The UI shows a notice.
 - **To change the save shape:** bump `SAVE_VERSION`, add the new type and validator, append a migration `{ from: n }`, and add a test that loads a real version-n save.
@@ -145,7 +175,7 @@ src/content/                    notes data, notes types, notes validator, requir
 src/content/questions/          question bank, case studies, question validator
 src/review/                     hidden /review page
 src/data/                       outline loader, machines, edges, floors, graph utils, shared validators
-src/game/                       state derivation, map layout, draws, scoring, progress, labs
+src/game/                       state derivation, map layout, draws, scoring, progress, labs, review, weak spots, mock
 src/save/                       versioned save
 src/content/puzzles/            puzzle scenarios, puzzle registry, puzzle validator
 src/puzzles/                    puzzle types, builders, play/scoring, Query Oracle engine + templates, evaluators
@@ -153,6 +183,9 @@ src/components/                 MillMap, MachineNode, Threads, MachineDetail, No
 src/components/puzzles/         Puzzle bench, PuzzlePanel, decision inputs
 src/content/labs/               lab content, sources, lab validator, coverage
 src/components/labs/            Workshop tab, Labs page, lab view
+src/components/review/          Daily review page
+src/components/weak/            Weak Spots page
+src/components/mock/            Mock exam, results, history
 e2e/                            Playwright flows (npm run e2e)
 ```
 
@@ -164,6 +197,6 @@ e2e/                            Playwright flows (npm run e2e)
 4. ✅ Core game loop: XP, levels, streaks, badges, 5-question machine inspections (80% to certify), PL-300 placement checks.
 5. ✅ Puzzles: Query Oracle (T-SQL/KQL/DAX predict-the-result), Pattern Draft, Gearbox Picker, Shuttle Fallback, Gatehouse Access Matrix, Ripple & Conveyor.
 6. ✅ Hands-on Fabric trial labs (label Windows-only ones).
-7. Spaced repetition and a timed mock exam with a case study. Also raise the difficulty-3 share of the question bank to about 25% (17% after Step 3) with new scenario questions, concentrated in Prepare data and Semantic models.
+7. ✅ Spaced repetition and a timed mock exam with a case study. Also raise the difficulty-3 share of the question bank to about 25% (17% after Step 3) with new scenario questions, concentrated in Prepare data and Semantic models.
 8. Fact-check all content against Microsoft Learn.
 9. Deploy to dp600.edwardtorres.dev.
