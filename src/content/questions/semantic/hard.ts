@@ -122,7 +122,7 @@ export const semanticHardQuestions: Question[] = [
     options: [
       { id: 'a', text: 'Existing field parameters stop working until they are rebuilt', explain: 'Learn lists no such effect; field parameter limits concern implicit measures, AI visuals, drillthrough, and live connections.' },
       { id: 'b', text: 'Every measure in reports changes to the variant data type', explain: 'Correct. Adding any calculation group changes measures to the variant data type; removing all calculation groups reverts them.' },
-      { id: 'c', text: 'Dragging a numeric column to sum it no longer works, so they need explicit measures', explain: 'Correct. Calculation groups need Discourage implicit measures turned on, so implicit aggregations stop working.' },
+      { id: 'c', text: 'Dragging a numeric column to sum it no longer works, so they need explicit measures', explain: 'Correct. Calculation groups need Discourage implicit measures turned on, which blocks adding data columns to visuals as values; existing implicit measures in visuals keep working, but new ones can’t be created.' },
       { id: 'd', text: 'The calculation items can only apply to one measure, chosen when the group is created', explain: 'Calculation items use SELECTEDMEASURE(), so they apply to whatever measure is in the visual.' },
     ],
     answers: ['b', 'c'],
@@ -170,7 +170,7 @@ export const semanticHardQuestions: Question[] = [
     stem: 'A composite model has a large Sales fact in DirectQuery from a SQL source and a Customer dimension in Import mode from the same source. Sales rows whose customer key has no match silently disappear from visuals, and queries that filter by customer are slow. Which change addresses both issues?',
     sources: [S.modes, S.composite, S.relationships],
     options: [
-      { id: 'a', text: 'Change the Customer table to Import partitions plus a DirectQuery partition (a hybrid table)', explain: 'Hybrid tables come from an incremental refresh policy and are typically facts; they don’t change how this dimension relates to the fact.' },
+      { id: 'a', text: 'Change the Customer table to Import partitions plus a DirectQuery partition (a hybrid table)', explain: 'Hybrid tables are usually created through an incremental refresh policy with real-time DirectQuery and are typically facts; they don’t change how this dimension relates to the fact.' },
       { id: 'b', text: 'Set the relationship’s cross-filter direction to Both', explain: 'Direction doesn’t change the cross-source-group relationship, which stays limited.' },
       { id: 'c', text: 'Set the Customer table to Dual storage mode', explain: 'Correct. Dual is typically used for dimensions in a composite model so relationships with DirectQuery facts stay regular, and the engine can send one efficient native query joining the fact to the filtered dimension.' },
       { id: 'd', text: 'Change the Sales fact to Import and drop the DirectQuery source', explain: 'That gives up the DirectQuery fact the design needs for its freshness or size, rather than fixing the relationship.' },
@@ -270,7 +270,7 @@ export const semanticHardQuestions: Question[] = [
     machineId: ds,
     bulletIds: ['S2.3'],
     format: 'match',
-    difficulty: 3,
+    difficulty: 2,
     trapPairId: 'dl-fallback',
     stem: 'A team uses a Direct Lake on SQL analytics endpoints model in development, test, and production. Match each goal to the DirectLakeBehavior setting Learn suggests for it.',
     sources: [S.dlHow],

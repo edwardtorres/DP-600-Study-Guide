@@ -13,6 +13,7 @@ export const moreCaseStudies: CaseStudy[] = [
       'Seed orders are loaded into a warehouse named OrdersWH in the Operations workspace. The source system resends changed orders, so staging contains several versions of some orders.',
       'Grower reference data lives in a lakehouse named AgronomyLH in a separate Research workspace that IT manages.',
       'Regional sales targets are kept by analysts in a spreadsheet.',
+      'Semantic models connect to their data with a fixed identity, so report readers don’t need their own permissions on the underlying data.',
       'The Operations workspace is connected to a GitHub repository, and a deployment pipeline moves content from Development to Test to Production.',
     ],
     requirements: [
@@ -70,7 +71,7 @@ export const moreCaseQuestions: Question[] = [
     difficulty: 3,
     trapPairId: 'onelake-availability-vs-integration',
     stem: 'Corrowmere’s semantic model must use the sensor readings in SensorDB, including the months already stored, without copying them into another store. What should you do?',
-    sources: [S.eventhouseOneLake],
+    sources: [S.eventhouseOneLake, S.modelOneLake],
     options: [
       { id: 'a', text: 'Turn on OneLake integration in the semantic model’s settings and refresh it', explain: 'Semantic model OneLake integration exports an Import model’s tables to OneLake; it doesn’t expose eventhouse data.' },
       { id: 'b', text: 'Turn on OneLake availability for SensorDB and choose Apply to existing tables', explain: 'Correct. OneLake availability creates a logical Delta copy of KQL data, with no extra storage cost, that other engines such as Direct Lake can read; applying it to existing tables back-fills the stored months.' },
@@ -277,7 +278,7 @@ export const moreCaseQuestions: Question[] = [
       { id: 'a', text: 'Import', explain: 'Import dimensions sit in a different source group from DirectQuery facts, so the relationships would be limited.' },
       { id: 'b', text: 'DirectQuery', explain: 'DirectQuery dimensions keep relationships regular but give up in-memory speed for filtering.' },
       { id: 'c', text: 'Dual', explain: 'Correct. Dual lets the engine serve the dimension from cache or by DirectQuery per query, keeping relationships with DirectQuery facts regular and filtering fast.' },
-      { id: 'd', text: 'Hybrid', explain: 'A hybrid table is a partitioned fact table created by an incremental refresh policy with real-time DirectQuery, not a dimension storage mode.' },
+      { id: 'd', text: 'Hybrid', explain: 'A hybrid table is a partitioned fact table, usually created through an incremental refresh policy with real-time DirectQuery; it isn’t a storage mode for dimensions.' },
     ],
     answer: 'c',
   },
@@ -305,7 +306,7 @@ export const moreCaseQuestions: Question[] = [
     machineId: 'seal-and-stamp',
     bulletIds: ['M1.4'],
     format: 'multi',
-    difficulty: 3,
+    difficulty: 2,
     stem: 'Brindlecombe’s ridership data carries a sensitivity label with protection, and exports must keep it. Which two export paths keep the label’s protection? Choose two.',
     sources: [S.infoProtection],
     options: [

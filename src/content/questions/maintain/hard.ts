@@ -56,8 +56,8 @@ export const maintainHardQuestions: Question[] = [
     sources: [S.endorsement],
     statements: [
       { id: 's1', text: 'A Fabric admin can delegate certification to domain admins so each domain has its own reviewers.', answer: true, explain: 'Yes. Certification must be enabled by a Fabric admin and can be delegated to domain admins.' },
-      { id: 's2', text: 'Certifying a semantic model grants Build permission to everyone who can find it.', answer: false, explain: 'No. Endorsement adds a badge and helps discovery; it doesn’t change who can access the item.' },
-      { id: 's3', text: 'Any user with write permission on an item can promote it.', answer: true, explain: 'Yes. Promotion is open to anyone with write permission on the item (dashboards excepted).' },
+      { id: 's2', text: 'Only users the Fabric admin specifies can certify items.', answer: true, explain: 'Yes. Anyone can request certification, but only authorized reviewers specified by the Fabric admin can certify.' },
+      { id: 's3', text: 'Promoting an item requires approval from a Fabric admin.', answer: false, explain: 'No. Any user with write permission on an item can promote it (Power BI dashboards can’t be endorsed).' },
     ],
   },
   {
@@ -65,7 +65,7 @@ export const maintainHardQuestions: Question[] = [
     machineId: ss,
     bulletIds: ['M1.4'],
     format: 'single',
-    difficulty: 3,
+    difficulty: 2,
     stem: 'A semantic model carries a sensitivity label with protection from Microsoft Purview. Analysts export data from reports built on it in several ways. In which case does the label’s protection travel with the exported file?',
     sources: [S.infoProtection],
     options: [
@@ -115,7 +115,7 @@ export const maintainHardQuestions: Question[] = [
     machineId: pb,
     bulletIds: ['M2.6'],
     format: 'single',
-    difficulty: 3,
+    difficulty: 2,
     stem: 'A certified shared semantic model lives in a workspace on an F32 capacity. Report authors in other workspaces have only free licenses and were granted Build permission, but they can’t build reports on the model. What would let them build reports while keeping their free licenses?',
     sources: [S.sharedModels],
     options: [
