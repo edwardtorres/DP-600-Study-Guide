@@ -32,15 +32,15 @@ function main() {
     console.error('check-bundle: no JavaScript in dist/assets.')
     process.exit(1)
   }
-  // Positive control: the detector must catch the hook's own source.
-  const source = readFileSync(join(process.cwd(), 'src', 'game', 'seed.ts'), 'utf8')
+  // Positive control: the detector must catch both hooks' own sources.
+  const source = ['seed.ts', 'mockShort.ts'].map((f) => readFileSync(join(process.cwd(), 'src', 'game', f), 'utf8')).join('\n')
   if (findSeedHook(source).length !== PATTERNS.length) {
-    console.error('check-bundle: the detector no longer matches src/game/seed.ts; update the patterns.')
+    console.error('check-bundle: the detector no longer matches src/game/seed.ts and mockShort.ts; update the patterns.')
     process.exit(1)
   }
   const hits = files.flatMap((f) => findSeedHook(readFileSync(join(dir, f), 'utf8')).map((what) => `${f}: ${what}`))
   if (hits.length) {
-    console.error(`check-bundle: the production bundle still contains the ?seed= hook:\n  ${hits.join('\n  ')}`)
+    console.error(`check-bundle: the production bundle still contains a dev-only hook:\n  ${hits.join('\n  ')}`)
     process.exit(1)
   }
   console.log(`check-bundle: ok, ${files.length} production JS file(s) contain no ?seed= or ?mock=short hook.`)
