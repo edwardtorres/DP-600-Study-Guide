@@ -214,6 +214,8 @@ export function finishMock(save: Save, questionsById: Map<string, Question>, now
     questionIds: ids,
     correct,
     timedOut,
+    responses: a.responses,
+    seed: a.seed,
     ...(a.short ? { short: true as const } : {}),
   }
   const { activeMock: _done, ...rest } = save

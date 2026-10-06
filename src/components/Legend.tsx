@@ -22,6 +22,10 @@ export function Legend() {
         certified by a perfect PL-300 placement check
       </span>
       <span className="flex items-center gap-1.5">
+        <span className="rounded bg-madder px-1.5 py-px font-semibold uppercase text-mill-50">Needs maintenance</span>
+        recent review accuracy is low (still certified)
+      </span>
+      <span className="flex items-center gap-1.5">
         <svg width="28" height="6" aria-hidden="true"><path d="M0 3h28" stroke="var(--color-mill-600)" strokeWidth="2" strokeDasharray="5 5" /></svg>
         thread not spun
       </span>

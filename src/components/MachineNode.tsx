@@ -11,6 +11,8 @@ interface Props {
   y: number
   selected: boolean
   placed?: boolean
+  /** Shows the "needs maintenance" mark (never removes certification). */
+  maintenance?: boolean
   onSelect: (id: string) => void
 }
 
@@ -22,15 +24,16 @@ function StateIcon({ state }: { state: MachineState }) {
   return <IdleIcon className={`${cls} text-brass-400`} />
 }
 
-export function MachineNode({ machine, state, x, y, selected, placed = false, onSelect }: Props) {
+export function MachineNode({ machine, state, x, y, selected, placed = false, maintenance = false, onSelect }: Props) {
   return (
     <button
       type="button"
       onClick={() => onSelect(machine.id)}
       aria-pressed={selected}
-      aria-label={`${machine.themedName}: ${machine.skillName}. ${stateLabel[state]}${placed ? ' (placed)' : ''}.`}
+      aria-label={`${machine.themedName}: ${machine.skillName}. ${stateLabel[state]}${placed ? ' (placed)' : ''}.${maintenance ? ' Needs maintenance.' : ''}`}
       data-state={state}
       data-placed={placed || undefined}
+      data-maintenance={maintenance || undefined}
       className={`absolute flex flex-col gap-1 rounded-lg border-2 p-2.5 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brass-300 ${stateCard[state]} ${selected ? 'ring-2 ring-mill-50' : ''}`}
       style={{ left: x, top: y, width: CARD_W, height: CARD_H }}
     >
@@ -43,6 +46,7 @@ export function MachineNode({ machine, state, x, y, selected, placed = false, on
       </span>
       <span className="mt-auto flex flex-wrap gap-1">
         {placed && <span className="rounded bg-weld px-1.5 py-px text-[10px] font-semibold uppercase text-mill-950">Placed</span>}
+        {maintenance && <span className="rounded bg-madder px-1.5 py-px text-[10px] font-semibold uppercase text-mill-50">Needs maintenance</span>}
         <Tags machine={machine} />
       </span>
     </button>

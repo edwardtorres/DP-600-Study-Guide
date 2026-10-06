@@ -33,6 +33,9 @@ interface Props {
   labs?: Lab[]
   labProgress?: Record<string, LabProgress>
   onOpenLab?: (labId: string) => void
+  /** Certified, but recent review or mock accuracy is below the maintenance threshold. */
+  maintenance?: { accuracy: number; answers: number } | null
+  onMaintenance?: () => void
   onAttempt: (kind: AttemptKind) => void
   onSelect: (id: string) => void
   onClose: () => void
@@ -53,7 +56,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   )
 }
 
-export function MachineDetail({ machine, state, graph, edges, machinesById, states, placed, availability, poolSizes, focusPairId, bench = [], onPuzzle, labs = [], labProgress = {}, onOpenLab, onAttempt, onSelect, onClose }: Props) {
+export function MachineDetail({ machine, state, graph, edges, machinesById, states, placed, availability, poolSizes, focusPairId, bench = [], onPuzzle, labs = [], labProgress = {}, onOpenLab, maintenance = null, onMaintenance, onAttempt, onSelect, onClose }: Props) {
   const heading = useRef<HTMLHeadingElement>(null)
   // The tab resets to Machine whenever another machine (or a notes pair) is opened.
   const tabKey = `${machine.id}|${focusPairId ?? ''}`
@@ -174,6 +177,16 @@ export function MachineDetail({ machine, state, graph, edges, machinesById, stat
           )}
           {state === 'certified' && (
             <p className="text-sm text-brass-300">{placed ? 'Placed out with a perfect placement check.' : 'Certified by inspection.'}</p>
+          )}
+          {state === 'certified' && maintenance && (
+            <div className="rounded-lg border border-madder/60 bg-madder/10 p-3" data-testid="maintenance-note">
+              <p className="text-sm text-mill-50">
+                Needs maintenance: {Math.round(maintenance.accuracy * 100)}% on your last {maintenance.answers} review or mock answers here. It stays certified.
+              </p>
+              <button type="button" onClick={onMaintenance} className="mt-2 rounded-lg border border-madder/70 px-3 py-1.5 text-sm font-semibold text-mill-50 hover:bg-madder/20">
+                Maintenance review (5 questions)
+              </button>
+            </div>
           )}
           {machine.pl300 && state !== 'certified' && (
             <>

@@ -104,6 +104,10 @@ export interface MockRecord {
   timedOut: boolean
   /** Dev-only short mock (?mock=short). */
   short?: true
+  /** What was answered, by question id (for the results page). */
+  responses?: Record<string, unknown>
+  /** Seed of the option shuffle used during the mock. */
+  seed?: number
 }
 
 /** A mock exam in progress. Kept in the save so the timer and answers survive a reload. */
@@ -260,7 +264,9 @@ function isMockRecord(v: unknown): v is MockRecord {
     v.correct.length === v.questionIds.length &&
     v.correct.every((c) => c === 0 || c === 1) &&
     typeof v.timedOut === 'boolean' &&
-    (v.short === undefined || v.short === true)
+    (v.short === undefined || v.short === true) &&
+    (v.responses === undefined || isObject(v.responses)) &&
+    (v.seed === undefined || (typeof v.seed === 'number' && Number.isFinite(v.seed)))
   )
 }
 

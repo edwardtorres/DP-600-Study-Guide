@@ -13,6 +13,8 @@ interface Props {
   states: Map<string, MachineState>
   selectedId: string | null
   placedIds?: Set<string>
+  /** Certified machines whose recent review accuracy is low. */
+  maintenanceIds?: Set<string>
   onSelect: (id: string) => void
 }
 
@@ -23,7 +25,7 @@ const bandTint: Record<string, string> = {
   maintain: 'bg-[#22261d]/70',
 }
 
-export function MillMap({ machines, edges, graph, states, selectedId, placedIds, onSelect }: Props) {
+export function MillMap({ machines, edges, graph, states, selectedId, placedIds, maintenanceIds, onSelect }: Props) {
   const layout = useMemo(() => layoutMill(machines, graph), [machines, graph])
 
   return (
@@ -57,6 +59,7 @@ export function MillMap({ machines, edges, graph, states, selectedId, placedIds,
               y={pos.y}
               selected={selectedId === m.id}
               placed={placedIds?.has(m.id) ?? false}
+              maintenance={maintenanceIds?.has(m.id) ?? false}
               onSelect={onSelect}
             />
           )

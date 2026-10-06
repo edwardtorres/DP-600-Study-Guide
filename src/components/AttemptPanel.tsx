@@ -9,10 +9,11 @@ import { QuestionInput } from './questions/QuestionInput'
 import { QuestionResult } from './questions/QuestionResult'
 
 /** A lab debrief reuses this panel: 3 bank questions, logged for readiness, never certifying. */
-export type PanelKind = AttemptKind | 'debrief'
+export type PanelKind = AttemptKind | 'debrief' | 'review'
 
 const attemptTitle: Record<PanelKind, string> = {
   debrief: 'Lab debrief',
+  review: 'Daily review',
   startup: 'Start-up check',
   inspection: 'Inspection',
   placement: 'Placement check',
@@ -20,6 +21,7 @@ const attemptTitle: Record<PanelKind, string> = {
 
 const rule: Record<PanelKind, string> = {
   debrief: '3 questions from the bank on this lab’s exam skills. They count toward readiness like an inspection; nothing is certified.',
+  review: 'Questions due for review, plus your weakest skills. Answers set when each one comes back, count toward readiness, and never certify.',
   startup: '2 questions. Get both right to start the machine.',
   inspection: '5 questions. Get at least 4 right (80%) to certify the machine.',
   placement: '5 questions from what DP-600 adds beyond PL-300. Get all 5 right to certify the machine as placed. One attempt per day, used as soon as you start.',
@@ -61,12 +63,14 @@ export function AttemptPanel({ machine, kind, heading, questions, onSubmit, onRe
   const right = result ? result.correct.filter(Boolean).length : 0
   const passedText: Record<PanelKind, string> = {
     debrief: 'All right. Logged toward readiness. A lab debrief never certifies a machine.',
+    review: 'All right. Each question moves further out in your review schedule. Reviews never certify a machine.',
     startup: `Start-up check passed. ${machine.themedName} is running. Study the notes, then take the inspection.`,
     inspection: `Inspection passed. ${machine.themedName} is certified, and any machine it feeds may now unlock.`,
     placement: `Placement passed. ${machine.themedName} is certified as placed, and the machines it feeds may now unlock.`,
   }
   const failedText: Record<PanelKind, string> = {
     debrief: 'Logged toward readiness. Review the explanations below; a lab debrief never certifies a machine.',
+    review: 'Missed questions come back tomorrow; correct ones move further out. Review the explanations below. Reviews never certify a machine.',
     startup: 'Not passed. Both answers must be right. Review the notes and try again with a new draw.',
     inspection: 'Not passed. You need at least 4 of 5. Review the explanations and notes, then try again with a new draw.',
     placement: 'Not passed. Placement needs all 5 right. You can try again tomorrow, or work through the machine normally.',

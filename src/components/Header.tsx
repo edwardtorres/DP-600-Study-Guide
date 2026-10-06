@@ -12,6 +12,12 @@ interface Props {
   badgesEarned: number
   onOpenGlossary: () => void
   onOpenLabs: () => void
+  onOpenReview: () => void
+  onOpenWeak: () => void
+  onOpenMock: () => void
+  /** Questions due for review today. */
+  dueCount: number
+  mockActive: boolean
   onOpenBadges: () => void
   onOpenSettings: () => void
 }
@@ -65,13 +71,34 @@ function Stats({ level, streak, readiness, badgesEarned, onOpenBadges }: Pick<Pr
   )
 }
 
-export function Header({ machines, states, level, streak, readiness, badgesEarned, onOpenGlossary, onOpenLabs, onOpenBadges, onOpenSettings }: Props) {
+export function Header({ machines, states, level, streak, readiness, badgesEarned, onOpenGlossary, onOpenLabs, onOpenReview, onOpenWeak, onOpenMock, dueCount, mockActive, onOpenBadges, onOpenSettings }: Props) {
   return (
     <header className="mb-5">
       <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brass-400">DP-600 · Fabric Analytics Engineer</p>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <h1 className="font-display text-3xl font-bold text-mill-50 sm:text-4xl">Fabric Mill</h1>
         <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={onOpenReview}
+            className="rounded-lg border border-brass-500/70 px-3 py-1.5 text-sm font-medium text-brass-300 hover:bg-brass-500/15"
+          >
+            Daily review{dueCount > 0 ? ` (${dueCount})` : ''}
+          </button>
+          <button
+            type="button"
+            onClick={onOpenWeak}
+            className="rounded-lg border border-mill-600 px-3 py-1.5 text-sm text-mill-200 hover:border-brass-400"
+          >
+            Weak Spots
+          </button>
+          <button
+            type="button"
+            onClick={onOpenMock}
+            className="rounded-lg border border-weld/70 px-3 py-1.5 text-sm font-medium text-weld hover:bg-weld/15"
+          >
+            {mockActive ? 'Mock exam (in progress)' : 'Mock exam'}
+          </button>
           <button
             type="button"
             onClick={onOpenLabs}

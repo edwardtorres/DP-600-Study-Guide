@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { makeRandom } from './random'
+import { makeRandom, shortMockMode } from './random'
 import { seedFromSearch } from './seed'
 
 afterEach(() => vi.unstubAllEnvs())
@@ -25,5 +25,20 @@ describe('seed hook', () => {
   it('ignores ?seed= in production builds', () => {
     vi.stubEnv('DEV', false)
     expect(makeRandom('?seed=22')).toBe(Math.random)
+  })
+})
+
+describe('short mock hook', () => {
+  it('turns on only with ?mock=short in dev builds', () => {
+    vi.spyOn(console, 'info').mockImplementation(() => {})
+    vi.stubEnv('DEV', true)
+    expect(shortMockMode('?mock=short')).toBe(true)
+    expect(shortMockMode('?mock=full')).toBe(false)
+    expect(shortMockMode('')).toBe(false)
+  })
+
+  it('is ignored in production builds', () => {
+    vi.stubEnv('DEV', false)
+    expect(shortMockMode('?mock=short')).toBe(false)
   })
 })

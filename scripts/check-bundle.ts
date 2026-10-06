@@ -1,5 +1,5 @@
 /**
- * Proves the production bundle ignores ?seed=. The seed hook (src/game/seed.ts)
+ * Proves the production bundle ignores ?seed= and ?mock=short. The seed hook (src/game/seed.ts)
  * is only reachable behind import.meta.env.DEV, which a production build folds to
  * false; this fails if the hook's marker or a "seed" query lookup survived.
  * Runs as part of `npm run build`.
@@ -11,6 +11,8 @@ const MARKER = 'fabric-mill:seed-hook'
 const PATTERNS: [string, RegExp][] = [
   ['seed hook marker', new RegExp(MARKER)],
   ['a "seed" query parameter lookup', /\.get\(\s*["'`]seed["'`]\s*\)/],
+  ['short mock hook marker', /fabric-mill:mock-short-hook/],
+  ['a "mock" query parameter lookup', /\.get\(\s*["'`]mock["'`]\s*\)/],
 ]
 
 export function findSeedHook(js: string): string[] {
@@ -41,7 +43,7 @@ function main() {
     console.error(`check-bundle: the production bundle still contains the ?seed= hook:\n  ${hits.join('\n  ')}`)
     process.exit(1)
   }
-  console.log(`check-bundle: ok, ${files.length} production JS file(s) contain no ?seed= hook.`)
+  console.log(`check-bundle: ok, ${files.length} production JS file(s) contain no ?seed= or ?mock=short hook.`)
 }
 
 main()
