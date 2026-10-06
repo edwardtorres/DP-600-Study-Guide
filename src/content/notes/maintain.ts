@@ -384,8 +384,8 @@ export const maintainNotes: MachineNotes[] = [
     preview: [
       {
         feature: 'OneLake security enforcement in authorized third-party engines',
-        note: 'Learn labels third-party engine enforcement as preview.',
-        sources: [ONELAKE_ACCESS_MODEL],
+        note: 'Learn labels enforcement in authorized third-party engines, and the OneLake security integrations overview, as preview.',
+        sources: [ONELAKE_SECURITY, ONELAKE_INTEGRATIONS],
       },
     ],
     upcoming: [],
