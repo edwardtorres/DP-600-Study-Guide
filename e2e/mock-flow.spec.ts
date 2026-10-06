@@ -96,6 +96,7 @@ test('mock exam (short dev mode): case study section and lock, mark for review, 
     await expect(results.getByTestId('mock-domains').locator('li')).toHaveCount(3)
     await expect(results.getByTestId('mock-bullets').locator('li').first()).toBeVisible()
     await expect(results.getByTestId('mock-traps')).toBeVisible()
+    await expect(results.getByTestId('mock-freshness')).toContainText('Freshness: 100% of main-section questions')
     await expect(results.getByTestId('scaled-note')).toContainText('scaled score, it may not equal 70% of the points')
     await expect(results.locator('article[data-question-id]')).toHaveCount(caseCount + mainCount)
     await expect(results.locator('article[data-correct="false"]').first()).toBeVisible()
@@ -109,6 +110,8 @@ test('mock exam (short dev mode): case study section and lock, mark for review, 
     await page.getByRole('button', { name: '← All mocks' }).tap()
     await expect(page.getByTestId('mock-history').locator('li')).toHaveCount(1)
     await expect(page.getByTestId('mock-history')).toContainText('(short)')
+    await expect(page.getByTestId('mock-history')).toContainText('fresh 100%')
+    expect(s.mocks[0]!.freshness).toBe(1)
   })
 
   expect(errors).toEqual([])

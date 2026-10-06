@@ -73,7 +73,7 @@ describe('mill map', () => {
     render(<App />)
     await user.click(screen.getByRole('button', { name: /^Founding Charter:/ }))
     let saved = JSON.parse(localStorage.getItem(SAVE_KEY)!)
-    expect(saved.version).toBe(5)
+    expect(saved.version).toBe(6)
     expect(saved.machines['founding-charter'].notesOpenedAt).toBeTruthy()
 
     await user.click(screen.getByRole('button', { name: /Start-up check/ }))

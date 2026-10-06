@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { CaseStudy, Question } from '../../content/questions/types'
 import { outline } from '../../data/outline'
-import { MOCK_MINUTES, MOCK_SIZE, READY_DOMAIN, READY_OVERALL, readyToBook, remainingMs, scoreMock } from '../../game/mock'
+import { FRESH_MIN, MOCK_MINUTES, MOCK_SIZE, READY_DOMAIN, READY_OVERALL, RECENT_DAYS, readyStatus, remainingMs, scoreMock } from '../../game/mock'
 import type { Save } from '../../save/schema'
 import { CloseIcon } from '../icons'
 import { MockResults } from './MockResults'
@@ -30,7 +30,8 @@ const pct = (x: number) => `${Math.round(x * 100)}%`
 export function MockCenter({ save, questions, cases, showId, nextRepeatsCase, now, onStart, onResume, onOpenPair, onClose }: Props) {
   const [selected, setSelected] = useState<string | null>(showId)
   const record = selected ? save.mocks.find((m) => m.id === selected) : undefined
-  const ready = readyToBook(save.mocks, questions, outline)
+  const status = readyStatus(save.mocks, questions, outline)
+  const ready = status.ready
   const company = (id: string) => cases.find((c) => c.id === id)?.company ?? id
   const active = save.activeMock
 
@@ -81,8 +82,18 @@ export function MockCenter({ save, questions, cases, showId, nextRepeatsCase, no
               <section className={`rounded-xl border p-4 ${ready ? 'border-emerald-400/60 bg-emerald-400/10' : 'border-mill-700'}`} data-testid="ready-to-book">
                 <p className="font-semibold text-mill-50">{ready ? 'Ready to book' : 'Not ready to book yet'}</p>
                 <p className="mt-1 text-xs text-mill-200">
-                  Shown after your two most recent full mocks each score at least {pct(READY_OVERALL)} overall, with every domain at least {pct(READY_DOMAIN)}. These are raw percentages, not Microsoft’s scaled score.
+                  Shown after your two most recent full mocks that count each score at least {pct(READY_OVERALL)} overall, with every domain at least {pct(READY_DOMAIN)}. A mock counts only if at least {pct(FRESH_MIN)} of its
+                  main-section questions were fresh (not answered in the {RECENT_DAYS} days before it started). These are raw percentages, not Microsoft’s scaled score.
                 </p>
+                {status.stale.length > 0 && (
+                  <ul className="mt-2 space-y-1 text-xs text-weld" data-testid="stale-mocks">
+                    {status.stale.map((m) => (
+                      <li key={m.id}>
+                        The mock from {new Date(m.finishedAt).toLocaleDateString()} doesn’t count: {m.reason}.
+                      </li>
+                    ))}
+                  </ul>
+                )}
                 <a href={PRACTICE_URL} target="_blank" rel="noreferrer" className="mt-2 inline-block text-xs text-brass-300 hover:underline">
                   Check yourself with Microsoft’s free DP-600 practice assessment ↗
                 </a>
@@ -103,6 +114,8 @@ export function MockCenter({ save, questions, cases, showId, nextRepeatsCase, no
                               <span className="font-semibold text-mill-50">
                                 {pct(s.overall.pct)}
                                 {m.short ? ' (short)' : ''}
+                                <span className="ml-2 text-xs font-normal text-mill-400">fresh {pct(m.freshness)}</span>
+                                {!m.short && m.freshness < FRESH_MIN && <span className="ml-2 rounded bg-weld/15 px-1.5 py-0.5 text-xs font-normal text-weld">doesn’t count</span>}
                               </span>
                               <span className="text-xs text-mill-400">{new Date(m.finishedAt).toLocaleString()}</span>
                             </span>

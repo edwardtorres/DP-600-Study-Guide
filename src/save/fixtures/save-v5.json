@@ -1,0 +1,676 @@
+{
+  "version": 5,
+  "createdAt": "2026-10-06T01:25:32.109Z",
+  "updatedAt": "2026-10-06T01:25:43.385Z",
+  "machines": {},
+  "answers": [
+    [
+      "CS1-01",
+      1,
+      1791249943,
+      "m"
+    ],
+    [
+      "CS1-02",
+      0,
+      1791249943,
+      "m"
+    ],
+    [
+      "CS1-03",
+      1,
+      1791249943,
+      "m"
+    ],
+    [
+      "CS1-04",
+      1,
+      1791249943,
+      "m"
+    ],
+    [
+      "CS1-05",
+      1,
+      1791249943,
+      "m"
+    ],
+    [
+      "CS1-06",
+      1,
+      1791249943,
+      "m"
+    ],
+    [
+      "CS1-07",
+      1,
+      1791249943,
+      "m"
+    ],
+    [
+      "DL-02",
+      0,
+      1791249943,
+      "m"
+    ],
+    [
+      "SS-04",
+      1,
+      1791249943,
+      "m"
+    ],
+    [
+      "CM-18",
+      1,
+      1791249943,
+      "m"
+    ],
+    [
+      "BC-08",
+      1,
+      1791249943,
+      "m"
+    ],
+    [
+      "RM-04",
+      1,
+      1791249943,
+      "m"
+    ],
+    [
+      "CM-01",
+      0,
+      1791249943,
+      "m"
+    ],
+    [
+      "IB-01",
+      1,
+      1791249943,
+      "m"
+    ],
+    [
+      "DT-06",
+      1,
+      1791249943,
+      "m"
+    ],
+    [
+      "TF-H2",
+      1,
+      1791249943,
+      "m"
+    ],
+    [
+      "TI-03",
+      1,
+      1791249943,
+      "m"
+    ],
+    [
+      "CV-02",
+      0,
+      1791249943,
+      "m"
+    ],
+    [
+      "TI-17",
+      1,
+      1791249943,
+      "m"
+    ],
+    [
+      "WB-04",
+      1,
+      1791249943,
+      "m"
+    ],
+    [
+      "PL-06",
+      1,
+      1791249943,
+      "m"
+    ],
+    [
+      "TF-11",
+      1,
+      1791249943,
+      "m"
+    ],
+    [
+      "DV-04",
+      0,
+      1791249943,
+      "m"
+    ],
+    [
+      "CM-12",
+      1,
+      1791249943,
+      "m"
+    ],
+    [
+      "IB-06",
+      1,
+      1791249943,
+      "m"
+    ],
+    [
+      "VS-05",
+      1,
+      1791249943,
+      "m"
+    ],
+    [
+      "JH-H1",
+      1,
+      1791249943,
+      "m"
+    ],
+    [
+      "CM-05",
+      0,
+      1791249943,
+      "m"
+    ],
+    [
+      "SL-06",
+      1,
+      1791249943,
+      "m"
+    ],
+    [
+      "DT-05",
+      1,
+      1791249943,
+      "m"
+    ],
+    [
+      "IB-14",
+      1,
+      1791249943,
+      "m"
+    ],
+    [
+      "LG-09",
+      1,
+      1791249943,
+      "m"
+    ],
+    [
+      "DLS-10",
+      0,
+      1791249943,
+      "m"
+    ],
+    [
+      "DS-07",
+      1,
+      1791249943,
+      "m"
+    ],
+    [
+      "TS-10",
+      1,
+      1791249943,
+      "m"
+    ],
+    [
+      "SL-07",
+      1,
+      1791249943,
+      "m"
+    ],
+    [
+      "WF-08",
+      1,
+      1791249943,
+      "m"
+    ],
+    [
+      "IL-05",
+      0,
+      1791249943,
+      "m"
+    ],
+    [
+      "KT-02",
+      1,
+      1791249943,
+      "m"
+    ],
+    [
+      "GK-H1",
+      1,
+      1791249943,
+      "m"
+    ],
+    [
+      "RB-01",
+      1,
+      1791249943,
+      "m"
+    ],
+    [
+      "WP-H2",
+      1,
+      1791249943,
+      "m"
+    ],
+    [
+      "WP-01",
+      0,
+      1791249943,
+      "m"
+    ],
+    [
+      "RL-03",
+      1,
+      1791249943,
+      "m"
+    ],
+    [
+      "PB-03",
+      1,
+      1791249943,
+      "m"
+    ],
+    [
+      "SG-09",
+      1,
+      1791249943,
+      "m"
+    ],
+    [
+      "WF-05",
+      1,
+      1791249943,
+      "m"
+    ],
+    [
+      "PC-06",
+      0,
+      1791249943,
+      "m"
+    ],
+    [
+      "SG-06",
+      1,
+      1791249943,
+      "m"
+    ],
+    [
+      "DLS-07",
+      1,
+      1791249943,
+      "m"
+    ]
+  ],
+  "labs": {},
+  "mocks": [
+    {
+      "id": "Mmuvzylwm",
+      "startedAt": "2026-10-06T01:25:32.902Z",
+      "finishedAt": "2026-10-06T01:25:43.385Z",
+      "durationMin": 100,
+      "caseStudyId": "case-fernhollow",
+      "questionIds": [
+        "CS1-01",
+        "CS1-02",
+        "CS1-03",
+        "CS1-04",
+        "CS1-05",
+        "CS1-06",
+        "CS1-07",
+        "DL-02",
+        "SS-04",
+        "CM-18",
+        "BC-08",
+        "RM-04",
+        "CM-01",
+        "IB-01",
+        "DT-06",
+        "TF-H2",
+        "TI-03",
+        "CV-02",
+        "TI-17",
+        "WB-04",
+        "PL-06",
+        "TF-11",
+        "DV-04",
+        "CM-12",
+        "IB-06",
+        "VS-05",
+        "JH-H1",
+        "CM-05",
+        "SL-06",
+        "DT-05",
+        "IB-14",
+        "LG-09",
+        "DLS-10",
+        "DS-07",
+        "TS-10",
+        "SL-07",
+        "WF-08",
+        "IL-05",
+        "KT-02",
+        "GK-H1",
+        "RB-01",
+        "WP-H2",
+        "WP-01",
+        "RL-03",
+        "PB-03",
+        "SG-09",
+        "WF-05",
+        "PC-06",
+        "SG-06",
+        "DLS-07"
+      ],
+      "correct": [
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1
+      ],
+      "timedOut": false,
+      "responses": {
+        "CS1-01": {
+          "format": "single",
+          "choice": "b"
+        },
+        "CS1-02": {
+          "format": "single",
+          "choice": "a"
+        },
+        "CS1-03": {
+          "format": "yesno",
+          "answers": {
+            "s1": false,
+            "s2": true,
+            "s3": false
+          }
+        },
+        "CS1-04": {
+          "format": "single",
+          "choice": "d"
+        },
+        "CS1-05": {
+          "format": "single",
+          "choice": "a"
+        },
+        "CS1-06": {
+          "format": "single",
+          "choice": "b"
+        },
+        "CS1-07": {
+          "format": "yesno",
+          "answers": {
+            "s1": true,
+            "s2": false,
+            "s3": false
+          }
+        },
+        "DL-02": {
+          "format": "single",
+          "choice": "a"
+        },
+        "SS-04": {
+          "format": "single",
+          "choice": "c"
+        },
+        "CM-18": {
+          "format": "single",
+          "choice": "a"
+        },
+        "BC-08": {
+          "format": "single",
+          "choice": "a"
+        },
+        "RM-04": {
+          "format": "single",
+          "choice": "b"
+        },
+        "CM-01": {
+          "format": "single",
+          "choice": "a"
+        },
+        "IB-01": {
+          "format": "single",
+          "choice": "a"
+        },
+        "DT-06": {
+          "format": "multi",
+          "choices": [
+            "b",
+            "c"
+          ]
+        },
+        "TF-H2": {
+          "format": "single",
+          "choice": "b"
+        },
+        "TI-03": {
+          "format": "single",
+          "choice": "a"
+        },
+        "CV-02": {
+          "format": "single",
+          "choice": "a"
+        },
+        "TI-17": {
+          "format": "multi",
+          "choices": [
+            "a",
+            "d"
+          ]
+        },
+        "WB-04": {
+          "format": "single",
+          "choice": "b"
+        },
+        "PL-06": {
+          "format": "single",
+          "choice": "d"
+        },
+        "TF-11": {
+          "format": "single",
+          "choice": "a"
+        },
+        "DV-04": {
+          "format": "single",
+          "choice": "a"
+        },
+        "CM-12": {
+          "format": "yesno",
+          "answers": {
+            "s1": true,
+            "s2": false,
+            "s3": true
+          }
+        },
+        "IB-06": {
+          "format": "single",
+          "choice": "a"
+        },
+        "VS-05": {
+          "format": "single",
+          "choice": "a"
+        },
+        "JH-H1": {
+          "format": "multi",
+          "choices": [
+            "b",
+            "c"
+          ]
+        },
+        "CM-05": {
+          "format": "yesno",
+          "answers": {
+            "s1": true,
+            "s2": true,
+            "s3": true
+          }
+        },
+        "SL-06": {
+          "format": "single",
+          "choice": "b"
+        },
+        "DT-05": {
+          "format": "single",
+          "choice": "d"
+        },
+        "IB-14": {
+          "format": "single",
+          "choice": "b"
+        },
+        "LG-09": {
+          "format": "single",
+          "choice": "d"
+        },
+        "DLS-10": {
+          "format": "yesno",
+          "answers": {
+            "s1": false,
+            "s2": false,
+            "s3": false
+          }
+        },
+        "DS-07": {
+          "format": "single",
+          "choice": "b"
+        },
+        "TS-10": {
+          "format": "single",
+          "choice": "d"
+        },
+        "SL-07": {
+          "format": "single",
+          "choice": "c"
+        },
+        "WF-08": {
+          "format": "order",
+          "order": [
+            "i1",
+            "i2",
+            "i3"
+          ]
+        },
+        "IL-05": {
+          "format": "single",
+          "choice": "a"
+        },
+        "KT-02": {
+          "format": "dropdown",
+          "slots": {
+            "1": "b",
+            "2": "a",
+            "3": "c"
+          }
+        },
+        "GK-H1": {
+          "format": "single",
+          "choice": "c"
+        },
+        "RB-01": {
+          "format": "single",
+          "choice": "c"
+        },
+        "WP-H2": {
+          "format": "multi",
+          "choices": [
+            "a",
+            "c"
+          ]
+        },
+        "WP-01": {
+          "format": "single",
+          "choice": "a"
+        },
+        "RL-03": {
+          "format": "single",
+          "choice": "c"
+        },
+        "PB-03": {
+          "format": "yesno",
+          "answers": {
+            "s1": false,
+            "s2": true,
+            "s3": true
+          }
+        },
+        "SG-09": {
+          "format": "single",
+          "choice": "b"
+        },
+        "WF-05": {
+          "format": "single",
+          "choice": "c"
+        },
+        "PC-06": {
+          "format": "single",
+          "choice": "a"
+        },
+        "SG-06": {
+          "format": "match",
+          "pairs": {
+            "p1": "c1",
+            "p2": "c2",
+            "p3": "c3",
+            "p4": "c4"
+          }
+        },
+        "DLS-07": {
+          "format": "single",
+          "choice": "c"
+        }
+      },
+      "seed": 540834770
+    }
+  ],
+  "settings": {}
+}

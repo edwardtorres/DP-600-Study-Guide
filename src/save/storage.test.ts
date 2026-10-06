@@ -5,7 +5,8 @@ import v1Fixture from './fixtures/save-v1.json'
 import v2Fixture from './fixtures/save-v2.json'
 import v3Fixture from './fixtures/save-v3.json'
 import v4Fixture from './fixtures/save-v4.json'
-import { BACKUP_KEY, SAVE_KEY, SAVE_VERSION, isSaveV1, isSaveV2, isSaveV3, isSaveV4, isSaveV5, newSave } from './schema'
+import v5Fixture from './fixtures/save-v5.json'
+import { BACKUP_KEY, SAVE_KEY, SAVE_VERSION, isSaveV1, isSaveV2, isSaveV3, isSaveV4, isSaveV5, isSaveV6, newSave } from './schema'
 import { backupSave, exportSave, importSave, loadSave, writeSave, type StorageLike } from './storage'
 
 function memory(initial: Record<string, string> = {}): StorageLike & { data: Record<string, string> } {
@@ -16,23 +17,23 @@ function memory(initial: Record<string, string> = {}): StorageLike & { data: Rec
 const now = new Date('2026-10-04T12:00:00Z')
 
 describe('save system', () => {
-  it('starts a fresh version-5 save when nothing is stored', () => {
+  it('starts a fresh version-6 save when nothing is stored', () => {
     const r = loadSave({ storage: memory(), now })
     expect(r.status).toBe('new')
     expect(r.save).toEqual(newSave(now))
-    expect(SAVE_VERSION).toBe(5)
+    expect(SAVE_VERSION).toBe(6)
     expect(r.save.mocks).toEqual([])
     expect(r.save.answers).toEqual([])
   })
 
-  it('migrates a real version-1 save to version 5 and keeps its progress', () => {
+  it('migrates a real version-1 save to version 6 and keeps its progress', () => {
     expect(isSaveV1(v1Fixture)).toBe(true)
     const r = loadSave({ storage: memory({ [SAVE_KEY]: JSON.stringify(v1Fixture) }), knownMachineIds: ['founding-charter', 'water-wheel'] })
     expect(r.status).toBe('loaded')
     if (r.status !== 'loaded') return
     expect(r.migratedFrom).toBe(1)
-    expect(isSaveV5(r.save)).toBe(true)
-    expect(r.save.version).toBe(5)
+    expect(isSaveV6(r.save)).toBe(true)
+    expect(r.save.version).toBe(6)
     expect(r.save.labs).toEqual({})
     expect(r.save.mocks).toEqual([])
     expect(r.save.createdAt).toBe(v1Fixture.createdAt)
@@ -40,39 +41,39 @@ describe('save system', () => {
     expect(r.save.answers).toEqual([])
   })
 
-  it('migrates a real version-3 save (captured from the Step 5 app) to version 5, adding an empty lab log and mock history', () => {
+  it('migrates a real version-3 save (captured from the Step 5 app) to version 6, adding an empty lab log and mock history', () => {
     expect(isSaveV3(v3Fixture)).toBe(true)
     const r = loadSave({ storage: memory({ [SAVE_KEY]: JSON.stringify(v3Fixture) }), knownMachineIds: Object.keys(v3Fixture.machines) })
     expect(r.status).toBe('loaded')
     if (r.status !== 'loaded') return
     expect(r.migratedFrom).toBe(3)
-    expect(isSaveV5(r.save)).toBe(true)
-    expect(r.save).toEqual({ ...v3Fixture, version: 5, labs: {}, mocks: [] })
+    expect(isSaveV6(r.save)).toBe(true)
+    expect(r.save).toEqual({ ...v3Fixture, version: 6, labs: {}, mocks: [] })
     expect(r.save.answers.some((a) => a[3] === 'z')).toBe(true)
     expect(r.save.machines['water-wheel']?.inspectionFails?.length).toBeGreaterThan(0)
   })
 
-  it('migrates a real version-2 save (captured from the Step 4 app) to version 5', () => {
+  it('migrates a real version-2 save (captured from the Step 4 app) to version 6', () => {
     expect(isSaveV2(v2Fixture)).toBe(true)
     const ids = Object.keys(v2Fixture.machines)
     const r = loadSave({ storage: memory({ [SAVE_KEY]: JSON.stringify(v2Fixture) }), knownMachineIds: ids })
     expect(r.status).toBe('loaded')
     if (r.status !== 'loaded') return
     expect(r.migratedFrom).toBe(2)
-    expect(isSaveV5(r.save)).toBe(true)
-    expect(r.save).toEqual({ ...v2Fixture, version: 5, labs: {}, mocks: [] })
+    expect(isSaveV6(r.save)).toBe(true)
+    expect(r.save).toEqual({ ...v2Fixture, version: 6, labs: {}, mocks: [] })
     expect(r.save.answers.length).toBeGreaterThan(0)
     expect(r.save.machines['founding-charter']?.certification?.kind).toBe('inspection')
   })
 
-  it('migrates a real version-4 save (captured from the Step 6 app) to version 5, adding an empty mock history', () => {
+  it('migrates a real version-4 save (captured from the Step 6 app) to version 6, adding an empty mock history', () => {
     expect(isSaveV4(v4Fixture)).toBe(true)
     const r = loadSave({ storage: memory({ [SAVE_KEY]: JSON.stringify(v4Fixture) }), knownMachineIds: Object.keys(v4Fixture.machines) })
     expect(r.status).toBe('loaded')
     if (r.status !== 'loaded') return
     expect(r.migratedFrom).toBe(4)
-    expect(isSaveV5(r.save)).toBe(true)
-    expect(r.save).toEqual({ ...v4Fixture, version: 5, mocks: [] })
+    expect(isSaveV6(r.save)).toBe(true)
+    expect(r.save).toEqual({ ...v4Fixture, version: 6, mocks: [] })
     expect(r.save.answers.some((a) => a[3] === 'l')).toBe(true)
     expect(r.save.labs.L01?.completedAt).toBeTruthy()
     expect(r.save.trialStart).toBe('2026-10-01')
@@ -80,14 +81,54 @@ describe('save system', () => {
 
   it('validates mock history, the mock in progress, and codes r and m', () => {
     const base = newSave(now)
-    const record = { id: 'M1', startedAt: now.toISOString(), finishedAt: now.toISOString(), durationMin: 100, caseStudyId: 'case-fernhollow', questionIds: ['CS1-01', 'FO-01'], correct: [1, 0], timedOut: false }
-    const active = { id: 'M2', startedAt: now.toISOString(), durationMin: 100, caseStudyId: 'case-quillmere', caseIds: ['CS2-01'], mainIds: ['FO-02'], seed: 7, responses: { 'FO-02': { format: 'single', choice: 'a' } }, marked: ['FO-02'], caseLocked: true }
-    expect(isSaveV5({ ...base, mocks: [record], activeMock: active, answers: [['FO-01', 1, 1, 'r'], ['FO-02', 0, 1, 'm']] })).toBe(true)
-    expect(isSaveV5({ ...base, mocks: [{ ...record, correct: [1] }] })).toBe(false)
-    expect(isSaveV5({ ...base, activeMock: { ...active, caseLocked: 'yes' } })).toBe(false)
-    expect(isSaveV5({ ...base, activeMock: { ...active, responses: { x: 5 } } })).toBe(false)
-    expect(isSaveV5({ ...base, mocks: undefined })).toBe(false)
+    const record = { id: 'M1', startedAt: now.toISOString(), finishedAt: now.toISOString(), durationMin: 100, caseStudyId: 'case-fernhollow', questionIds: ['CS1-01', 'FO-01'], correct: [1, 0], timedOut: false, freshness: 1 }
+    const active = { id: 'M2', startedAt: now.toISOString(), durationMin: 100, caseStudyId: 'case-quillmere', caseIds: ['CS2-01'], mainIds: ['FO-02'], seed: 7, responses: { 'FO-02': { format: 'single', choice: 'a' } }, marked: ['FO-02'], caseLocked: true, freshness: 0.5 }
+    expect(isSaveV6({ ...base, mocks: [record], activeMock: active, answers: [['FO-01', 1, 1, 'r'], ['FO-02', 0, 1, 'm']] })).toBe(true)
+    expect(isSaveV6({ ...base, mocks: [{ ...record, correct: [1] }] })).toBe(false)
+    expect(isSaveV6({ ...base, activeMock: { ...active, caseLocked: 'yes' } })).toBe(false)
+    expect(isSaveV6({ ...base, activeMock: { ...active, responses: { x: 5 } } })).toBe(false)
+    expect(isSaveV6({ ...base, mocks: undefined })).toBe(false)
     expect(isSaveV4({ ...base, version: 4, answers: [['FO-01', 1, 1, 'r']] })).toBe(false)
+  })
+
+  it('requires freshness on v6 mocks, and v5 mocks have none', () => {
+    const base = newSave(now)
+    const { freshness: _f, ...v5record } = { id: 'M1', startedAt: now.toISOString(), finishedAt: now.toISOString(), durationMin: 100, caseStudyId: 'case-fernhollow', questionIds: ['FO-01'], correct: [1], timedOut: false, freshness: 1 }
+    expect(isSaveV6({ ...base, mocks: [v5record] })).toBe(false)
+    expect(isSaveV6({ ...base, mocks: [{ ...v5record, freshness: 1.5 }] })).toBe(false)
+    expect(isSaveV6({ ...base, mocks: [{ ...v5record, freshness: 0.4 }] })).toBe(true)
+    expect(isSaveV5({ ...base, version: 5, mocks: [v5record] })).toBe(true)
+  })
+
+  it('migrates a real version-5 save (captured from the Step 7 app) to version 6, computing each mock’s freshness', () => {
+    expect(isSaveV5(v5Fixture)).toBe(true)
+    expect(v5Fixture.mocks.length).toBeGreaterThan(0)
+    const r = loadSave({ storage: memory({ [SAVE_KEY]: JSON.stringify(v5Fixture) }), knownMachineIds: Object.keys(v5Fixture.machines) })
+    expect(r.status).toBe('loaded')
+    if (r.status !== 'loaded') return
+    expect(r.migratedFrom).toBe(5)
+    expect(isSaveV6(r.save)).toBe(true)
+    // The captured mock was the player's first activity, so every main-section question was fresh.
+    expect(r.save.mocks.map((m) => m.freshness)).toEqual([1])
+    expect(r.save).toEqual({ ...v5Fixture, version: 6, mocks: v5Fixture.mocks.map((m) => ({ ...m, freshness: 1 })) })
+  })
+
+  it('computes freshness in the v5 migration from answers in the 14 days before each mock, ignoring case questions', () => {
+    const start = Date.parse('2026-10-20T10:00:00Z') / 1000
+    const v5 = {
+      ...newSave(now),
+      version: 5,
+      answers: [
+        ['FO-01', 1, start - 3 * 86400, 'i'],
+        ['FO-02', 0, start - 20 * 86400, 'i'],
+        ['CS1-01', 1, start - 86400, 'r'],
+      ],
+      mocks: [{ id: 'M1', startedAt: '2026-10-20T10:00:00.000Z', finishedAt: '2026-10-20T11:00:00.000Z', durationMin: 100, caseStudyId: 'case-fernhollow', questionIds: ['CS1-01', 'FO-01', 'FO-02', 'FO-03', 'FO-04'], correct: [1, 1, 1, 1, 1], timedOut: false }],
+    }
+    const r = loadSave({ storage: memory({ [SAVE_KEY]: JSON.stringify(v5) }), knownMachineIds: [] })
+    expect(r.status).toBe('loaded')
+    if (r.status !== 'loaded') return
+    expect(r.save.mocks[0]!.freshness).toBe(0.75)
   })
 
   it('validates the answer log and new machine fields', () => {
@@ -96,19 +137,19 @@ describe('save system', () => {
       machines: { 'water-wheel': { notesOpenedAt: now.toISOString(), lastDraw: { inspection: ['FO-04'] }, placementDays: ['2026-10-04'] } },
       answers: [['FO-04', 1, 1759579200, 'i']],
     }
-    expect(isSaveV5(good)).toBe(true)
-    expect(isSaveV5({ ...good, answers: [['QO-T01', 1, 1759579200, 'z']] })).toBe(true)
-    expect(isSaveV5({ ...good, machines: { 'water-wheel': { inspectionFails: ['2026-10-04', '2026-10-04'] } } })).toBe(true)
-    expect(isSaveV5({ ...good, answers: [['FO-04', 2, 1, 'i']] })).toBe(false)
-    expect(isSaveV5({ ...good, answers: [['FO-04', 1, 1, 'x']] })).toBe(false)
-    expect(isSaveV5({ ...good, machines: { 'water-wheel': { placementDays: ['4 Oct'] } } })).toBe(false)
-    expect(isSaveV5({ ...good, machines: { 'water-wheel': { inspectionFails: ['today'] } } })).toBe(false)
-    expect(isSaveV5({ ...good, machines: { 'water-wheel': { lastDraw: { review: [] } } } })).toBe(false)
-    expect(isSaveV5({ ...good, answers: [['FO-04', 1, 1759579200, 'l']] })).toBe(true)
-    expect(isSaveV5({ ...good, labs: { L01: { steps: { s1: true }, problems: { s2: 'Button moved' }, completedAt: now.toISOString() } }, trialStart: '2026-10-01' })).toBe(true)
-    expect(isSaveV5({ ...good, labs: { L01: { steps: { s1: 'yes' }, problems: {} } } })).toBe(false)
-    expect(isSaveV5({ ...good, labs: { L01: { steps: {}, problems: { s1: 'x'.repeat(2001) } } } })).toBe(false)
-    expect(isSaveV5({ ...good, trialStart: 'next week' })).toBe(false)
+    expect(isSaveV6(good)).toBe(true)
+    expect(isSaveV6({ ...good, answers: [['QO-T01', 1, 1759579200, 'z']] })).toBe(true)
+    expect(isSaveV6({ ...good, machines: { 'water-wheel': { inspectionFails: ['2026-10-04', '2026-10-04'] } } })).toBe(true)
+    expect(isSaveV6({ ...good, answers: [['FO-04', 2, 1, 'i']] })).toBe(false)
+    expect(isSaveV6({ ...good, answers: [['FO-04', 1, 1, 'x']] })).toBe(false)
+    expect(isSaveV6({ ...good, machines: { 'water-wheel': { placementDays: ['4 Oct'] } } })).toBe(false)
+    expect(isSaveV6({ ...good, machines: { 'water-wheel': { inspectionFails: ['today'] } } })).toBe(false)
+    expect(isSaveV6({ ...good, machines: { 'water-wheel': { lastDraw: { review: [] } } } })).toBe(false)
+    expect(isSaveV6({ ...good, answers: [['FO-04', 1, 1759579200, 'l']] })).toBe(true)
+    expect(isSaveV6({ ...good, labs: { L01: { steps: { s1: true }, problems: { s2: 'Button moved' }, completedAt: now.toISOString() } }, trialStart: '2026-10-01' })).toBe(true)
+    expect(isSaveV6({ ...good, labs: { L01: { steps: { s1: 'yes' }, problems: {} } } })).toBe(false)
+    expect(isSaveV6({ ...good, labs: { L01: { steps: {}, problems: { s1: 'x'.repeat(2001) } } } })).toBe(false)
+    expect(isSaveV6({ ...good, trialStart: 'next week' })).toBe(false)
     expect(isSaveV3({ ...good, version: 3, answers: [['FO-04', 1, 1, 'l']] })).toBe(false)
     // A v2 save can't hold puzzle plays.
     expect(isSaveV2({ ...good, version: 2, answers: [['QO-T01', 1, 1, 'z']] })).toBe(false)
@@ -178,7 +219,7 @@ describe('save system', () => {
     expect(r).toEqual({
       status: 'loaded',
       migratedFrom: 0,
-      save: { version: 5, labs: {}, mocks: [], createdAt: v0.created, updatedAt: v0.created, machines: { 'water-wheel': { startedAt: v0.created } }, settings: {}, answers: [] },
+      save: { version: 6, labs: {}, mocks: [], createdAt: v0.created, updatedAt: v0.created, machines: { 'water-wheel': { startedAt: v0.created } }, settings: {}, answers: [] },
     })
     expect(() => runMigrations({ version: 0 }, 1, [])).toThrow(/No migration/)
   })

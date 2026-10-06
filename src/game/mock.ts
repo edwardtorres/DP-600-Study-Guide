@@ -18,7 +18,13 @@ export const SHORT_MAIN = 6
 export const SHORT_MINUTES = 10
 /** Questions answered in this many days count as "seen recently". */
 export const RECENT_DAYS = 14
-/** Ready to book: the two most recent full mocks each at least this overall... */
+/**
+ * A full mock counts toward "ready to book" only if at least this share of its
+ * main-section questions weren't answered (in any attempt) in the RECENT_DAYS
+ * days before it started.
+ */
+export const FRESH_MIN = 0.5
+/** Ready to book: the two most recent counting mocks each at least this overall... */
 export const READY_OVERALL = 0.8
 /** ...and every domain at least this. */
 export const READY_DOMAIN = 0.7
@@ -141,6 +147,19 @@ export function drawMock(input: {
   return { caseStudyId, repeatCase: repeat, caseIds: caseQs.map((q) => q.id), mainIds: shuffled(mainIds, rand) }
 }
 
+/**
+ * Share (0–1) of `mainIds` not answered in any question attempt (every code but
+ * puzzles) in the RECENT_DAYS days before `startedAt`. An empty section is fully fresh.
+ */
+export function mockFreshness(mainIds: readonly string[], answers: readonly AnswerEntry[], startedAt: string): number {
+  if (mainIds.length === 0) return 1
+  const start = Date.parse(startedAt) / 1000
+  const from = start - RECENT_DAYS * 86400
+  const seen = new Set<string>()
+  for (const [id, , t, code] of answers) if (code !== 'z' && t >= from && t < start) seen.add(id)
+  return mainIds.filter((id) => !seen.has(id)).length / mainIds.length
+}
+
 export function startMock(save: Save, draw: MockDraw, seed: number, now: Date = new Date(), short = false): Save {
   const active: ActiveMock = {
     id: `M${now.getTime().toString(36)}`,
@@ -154,6 +173,7 @@ export function startMock(save: Save, draw: MockDraw, seed: number, now: Date = 
     marked: [],
     caseLocked: false,
     ...(short ? { short: true as const } : {}),
+    freshness: mockFreshness(draw.mainIds, save.answers, now.toISOString()),
   }
   return { ...save, updatedAt: now.toISOString(), activeMock: active }
 }
@@ -217,6 +237,7 @@ export function finishMock(save: Save, questionsById: Map<string, Question>, now
     responses: a.responses,
     seed: a.seed,
     ...(a.short ? { short: true as const } : {}),
+    freshness: a.freshness,
   }
   const { activeMock: _done, ...rest } = save
   return {
@@ -273,11 +294,41 @@ export function scoreMock(record: MockRecord, questionsById: Map<string, Pick<Qu
  * is a raw-percentage signal; Microsoft's 700 is a scaled score, so the mock
  * can't predict it exactly.
  */
-export function readyToBook(mocks: MockRecord[], questionsById: Map<string, Pick<Question, 'bulletIds'>>, outline: Outline): boolean {
+export interface ReadyStatus {
+  ready: boolean
+  /** Full mocks that don't count because too few of their questions were fresh, newest first. */
+  stale: { id: string; finishedAt: string; freshness: number; reason: string }[]
+  /** The full mocks the rule looked at (the two most recent that count), newest first. */
+  counted: string[]
+}
+
+/**
+ * Ready to book: the two most recent full mocks that count (freshness at least
+ * FRESH_MIN) each score at least READY_OVERALL overall with every domain at
+ * least READY_DOMAIN. A stale mock is skipped: it neither counts nor breaks the run.
+ * Short (dev) mocks never count.
+ */
+export function readyStatus(mocks: MockRecord[], questionsById: Map<string, Pick<Question, 'bulletIds'>>, outline: Outline): ReadyStatus {
   const full = mocks.filter((m) => !m.short)
-  if (full.length < 2) return false
-  return full.slice(-2).every((m) => {
-    const s = scoreMock(m, questionsById, outline)
-    return s.overall.pct >= READY_OVERALL && outline.domains.every((d) => (s.byDomain.get(d.id)?.pct ?? 0) >= READY_DOMAIN)
-  })
+  const stale = full
+    .filter((m) => m.freshness < FRESH_MIN)
+    .reverse()
+    .map((m) => ({
+      id: m.id,
+      finishedAt: m.finishedAt,
+      freshness: m.freshness,
+      reason: `only ${Math.round(m.freshness * 100)}% of its main-section questions were fresh (not answered in the ${RECENT_DAYS} days before it); a mock needs ${Math.round(FRESH_MIN * 100)}% to count`,
+    }))
+  const counting = full.filter((m) => m.freshness >= FRESH_MIN).slice(-2)
+  const ready =
+    counting.length === 2 &&
+    counting.every((m) => {
+      const s = scoreMock(m, questionsById, outline)
+      return s.overall.pct >= READY_OVERALL && outline.domains.every((d) => (s.byDomain.get(d.id)?.pct ?? 0) >= READY_DOMAIN)
+    })
+  return { ready, stale, counted: counting.map((m) => m.id).reverse() }
+}
+
+export function readyToBook(mocks: MockRecord[], questionsById: Map<string, Pick<Question, 'bulletIds'>>, outline: Outline): boolean {
+  return readyStatus(mocks, questionsById, outline).ready
 }

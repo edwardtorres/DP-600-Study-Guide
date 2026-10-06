@@ -1,5 +1,5 @@
 import { migrations as defaultMigrations, runMigrations, type Migration } from './migrations'
-import { BACKUP_KEY, SAVE_KEY, SAVE_VERSION, isSaveV5, newSave, type Save } from './schema'
+import { BACKUP_KEY, SAVE_KEY, SAVE_VERSION, isSaveV6, newSave, type Save } from './schema'
 
 export interface StorageLike {
   getItem(key: string): string | null
@@ -69,7 +69,7 @@ export function parseSave(
   if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) throw new Error('Save is not an object')
   const fromVersion = (parsed as Record<string, unknown>).version
   const migrated = runMigrations(parsed as Record<string, unknown>, SAVE_VERSION, list)
-  if (!isSaveV5(migrated)) throw new Error('Save failed validation')
+  if (!isSaveV6(migrated)) throw new Error('Save failed validation')
   return { save: pruneUnknownMachines(migrated, knownMachineIds), fromVersion: fromVersion as number }
 }
 

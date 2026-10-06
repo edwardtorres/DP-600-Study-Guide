@@ -3,6 +3,12 @@
  * To change the save shape: bump SAVE_VERSION, add the new type and validator
  * in schema.ts, append a migration here, and add a test with a real old save.
  */
+import { caseQuestions } from '../content/questions/cases'
+import { mockFreshness } from '../game/mock'
+import type { AnswerEntry } from './schema'
+
+const caseIds = new Set(caseQuestions.map((q) => q.id))
+
 export interface Migration {
   from: number
   migrate: (old: Record<string, unknown>) => Record<string, unknown>
@@ -32,6 +38,24 @@ export const migrations: Migration[] = [
     // answer codes 'r' (daily review) and 'm' (mock exam). Existing data is unchanged.
     from: 4,
     migrate: (old) => ({ ...old, mocks: [] }),
+  },
+  {
+    // v5 → v6 (Step 8): each mock stores its freshness (share of main-section
+    // questions not answered in the 14 days before it started), computed here
+    // from the answer log. Mocks list case questions first; those are excluded.
+    from: 5,
+    migrate: (old) => {
+      const answers = (Array.isArray(old.answers) ? old.answers : []) as AnswerEntry[]
+      const mocks = (Array.isArray(old.mocks) ? old.mocks : []) as { questionIds?: unknown; startedAt?: unknown }[]
+      const withFreshness = (ids: unknown, startedAt: unknown) =>
+        Array.isArray(ids) && typeof startedAt === 'string' ? mockFreshness(ids.filter((id: unknown): id is string => typeof id === 'string' && !caseIds.has(id)), answers, startedAt) : 0
+      const active = old.activeMock as { mainIds?: unknown; startedAt?: unknown } | undefined
+      return {
+        ...old,
+        mocks: mocks.map((m) => ({ ...m, freshness: withFreshness(m.questionIds, m.startedAt) })),
+        ...(active ? { activeMock: { ...active, freshness: withFreshness(active.mainIds, active.startedAt) } } : {}),
+      }
+    },
   },
 ]
 

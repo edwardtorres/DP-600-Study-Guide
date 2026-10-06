@@ -1,4 +1,4 @@
-export const SAVE_VERSION = 5
+export const SAVE_VERSION = 6
 export const SAVE_KEY = 'fabric-mill:save'
 export const BACKUP_KEY = 'fabric-mill:save:corrupt-backup'
 
@@ -108,6 +108,12 @@ export interface MockRecord {
   responses?: Record<string, unknown>
   /** Seed of the option shuffle used during the mock. */
   seed?: number
+  /**
+   * Share (0–1) of main-section questions not answered in any attempt in the
+   * RECENT_DAYS days before the mock started (v6). Below FRESH_MIN, the mock
+   * doesn't count toward "ready to book".
+   */
+  freshness: number
 }
 
 /** A mock exam in progress. Kept in the save so the timer and answers survive a reload. */
@@ -126,7 +132,13 @@ export interface ActiveMock {
   /** Set once the player leaves the case study section; it can't be reopened. */
   caseLocked: boolean
   short?: true
+  /** Freshness of the main section when the mock started (v6; see MockRecord). */
+  freshness: number
 }
+
+/** v5 mock shapes, before freshness was stored. */
+export type MockRecordV5 = Omit<MockRecord, 'freshness'>
+export type ActiveMockV5 = Omit<ActiveMock, 'freshness'>
 
 export interface SaveV5 {
   version: 5
@@ -137,12 +149,19 @@ export interface SaveV5 {
   labs: Record<string, LabProgress>
   trialStart?: string
   /** Finished mock exams, oldest first. */
-  mocks: MockRecord[]
-  activeMock?: ActiveMock
+  mocks: MockRecordV5[]
+  activeMock?: ActiveMockV5
   settings: Record<string, never>
 }
 
-export type Save = SaveV5
+export interface SaveV6 extends Omit<SaveV5, 'version' | 'mocks' | 'activeMock'> {
+  version: 6
+  /** Finished mock exams, oldest first, each with its freshness. */
+  mocks: MockRecord[]
+  activeMock?: ActiveMock
+}
+
+export type Save = SaveV6
 
 export function newSave(now: Date = new Date()): Save {
   const iso = now.toISOString()
@@ -153,6 +172,7 @@ const isObject = (v: unknown): v is Record<string, unknown> =>
   typeof v === 'object' && v !== null && !Array.isArray(v)
 const isIsoDate = (v: unknown): v is string => typeof v === 'string' && !Number.isNaN(Date.parse(v))
 const isStringArray = (v: unknown): v is string[] => Array.isArray(v) && v.every((x) => typeof x === 'string')
+const isShare = (v: unknown): v is number => typeof v === 'number' && v >= 0 && v <= 1
 const isDayKey = (v: unknown): v is string => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v)
 
 function isCertification(v: unknown): v is Certification {
@@ -250,9 +270,10 @@ export function isSaveV4(v: unknown): v is SaveV4 {
   return Object.values(v.machines).every(isMachineProgress) && v.answers.every((a) => isAnswerEntry(a) && a[3] !== 'r' && a[3] !== 'm')
 }
 
-function isMockRecord(v: unknown): v is MockRecord {
+function isMockRecord(v: unknown, withFreshness: boolean): v is MockRecord {
   return (
     isObject(v) &&
+    (!withFreshness || isShare(v.freshness)) &&
     typeof v.id === 'string' &&
     isIsoDate(v.startedAt) &&
     isIsoDate(v.finishedAt) &&
@@ -270,9 +291,10 @@ function isMockRecord(v: unknown): v is MockRecord {
   )
 }
 
-function isActiveMock(v: unknown): v is ActiveMock {
+function isActiveMock(v: unknown, withFreshness: boolean): v is ActiveMock {
   return (
     isObject(v) &&
+    (!withFreshness || isShare(v.freshness)) &&
     typeof v.id === 'string' &&
     isIsoDate(v.startedAt) &&
     typeof v.durationMin === 'number' &&
@@ -290,12 +312,22 @@ function isActiveMock(v: unknown): v is ActiveMock {
   )
 }
 
-/** Structural check for the current save version. */
+/** Structural check for version-5 saves (mocks without freshness). */
 export function isSaveV5(v: unknown): v is SaveV5 {
   if (!hasSaveShell(v, 5)) return false
   if (!isObject(v.labs) || !Object.values(v.labs).every(isLabProgress)) return false
   if (v.trialStart !== undefined && !isDayKey(v.trialStart)) return false
-  if (!Array.isArray(v.mocks) || !v.mocks.every(isMockRecord)) return false
-  if (v.activeMock !== undefined && !isActiveMock(v.activeMock)) return false
+  if (!Array.isArray(v.mocks) || !v.mocks.every((m) => isMockRecord(m, false))) return false
+  if (v.activeMock !== undefined && !isActiveMock(v.activeMock, false)) return false
+  return Object.values(v.machines).every(isMachineProgress) && v.answers.every(isAnswerEntry)
+}
+
+/** Structural check for the current save version. */
+export function isSaveV6(v: unknown): v is SaveV6 {
+  if (!hasSaveShell(v, 6)) return false
+  if (!isObject(v.labs) || !Object.values(v.labs).every(isLabProgress)) return false
+  if (v.trialStart !== undefined && !isDayKey(v.trialStart)) return false
+  if (!Array.isArray(v.mocks) || !v.mocks.every((m) => isMockRecord(m, true))) return false
+  if (v.activeMock !== undefined && !isActiveMock(v.activeMock, true)) return false
   return Object.values(v.machines).every(isMachineProgress) && v.answers.every(isAnswerEntry)
 }

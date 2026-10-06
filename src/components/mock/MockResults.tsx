@@ -1,7 +1,7 @@
 import { pairIndex } from '../../content/pairs'
 import type { Question } from '../../content/questions/types'
 import { findBullet, outline } from '../../data/outline'
-import { scoreMock } from '../../game/mock'
+import { FRESH_MIN, RECENT_DAYS, scoreMock } from '../../game/mock'
 import { emptyResponse, type Response } from '../../game/score'
 import type { MockRecord } from '../../save/schema'
 import { QuestionResult } from '../questions/QuestionResult'
@@ -24,6 +24,10 @@ export function MockResults({ record, questions, onOpenPair }: { record: MockRec
         </p>
         <p className="text-sm text-mill-200">
           {score.overall.right} of {score.overall.total} correct (raw) · {minutes} of {record.durationMin} minutes{record.timedOut ? ' · time ran out' : ''}
+        </p>
+        <p className="mt-1 text-sm text-mill-200" data-testid="mock-freshness">
+          Freshness: {pct(record.freshness)} of main-section questions not answered in the {RECENT_DAYS} days before this mock
+          {!record.short && record.freshness < FRESH_MIN ? ` (below ${pct(FRESH_MIN)}, so it doesn’t count toward ready to book)` : ''}.
         </p>
         <p className="mt-2 text-xs text-mill-400" data-testid="scaled-note">
           Microsoft reports exam scores on a scale of 1 to 1,000, and 700 passes. Learn says that because it’s a scaled score, it may not equal 70% of the points, so this raw percentage can’t predict your exam score exactly.{' '}

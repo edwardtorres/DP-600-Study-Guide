@@ -12,7 +12,11 @@ import {
   leaveCase,
   MOCK_MINUTES,
   MOCK_SIZE,
+  FRESH_MIN,
+  mockFreshness,
+  readyStatus,
   readyToBook,
+  RECENT_DAYS,
   remainingMs,
   scoreMock,
   setMockResponse,
@@ -35,6 +39,7 @@ const record = (over: Partial<MockRecord>): MockRecord => ({
   questionIds: [],
   correct: [],
   timedOut: false,
+  freshness: 1,
   ...over,
 })
 
@@ -191,5 +196,62 @@ describe('ready to book', () => {
 
   it('ignores short (dev) mocks', () => {
     expect(readyToBook([mock(1), { ...mock(1), short: true }], byId, outline)).toBe(false)
+  })
+
+  const stale = (pct: number): MockRecord => ({ ...mock(pct), id: 'S', freshness: 0.4 })
+
+  it('counts only mocks with at least half their main section fresh', () => {
+    expect(FRESH_MIN).toBe(0.5)
+    expect(readyToBook([stale(1), stale(1)], byId, outline)).toBe(false)
+    expect(readyToBook([mock(1), stale(1)], byId, outline)).toBe(false)
+    expect(readyToBook([mock(1), { ...mock(1), freshness: 0.5 }], byId, outline)).toBe(true)
+  })
+
+  it('skips a stale mock between two fresh passing mocks, and a stale poor mock doesn’t break the run', () => {
+    expect(readyToBook([mock(1), stale(1), mock(1)], byId, outline)).toBe(true)
+    expect(readyToBook([mock(1), stale(0.2), mock(1)], byId, outline)).toBe(true)
+  })
+
+  it('explains why each stale mock didn’t count', () => {
+    const st = readyStatus([mock(1), stale(1), mock(1)], byId, outline)
+    expect(st.ready).toBe(true)
+    expect(st.stale).toHaveLength(1)
+    expect(st.stale[0]!.reason).toMatch(/only 40% .* fresh .* needs 50%/)
+    expect(st.counted).toHaveLength(2)
+  })
+})
+
+describe('mock freshness', () => {
+  const start = '2026-10-20T10:00:00.000Z'
+  const t = Date.parse(start) / 1000
+  const main = ['A', 'B', 'C', 'D']
+
+  it('is the share of main-section questions not answered in the 14 days before the mock', () => {
+    expect(RECENT_DAYS).toBe(14)
+    expect(mockFreshness(main, [], start)).toBe(1)
+    expect(mockFreshness(main, [['A', 1, t - 86400, 'i'], ['B', 0, t - 86400, 'r']], start)).toBe(0.5)
+    expect(mockFreshness([], [], start)).toBe(1)
+  })
+
+  it('counts any question attempt type but not puzzle plays', () => {
+    for (const code of ['s', 'i', 'p', 'l', 'r', 'm'] as const) expect(mockFreshness(main, [['A', 1, t - 60, code]], start)).toBe(0.75)
+    expect(mockFreshness(main, [['A', 1, t - 60, 'z']], start)).toBe(1)
+  })
+
+  it('uses the 14 days before the start: older answers and answers after the start don’t count', () => {
+    expect(mockFreshness(main, [['A', 1, t - 14 * 86400, 'i']], start)).toBe(0.75)
+    expect(mockFreshness(main, [['A', 1, t - 14 * 86400 - 1, 'i']], start)).toBe(1)
+    expect(mockFreshness(main, [['A', 1, t, 'm']], start)).toBe(1)
+  })
+
+  it('is computed for the main section only when a mock starts, and kept in its record', () => {
+    const now = new Date(start)
+    const draw = drawMock({ questions: allQuestions, cases: caseStudies, mocks: [], answers: [], outline, now, rand: mulberry32(3) })
+    const seen: AnswerEntry[] = [...draw.caseIds, ...draw.mainIds.slice(0, 10)].map((id) => [id, 1, t - 3600, 'i'])
+    const save = { ...newSave(now), answers: seen }
+    const started = startMock(save, draw, 1, now)
+    expect(started.activeMock!.freshness).toBeCloseTo((draw.mainIds.length - 10) / draw.mainIds.length)
+    const done = finishMock(started, byId, new Date(t * 1000 + 3600_000))
+    expect(done.mocks[0]!.freshness).toBe(started.activeMock!.freshness)
   })
 })
