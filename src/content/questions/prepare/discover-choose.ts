@@ -131,7 +131,7 @@ export const discoverChooseQuestions: Question[] = [
     format: 'single',
     difficulty: 2,
     stem: 'You need to filter a stream from the Real-Time hub and group events before sending them to a destination. Where do you add these transformations?',
-    sources: [S.rtHub],
+    sources: [S.rtHub, S.kqlQueryset, S.copyJob],
     options: [
       { id: 'a', text: 'In the KQL queryset attached to the stream', explain: 'A queryset queries data already in a KQL database; it doesn’t transform the stream in flight.' },
       { id: 'b', text: 'In the parent eventstream’s editor', explain: 'Correct. Learn: open the parent eventstream and add transformations such as Filter, Aggregate, and Group by.' },
@@ -215,7 +215,7 @@ export const discoverChooseQuestions: Question[] = [
     format: 'single',
     difficulty: 2,
     stem: 'A team of experienced SQL Server developers is moving to Fabric. They want to reuse their existing T-SQL code, use SQL Server Management Studio, and query lakehouse Delta tables from the same queries. Which data store should they choose?',
-    sources: [S.decisionStore],
+    sources: [S.decisionStore, S.mirroring],
     options: [
       { id: 'a', text: 'A lakehouse with Spark SQL notebooks', explain: 'Spark SQL isn’t T-SQL, and the team wants to reuse T-SQL and SSMS.' },
       { id: 'b', text: 'An eventhouse with KQL querysets', explain: 'KQL is a different language; this doesn’t reuse the team’s T-SQL code.' },
@@ -289,7 +289,7 @@ export const discoverChooseQuestions: Question[] = [
     format: 'single',
     difficulty: 2,
     stem: 'You need to store a product catalog as JSON documents for a web app, using a NoSQL API, while keeping the data available in OneLake. Which Fabric data store fits?',
-    sources: [S.decisionStore],
+    sources: [S.decisionStore, S.dbShortcut],
     options: [
       { id: 'a', text: 'A warehouse', explain: 'A warehouse is a relational T-SQL store for analytics, not a NoSQL document database.' },
       { id: 'b', text: 'Cosmos DB in Fabric', explain: 'Correct. Learn recommends Cosmos DB in Fabric for NoSQL databases; its data is available in OneLake.' },
@@ -360,7 +360,7 @@ export const discoverChooseQuestions: Question[] = [
     options: [
       { id: 'a', text: 'Switch the model’s tables to Direct Lake', explain: 'OneLake integration applies to import tables; switching modes doesn’t trigger the export.' },
       { id: 'b', text: 'Run a manual or scheduled refresh of the semantic model', explain: 'Correct. Import data is written to Delta tables in OneLake only when at least one manual or scheduled refresh runs.' },
-      { id: 'c', text: 'Enable large semantic model storage format', explain: 'Large model format affects model size limits, not whether OneLake integration exports data.' },
+      { id: 'c', text: 'Enable large semantic model storage format', explain: 'Learn ties the export to a manual or scheduled refresh; the storage format setting doesn’t trigger it.' },
       { id: 'd', text: 'Turn on OneLake availability for the workspace', explain: 'OneLake availability is an eventhouse setting; it doesn’t trigger a semantic model export.' },
     ],
     answer: 'b',

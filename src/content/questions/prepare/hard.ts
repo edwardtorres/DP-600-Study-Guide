@@ -124,7 +124,7 @@ export const prepareHardQuestions: Question[] = [
     sources: [S.dimTables, S.createView, S.whGranular],
     options: [
       { id: 'a', text: 'Three model tables related in a chain, with the hierarchy built across them', explain: 'A model hierarchy can only use columns from one table, so a chain of three tables can’t hold it.' },
-      { id: 'b', text: 'A stored procedure that returns the joined rows each time the model refreshes', explain: 'A semantic model reads tables or views, not procedure results, and this doesn’t give the team a secured slice.' },
+      { id: 'b', text: 'A stored procedure that returns the joined rows each time the model refreshes', explain: 'This doesn’t give the team a secured slice; Learn’s approach is a view that joins the tables, with permissions granted on the view.' },
       { id: 'c', text: 'Primary and foreign key constraints between the tables so the model detects the hierarchy', explain: 'Constraints in a warehouse are NOT ENFORCED metadata. They don’t flatten the dimension or limit what users see.' },
       { id: 'd', text: 'A view that joins the three tables into one denormalized product result, with permissions granted on the view', explain: 'Correct. Learn suggests exposing a snowflake dimension through a view that joins it back into one table, and a view lets users read data through it without permissions on the underlying base tables.' },
     ],
@@ -353,7 +353,7 @@ export const prepareHardQuestions: Question[] = [
       { id: 'a', text: 'SELECT s.StoreName, SUM(f.Amount) AS Sales FROM dbo.FactSales AS f JOIN dbo.Store AS s ON f.StoreKey = s.StoreKey GROUP BY s.StoreName;', explain: 'dbo.Store without an item name refers to SalesWH, which has no Store table.' },
       { id: 'b', text: 'SELECT s.StoreName, SUM(f.Amount) AS Sales FROM dbo.FactSales AS f JOIN RefLake.dbo.Store AS s ON f.StoreKey = s.StoreKey GROUP BY s.StoreName;', explain: 'Correct. A three-part name (item.schema.table) reads the lakehouse table in the same workspace, and GROUP BY returns one row per store.' },
       { id: 'c', text: 'SELECT s.StoreName, SUM(f.Amount) AS Sales FROM dbo.FactSales AS f JOIN Sales.RefLake.dbo.Store AS s ON f.StoreKey = s.StoreKey GROUP BY s.StoreName;', explain: 'Fabric cross-database queries use three-part names; a workspace prefix isn’t part of the syntax.' },
-      { id: 'd', text: 'SELECT s.StoreName, SUM(f.Amount) AS Sales FROM dbo.FactSales AS f JOIN RefLake.dbo.Store AS s ON f.StoreKey = s.StoreKey;', explain: 'Without GROUP BY, a query that mixes StoreName with SUM() fails.' },
+      { id: 'd', text: 'SELECT s.StoreName, SUM(f.Amount) AS Sales FROM dbo.FactSales AS f JOIN RefLake.dbo.Store AS s ON f.StoreKey = s.StoreKey;', explain: 'This drops GROUP BY, so it doesn’t return one total per store.' },
     ],
     answer: 'b',
   },

@@ -261,7 +261,7 @@ const firstCaseQuestions: Question[] = [
         options: [
           { id: 'a', text: '5m', explain: 'Correct. 5m is a five-minute timespan.' },
           { id: 'b', text: '1h', explain: 'This would give hourly buckets.' },
-          { id: 'c', text: '300', explain: 'Binning a datetime column takes a timespan size, written like 5m.' },
+          { id: 'c', text: '300', explain: '5m is the five-minute timespan; 300 isn’t written as a timespan.' },
         ],
         answer: 'a',
       },

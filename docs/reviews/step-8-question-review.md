@@ -30,3 +30,10 @@ All cited pages returned 200. No blockers or majors. Three minor findings, all f
 The reviewer confirmed:
 - `preview: true` on RB-V1 and RB-V2 ("Scalar UDFs are currently a preview feature in Fabric Data Warehouse").
 - DS-V2 isn't ambiguous: How Direct Lake works lists DDM as a fallback condition, and DirectLakeOnly makes such a query fail.
+
+## Re-review of a changed key (Part C)
+
+- **WP-09:** the fact-check found the key contradicted Learn ("A stock balance measure in an inventory fact table can't be summed across other products").
+  - The question was rewritten on Learn's own example (item age sampled nightly: summed across items on a shelf each night, not across nights).
+  - A separate reviewer answered it blind: **1/1 match**.
+  - Source pass: OK. The reviewer suggested difficulty 2 or 1; it stays at 2.

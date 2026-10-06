@@ -2,6 +2,9 @@ import type { MachineNotes } from '../types'
 
 const L = 'https://learn.microsoft.com/en-us/'
 const TERMS = `${L}fabric/fundamentals/fabric-terminology`
+const STUDY_GUIDE = `${L}credentials/certifications/resources/study-guides/dp-600`
+const KQL_BETWEEN = `${L}kusto/query/between-operator?view=microsoft-fabric`
+const KQL_STRING_OPS = `${L}kusto/query/datatypes-string-operators?view=microsoft-fabric`
 const CONNECTORS = `${L}fabric/data-factory/connector-overview`
 const CONNECTIONS = `${L}fabric/data-factory/data-source-management`
 const DATA_FACTORY = `${L}fabric/data-factory/data-factory-overview`
@@ -266,7 +269,7 @@ export const prepareNotes: MachineNotes[] = [
         newName: 'Dataflow Gen1',
         examLikely: 'The study guide only says "dataflows". Expect Dataflow Gen2 in Fabric scenarios.',
         note: 'Learn calls the original Power BI dataflow "Gen1" and recommends Dataflow Gen2 for new work. You can’t upgrade Gen1 to Gen2.',
-        sources: [DATAFLOW_GEN2, TERMS],
+        sources: [DATAFLOW_GEN2, TERMS, STUDY_GUIDE],
       },
     ],
     preview: [
@@ -300,7 +303,7 @@ export const prepareNotes: MachineNotes[] = [
       },
       {
         term: 'Mirroring',
-        definition: 'Continuous, managed replication of an external database or catalog into OneLake, exposed as Delta tables with a SQL analytics endpoint.',
+        definition: 'Bringing external data into OneLake without building pipelines. Database mirroring continuously replicates a database into Delta tables with a SQL analytics endpoint; metadata mirroring syncs only catalog metadata and uses shortcuts, so the data stays at its source.',
         sources: [MIRRORING, TERMS],
       },
       {
@@ -477,7 +480,7 @@ export const prepareNotes: MachineNotes[] = [
         ],
         howTo: [
           {
-            text: 'Apply the decision points in order. Spark developers → lakehouse; T-SQL developers → warehouse. Multi-table transactions needed → warehouse. Unstructured or mixed data → lakehouse. Streaming events → eventhouse.',
+            text: 'Apply the decision points. Spark developers → lakehouse; T-SQL developers → warehouse. Multi-table transactions needed → warehouse. Unstructured or mixed data → lakehouse. Streaming events → eventhouse.',
             sources: [DECIDE_LH_WH, DECIDE_STORE],
           },
           {
@@ -666,7 +669,7 @@ export const prepareNotes: MachineNotes[] = [
         tools: ['warehouse', 'notebook', 'dataflow-gen2'],
         concepts: [
           {
-            text: 'Duplicates: identify them by the business key and keep one row per key, usually the latest. In T-SQL, ROW_NUMBER() OVER (PARTITION BY key ORDER BY ...) numbers the rows within each key, and QUALIFY keeps row 1 without a subquery.',
+            text: 'Duplicates: identify them by the business key and keep one row per key, for example the latest. In T-SQL, ROW_NUMBER() OVER (PARTITION BY key ORDER BY ...) numbers the rows within each key, and QUALIFY keeps row 1 without a subquery.',
             sources: [QUALIFY],
           },
           {
@@ -735,7 +738,7 @@ export const prepareNotes: MachineNotes[] = [
           },
           {
             text: 'Filtering early, when staging, keeps only relevant rows in later steps.',
-            sources: [LOAD_TABLES],
+            sources: [LOAD_TABLES, NOTEBOOK_CLEAN],
           },
         ],
         howTo: [
@@ -827,7 +830,7 @@ export const prepareNotes: MachineNotes[] = [
     preview: [
       {
         feature: 'ALTER TABLE … ALTER COLUMN in Warehouse',
-        note: 'Changing an existing column’s type in place is in preview. Otherwise only ADD nullable column and DROP COLUMN are supported.',
+        note: 'Changing an existing column’s type in place is in preview. Otherwise ALTER TABLE supports ADD nullable column, DROP COLUMN, and PRIMARY KEY, UNIQUE, or FOREIGN KEY constraints only with NOT ENFORCED.',
         sources: [TSQL_SURFACE],
       },
     ],
@@ -1104,7 +1107,7 @@ export const prepareNotes: MachineNotes[] = [
     ],
     traps: [
       {
-        text: 'Columns derived in the ETL are stored once and shared by every engine. A DAX calculated column exists only inside one semantic model.',
+        text: 'Columns derived in the ETL are stored once and shared by every engine that reads the table.',
         sources: [LOAD_TABLES, ONELAKE],
       },
       {
@@ -1641,6 +1644,20 @@ export const prepareNotes: MachineNotes[] = [
         ],
         guidance: 'Learn doesn’t settle this, so no question or puzzle in the game depends on it.',
       },
+      {
+        topic: 'Release status of inline table-valued functions in Fabric Data Warehouse',
+        readings: [
+          {
+            text: 'The Fabric CREATE FUNCTION page’s opening note lists only scalar UDFs and external UDFs as preview features in Fabric Data Warehouse.',
+            sources: [CREATE_FUNCTION],
+          },
+          {
+            text: 'The same page’s argument description says "In inline TVFs (preview), you define the TABLE return value through a single SELECT statement."',
+            sources: [CREATE_FUNCTION],
+          },
+        ],
+        guidance: 'Both readings agree that inline TVFs can be created in a warehouse and on the SQL analytics endpoint; questions use them only for what they do, never for their release status.',
+      },
     ],
     needsVerification: [],
   },
@@ -1715,7 +1732,7 @@ export const prepareNotes: MachineNotes[] = [
         illustrative: true,
         steps: [
           {
-            code: "StormEvents\n| where StartTime between (datetime(2007-08-01) .. datetime(2007-08-30))",
+            code: "StormEvents\n| where StartTime between (datetime(2007-08-01) .. datetime(2007-08-30 23:59:59))",
             explain: 'where keeps only rows whose StartTime falls in August 1\u201330, 2007; between takes an inclusive range.',
           },
           {
@@ -1727,7 +1744,7 @@ export const prepareNotes: MachineNotes[] = [
             explain: 'project returns only these five columns, in this order, like a SQL SELECT list.',
           },
         ],
-        sources: [KQL_WHERE, KQL_PROJECT, KQL_OPERATORS],
+        sources: [KQL_WHERE, KQL_PROJECT, KQL_OPERATORS, KQL_BETWEEN, KQL_STRING_OPS],
       },
       {
         title: 'Add a calculated column and keep everything else (extend)',
@@ -1836,7 +1853,7 @@ export const prepareNotes: MachineNotes[] = [
         sources: [KQL_SUMMARIZE],
       },
       {
-        text: 'Aggregations in summarize ignore null values.',
+        text: 'Most summarize aggregations ignore null values (avg sums and counts only non-null values), but the standard count() counts every row, nulls included.',
         sources: [KQL_SUMMARIZE],
       },
       {

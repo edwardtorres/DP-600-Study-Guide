@@ -87,7 +87,7 @@ const scenarios: PatternScenario[] = [
     grain: { choices: ['One row per product per warehouse per day', 'One row per stock movement', 'One row per product'], accepted: [0], why: 'This is a periodic snapshot fact table: one row per product per warehouse at each day’s end. Its measures are semi-additive.' },
     dimensions: ['Product', 'Warehouse', 'Date'],
     columns: [
-      { name: 'OnHandQty', accepted: ['measure'], why: 'Stock on hand is a measure. It’s semi-additive: sum it across products or warehouses, but not across days.' },
+      { name: 'OnHandQty', accepted: ['measure'], why: 'Stock on hand is a measure. It’s semi-additive: Learn says a periodic snapshot measure can’t be summed across time periods, and a stock balance can’t be summed across other products.' },
       { name: 'WarehouseManager', accepted: ['dim:Warehouse'], why: 'The manager describes the warehouse.' },
       { name: 'ProductName', accepted: ['dim:Product'], why: 'The name describes the product.' },
       { name: 'StandardCost', accepted: ['measure'], why: 'A numeric attribute that changes rapidly belongs in the fact table as a measure, not in a versioned dimension.' },
