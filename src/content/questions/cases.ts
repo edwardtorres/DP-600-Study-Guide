@@ -438,7 +438,7 @@ const firstCaseQuestions: Question[] = [
       { id: 'a', text: 'Large semantic model storage format', explain: 'Correct. It’s required beyond 10 GB and improves XMLA write performance.' },
       { id: 'b', text: 'Dual storage mode on the fact table', explain: 'Dual doesn’t change size limits or XMLA performance.' },
       { id: 'c', text: 'Query caching', explain: 'Caching speeds up reads only.' },
-      { id: 'd', text: 'Automatic page refresh', explain: 'This is a report setting for DirectQuery visuals.' },
+      { id: 'd', text: 'Automatic page refresh', explain: 'This is a report page setting; it doesn’t change model size limits or XMLA performance.' },
     ],
     answer: 'a',
   },

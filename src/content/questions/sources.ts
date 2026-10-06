@@ -79,7 +79,7 @@ export const S = {
   directLake: `${L}fabric/fundamentals/direct-lake-overview`,
   dlHow: `${L}fabric/fundamentals/direct-lake-how-it-works`,
   dlAnalyze: `${L}fabric/fundamentals/direct-lake-analyze-query-processing`,
-  dlManage: `${L}fabric/fundamentals/direct-lake-manage`,
+  dlManage: `${L}fabric/fundamentals/direct-lake-security-integration`,
   composite: `${L}power-bi/transform-model/desktop-composite-models`,
   star: `${L}power-bi/guidance/star-schema`,
   manyToMany: `${L}power-bi/guidance/relationships-many-to-many`,

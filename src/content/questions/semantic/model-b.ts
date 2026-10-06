@@ -97,7 +97,7 @@ export const modelBQuestions: Question[] = [
     sources: [S.largeModels, S.directLake],
     options: [
       { id: 'a', text: 'Both are limited only by the 1 GB default size limit', explain: 'The large format lifts the 1 GB default, and Direct Lake is governed by capacity guardrails.' },
-      { id: 'b', text: 'Direct Lake needs the large storage format setting to pass 10 GB', explain: 'The large format setting is about Import model size; Direct Lake has its own guardrails.' },
+      { id: 'b', text: 'Direct Lake needs the large storage format setting to pass 10 GB', explain: 'The large format setting lifts the in-memory model size limit; Direct Lake depends on its own SKU guardrails.' },
       { id: 'c', text: 'Import uses the large format limit; Direct Lake uses guardrails', explain: 'Correct. Large format lets Import models grow to the capacity limit, while Direct Lake depends on SKU guardrails and only loads the columns queries need.' },
       { id: 'd', text: 'Import models can’t exceed 10 GB on any capacity', explain: 'With the large format, Import models can grow beyond 10 GB through refresh in the service.' },
     ],
@@ -259,7 +259,7 @@ export const modelBQuestions: Question[] = [
       { promptId: 'p1', choiceId: 'c1', explain: 'This is Learn’s definition of a source group.' },
       { promptId: 'p2', choiceId: 'c2', explain: 'Dual tables can act as Import or DirectQuery depending on the query.' },
       { promptId: 'p3', choiceId: 'c3', explain: 'Hybrid tables come from incremental refresh with real-time DirectQuery.' },
-      { promptId: 'p4', choiceId: 'c4', explain: 'Chained models depend on upstream models, so upstream changes affect them.' },
+      { promptId: 'p4', choiceId: 'c4', explain: 'Models built on other models form a chain; Learn sets the maximum chain length at three.' },
     ],
   },
 

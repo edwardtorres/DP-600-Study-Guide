@@ -38,6 +38,7 @@ const SEMANTIC_MODELS = `${L}fabric/data-warehouse/semantic-models`
 const DAX_QUERY_VIEW = `${L}power-bi/transform-model/dax-query-view`
 const DIM_OVERVIEW = `${L}fabric/data-warehouse/dimensional-modeling-overview`
 const TERMS = `${L}fabric/fundamentals/fabric-terminology`
+const STUDY_GUIDE = `${L}credentials/certifications/resources/study-guides/dp-600`
 
 export const semanticNotes: MachineNotes[] = [
   // ── Loom Gearbox ─────────────────────────────────────────────────────
@@ -69,7 +70,7 @@ export const semanticNotes: MachineNotes[] = [
             sources: [MODES],
           },
           {
-            text: 'DirectQuery: the model holds only metadata, and each query is translated to native queries against the source. Freshest data and no size limit, but slower and limited to M and DAX that can be translated. Calculated tables aren’t supported.',
+            text: 'DirectQuery: the model holds only metadata, and each query is translated to native queries against the source. Freshest data and Import model size limits don’t apply, but slower and limited to M and DAX that can be translated. Calculated tables aren’t supported.',
             sources: [MODES],
           },
           {
@@ -127,7 +128,7 @@ export const semanticNotes: MachineNotes[] = [
             sources: [DIRECT_LAKE, MODES],
           },
           {
-            text: 'Refresh: Import refresh copies data (minutes to hours). Direct Lake refresh is framing (seconds, metadata only). DirectQuery needs no data refresh.',
+            text: 'Refresh: Import refresh copies data, which can take considerable time and use significant source and capacity resources. Direct Lake refresh is framing (seconds, metadata only). DirectQuery needs no data refresh.',
             sources: [DIRECT_LAKE, MODES],
           },
         ],
@@ -138,8 +139,8 @@ export const semanticNotes: MachineNotes[] = [
         oldName: 'Power BI dataset',
         newName: 'Semantic model',
         examLikely: '"Semantic model". The current study guide uses it throughout.',
-        note: 'Microsoft renamed the dataset content type to semantic model in Power BI and Fabric. Older Learn pages and UI strings may still say "dataset".',
-        sources: [SEMANTIC_MODELS],
+        note: 'Microsoft renamed the dataset content type to semantic model in Power BI and Fabric.',
+        sources: [SEMANTIC_MODELS, STUDY_GUIDE],
       },
     ],
     preview: [],
@@ -177,8 +178,8 @@ export const semanticNotes: MachineNotes[] = [
       },
       {
         term: 'VertiPaq',
-        definition: 'The in-memory columnar engine that answers queries for Import and Direct Lake tables.',
-        sources: [DIRECT_LAKE],
+        definition: 'The in-memory engine that answers queries for Import and Direct Lake tables from a cache of the columns.',
+        sources: [DIRECT_LAKE, DL_HOW],
       },
     ],
     needsVerification: [],
@@ -199,8 +200,8 @@ export const semanticNotes: MachineNotes[] = [
     ],
     overview: [
       {
-        text: 'The semantic model’s tables and relationships decide how filters flow and whether measures add up correctly. A clean star (facts in the middle, dimensions around, one-to-many single-direction relationships) is the default. Many-to-many cases need deliberate patterns.',
-        sources: [STAR, MANY_TO_MANY],
+        text: 'The semantic model’s tables and relationships decide how filters flow and whether measures add up correctly. A clean star (facts in the middle, dimensions around, one-to-many relationships, with bi-directional filtering only as needed) is the default. Many-to-many cases need deliberate patterns.',
+        sources: [STAR, MANY_TO_MANY, RELATIONSHIPS],
       },
     ],
     bullets: [
@@ -481,7 +482,7 @@ export const semanticNotes: MachineNotes[] = [
       },
       {
         term: 'Window function',
-        definition: 'A DAX function (WINDOW, OFFSET, INDEX) that returns rows positioned relative to the current row, using ORDERBY and PARTITIONBY.',
+        definition: 'A DAX function (WINDOW, OFFSET, INDEX) that returns rows by position within a sorted, partitioned table: relative to the current row (OFFSET), at an absolute position (INDEX), or either (WINDOW).',
         sources: [WINDOW, OFFSET],
       },
       {
@@ -528,7 +529,7 @@ export const semanticNotes: MachineNotes[] = [
           },
           {
             text: 'A field parameter is a calculated table, defined with a DAX table constructor using NAMEOF(), listing fields (columns and/or measures) with display names and order. Put it on a slicer and in a visual’s field well so readers can switch fields.',
-            sources: [FIELD_PARAMS],
+            sources: [FIELD_PARAMS, DIRECT_LAKE],
           },
         ],
         howTo: [
@@ -719,7 +720,7 @@ export const semanticNotes: MachineNotes[] = [
         sources: [LARGE_MODELS],
       },
       {
-        text: 'Large format is about Import model size. Direct Lake models are governed instead by capacity guardrails such as max model size on disk and max memory per SKU.',
+        text: 'Large format is about the in-memory model size limit. Direct Lake models are governed instead by capacity guardrails such as max model size on disk and max memory per SKU.',
         sources: [LARGE_MODELS, DIRECT_LAKE],
       },
     ],
@@ -757,7 +758,7 @@ export const semanticNotes: MachineNotes[] = [
         tools: ['semantic-model', 'power-bi-desktop'],
         concepts: [
           {
-            text: 'A source group is the set of tables from one DirectQuery source, or all Import sources together. Direct Lake and Import tables count as the same source group. A composite model has more than one source group.',
+            text: 'A source group is the set of tables from one DirectQuery source, or all Import sources together. Direct Lake and Import tables count as the same source group. Learn says a composite model is made of one or more source groups.',
             sources: [COMPOSITE],
           },
           {
@@ -796,7 +797,7 @@ export const semanticNotes: MachineNotes[] = [
         sources: [COMPOSITE],
       },
       {
-        text: 'Chaining: models built on other models form a chain. Changes upstream can affect every model below.',
+        text: 'Chaining: models built on other models form a chain, and the maximum length of a chain is three models.',
         sources: [COMPOSITE],
       },
       {
@@ -823,7 +824,7 @@ export const semanticNotes: MachineNotes[] = [
     glossary: [
       {
         term: 'Composite model',
-        definition: 'A semantic model whose tables use different storage modes or come from more than one source group.',
+        definition: 'A semantic model made of one or more source groups, for example one that combines tables with different storage modes or adds to a model it connects to.',
         sources: [DIRECT_LAKE, COMPOSITE],
       },
       {
@@ -1319,7 +1320,7 @@ export const semanticNotes: MachineNotes[] = [
       },
       {
         text: 'If several tables have policies, they must all use the same RangeStart and RangeEnd parameters, even with different periods.',
-        sources: [INCREMENTAL_CFG],
+        sources: [INCREMENTAL],
       },
       {
         text: 'Direct Lake tables don’t use incremental refresh partitions. Partition the Delta tables instead.',

@@ -95,7 +95,6 @@ export const SOURCE_VERIFIED: Record<string, string> = {
   "https://learn.microsoft.com/en-us/fabric/fundamentals/direct-lake-analyze-query-processing": '2026-10-06',
   "https://learn.microsoft.com/en-us/fabric/fundamentals/direct-lake-develop": '2026-10-06',
   "https://learn.microsoft.com/en-us/fabric/fundamentals/direct-lake-how-it-works": '2026-10-06',
-  "https://learn.microsoft.com/en-us/fabric/fundamentals/direct-lake-manage": '2026-10-06',
   "https://learn.microsoft.com/en-us/fabric/fundamentals/direct-lake-overview": '2026-10-06',
   "https://learn.microsoft.com/en-us/fabric/fundamentals/direct-lake-security-integration": '2026-10-06',
   "https://learn.microsoft.com/en-us/fabric/fundamentals/direct-lake-web-modeling": '2026-10-06',
