@@ -8,6 +8,7 @@ import type { AttemptKind } from '../save/schema'
 import { CloseIcon } from './icons'
 import { stateBadge, stateLabel } from './stateStyles'
 import { NotesView } from './NotesView'
+import { NOTES_VERIFIED } from '../content/verified'
 import { Tags } from './Tags'
 import { PuzzleBench, type BenchItem } from './puzzles/PuzzleBench'
 import type { Lab } from '../content/labs/types'
@@ -231,7 +232,14 @@ export function MachineDetail({ machine, state, graph, edges, machinesById, stat
         )}
 
         {notesByMachine.get(machine.id) ? (
-          <NotesView notes={notesByMachine.get(machine.id)!} />
+          <>
+            {NOTES_VERIFIED[machine.id] && (
+              <p className="text-xs text-mill-400" data-testid="notes-verified">
+                Last checked on Learn: {NOTES_VERIFIED[machine.id]}
+              </p>
+            )}
+            <NotesView notes={notesByMachine.get(machine.id)!} />
+          </>
         ) : (
           <Section title="Notes">
             <p className="text-sm italic text-mill-400">Notes for this floor are still being written.</p>

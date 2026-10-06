@@ -66,6 +66,9 @@ describe('mill map', () => {
     expect(within(panel).getByText(/Certify every prerequisite/)).toBeInTheDocument()
     expect(within(panel).queryByRole('button', { name: /Start-up check/ })).toBeNull()
     expect(within(panel).queryByRole('button', { name: /placement check/ })).toBeNull()
+    expect(within(panel).getByTestId('notes-verified')).toHaveTextContent(/^Last checked on Learn: \d{4}-\d{2}-\d{2}$/)
+    // Learn pages disagree on two Direct Lake security outcomes; both readings are shown.
+    expect(within(panel).getAllByTestId('contested')).toHaveLength(2)
   })
 
   it('opens the notes, passes a start-up check, and runs the machine without certifying it', async () => {

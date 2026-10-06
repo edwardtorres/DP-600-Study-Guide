@@ -16,6 +16,7 @@
     "check:secrets": "tsx scripts/check-secrets.ts",
     "check": "npm run typecheck && npm run lint && npm test && npm run check:content && npm run check:secrets",
     "check:links": "tsx scripts/check-links.ts",
+    "check:freshness": "tsx scripts/check-freshness.ts",
     "export:questions": "tsx scripts/export-questions.ts",
     "export:puzzles": "tsx scripts/export-puzzles.ts"
   },

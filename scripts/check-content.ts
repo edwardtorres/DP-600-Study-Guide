@@ -18,6 +18,9 @@ import { puzzleStats, validatePuzzles } from '../src/content/puzzles/validate.ts
 import { puzzleTypeName } from '../src/puzzles/types.ts'
 import { allLabs, LABS_PARTIAL, LABS_UNCOVERED, labMinutes } from '../src/content/labs/index.ts'
 import { validateLabs } from '../src/content/labs/validate.ts'
+import { citations } from './citations.ts'
+import { NOTES_VERIFIED, SOURCE_VERIFIED } from '../src/content/verified.ts'
+import { allNotes as notesForDates } from '../src/content/notes/index.ts'
 
 const decode = (s: string) =>
   s
@@ -128,6 +131,7 @@ async function main() {
     ...validateQuestions(outline, machines, allNotes, allQuestions, caseStudies),
     ...validatePuzzles(outline, machines, allPuzzles, oracleTemplates, allQuestions.map((q) => q.id)),
     ...validateLabs(outline, machines, allLabs, allQuestions, LABS_UNCOVERED),
+    ...validateVerifiedDates(),
   ]
 
   if (process.argv.includes('--live')) {
@@ -163,3 +167,13 @@ async function main() {
 }
 
 await main()
+
+/** Every cited page and every machine's notes has a verifiedAt date (Step 8), none in the future. */
+function validateVerifiedDates(): string[] {
+  const errs: string[] = []
+  const today = new Date().toISOString().slice(0, 10)
+  const ok = (d: string | undefined) => !!d && /^\d{4}-\d{2}-\d{2}$/.test(d) && d <= today
+  for (const url of citations().keys()) if (!ok(SOURCE_VERIFIED[url])) errs.push(`No valid verifiedAt date for ${url} (run scripts/stamp-verified.ts after checking it)`)
+  for (const n of notesForDates) if (!ok(NOTES_VERIFIED[n.machineId])) errs.push(`No valid notes verifiedAt date for ${n.machineId}`)
+  return errs
+}
