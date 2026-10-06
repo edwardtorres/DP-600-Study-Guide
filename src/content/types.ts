@@ -73,6 +73,18 @@ export interface GlossaryEntry {
   sources: string[]
 }
 
+/**
+ * A point on which current Learn pages disagree (Step 8). Each reading quotes
+ * its own page. Contested points stay out of questions and puzzles.
+ */
+export interface Contested {
+  topic: string
+  /** At least two readings, each citing the page that states it. */
+  readings: Cited[]
+  /** What to do about it as a learner. */
+  guidance: string
+}
+
 export interface NeedsVerification {
   claim: string
   why: string
@@ -91,5 +103,7 @@ export interface MachineNotes {
   preview: PreviewLabel[]
   upcoming: DatedChange[]
   glossary: GlossaryEntry[]
+  /** Points where Learn pages disagree; both readings are shown. */
+  contested?: Contested[]
   needsVerification: NeedsVerification[]
 }

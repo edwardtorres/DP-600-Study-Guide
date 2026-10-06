@@ -1,3 +1,4 @@
+import { prepareVerifiedQuestions } from './prepare/verified'
 import { discoverChooseQuestions } from './prepare/discover-choose'
 import { prepareHardQuestions } from './prepare/hard'
 import { kqlDaxQuestions } from './prepare/kql-dax'
@@ -14,5 +15,5 @@ export const prepareQuestions: Question[] = [
   ...transformBQuestions,
   ...queryQuestions,
   ...kqlDaxQuestions,
-  ...prepareHardQuestions,
+  ...prepareHardQuestions, ...prepareVerifiedQuestions,
 ]

@@ -302,9 +302,9 @@ export const maintainLabs: Lab[] = [
       {
         id: 's5',
         windows: true,
-        text: 'In a new Desktop file, connect to Mill_Warehouse and load one table. Then export a .pbids file from Data source settings, close the file, and open the .pbids. Learn doesn’t confirm Export PBIDS for this connector: if it isn’t offered, report it and skip to step 6.',
+        text: 'In a new Desktop file, connect to Mill_Warehouse and load one table. Then try to export a .pbids file from Data source settings. Learn shows Export PBIDS but has no Fabric warehouse example, so this is an experiment: if Export PBIDS is offered, close the file and open the .pbids; if it isn’t, record that in a problem note and go on to step 6.',
         sources: [learn(P.whConnect, 'connect-using-power-bi'), learn(P.pbids, 'how-to-create-a-pbids-connection-file')],
-        checkpoint: 'Opening the .pbids prompts for credentials if needed, then opens the Navigator for that warehouse without asking you to pick a connector.',
+        checkpoint: 'You know whether Export PBIDS was offered for this source, and, if it was, what opening the .pbids did.',
       },
       {
         id: 's6',

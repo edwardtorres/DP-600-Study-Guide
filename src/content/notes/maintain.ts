@@ -11,6 +11,7 @@ const WH_GRANULAR = `${L}fabric/data-warehouse/sql-granular-permissions`
 const WH_DDM = `${L}fabric/data-warehouse/dynamic-data-masking`
 const ONELAKE_SECURITY = `${L}fabric/onelake/security/get-started-security`
 const ONELAKE_ACCESS_MODEL = `${L}fabric/onelake/security/data-access-control-model`
+const ONELAKE_INTEGRATIONS = `${L}fabric/onelake/security/onelake-security-integrations-overview`
 const MODEL_RLS = `${L}fabric/security/service-admin-row-level-security`
 const MODEL_OLS = `${L}fabric/security/service-admin-object-level-security`
 const ENDPOINT = `${L}fabric/data-engineering/lakehouse-sql-analytics-endpoint`
@@ -354,6 +355,10 @@ export const maintainNotes: MachineNotes[] = [
         sources: [ONELAKE_ACCESS_MODEL],
       },
       {
+        text: 'Don’t assume a release status Learn doesn’t state. The OneLake security pages mark only enforcement in authorized third-party engines (and its integrations overview) as preview; they don’t call OneLake security as a whole generally available.',
+        sources: [ONELAKE_SECURITY, ONELAKE_INTEGRATIONS],
+      },
+      {
         text: 'To change an RLS predicate function, drop the security policy first, alter the function, then recreate the policy.',
         sources: [WH_RLS],
       },
@@ -421,12 +426,7 @@ export const maintainNotes: MachineNotes[] = [
         sources: [MODEL_RLS],
       },
     ],
-    needsVerification: [
-      {
-        claim: 'Whether OneLake security (outside third-party engines) is generally available.',
-        why: 'The pages read label only third-party engine enforcement as preview and don’t state GA for the rest.',
-      },
-    ],
+    needsVerification: [],
   },
 
   // ── Seal & Stamp ─────────────────────────────────────────────────────
@@ -869,12 +869,23 @@ export const maintainNotes: MachineNotes[] = [
         sources: [PIPELINES_PROCESS],
       },
     ],
-    needsVerification: [
+    contested: [
       {
-        claim: 'Which workspace role is needed to deploy an existing semantic model or paginated report through a deployment pipeline: Contributor (the page’s action table) or Member (its “Granted permissions” item table).',
-        why: 'Both tables are on Understand the deployment process and disagree for these item types (Step 5 review). No question or puzzle tests a Contributor deploying them; confirm in Step 8.',
+        topic: 'Which workspace role can deploy an existing semantic model or paginated report',
+        readings: [
+          {
+            text: 'Understand the deployment process, permissions table: a workspace contributor who is also a pipeline admin can "Deploy items (must be at least a contributor in both source and target workspaces)".',
+            sources: [PIPELINES_PROCESS],
+          },
+          {
+            text: 'The same page’s "Granted permissions" table lists "Workspace member" as the required permission to deploy an existing semantic model or paginated report.',
+            sources: [PIPELINES_PROCESS],
+          },
+        ],
+        guidance: 'The two tables on one page don’t agree for these item types, so no question or puzzle asks whether a Contributor can deploy them. The page’s general rule still holds: to deploy you must be a pipeline admin and a contributor, member, or admin of the workspaces in the stages involved.',
       },
     ],
+    needsVerification: [],
   },
 
   // ── Ripple Map ───────────────────────────────────────────────────────
@@ -1176,11 +1187,6 @@ export const maintainNotes: MachineNotes[] = [
         sources: [SHARED_MODELS],
       },
     ],
-    needsVerification: [
-      {
-        claim: 'Whether Power BI Desktop’s Export PBIDS (Data source settings) works for a Fabric warehouse source.',
-        why: 'Learn’s PBIDS examples show the tds (SQL Server) protocol but no Fabric warehouse example (Step 6 lab review). Lab 14 asks the player to report it; no question depends on it.',
-      },
-    ],
+    needsVerification: [],
   },
 ]

@@ -35,6 +35,10 @@ const VISUAL_QUERY = `${L}fabric/data-warehouse/visual-query-editor`
 const QUERY_WAREHOUSE = `${L}fabric/data-warehouse/query-warehouse`
 const LAKEHOUSE_PREP = `${L}fabric/data-engineering/tutorial-lakehouse-data-preparation`
 const DATA_WRANGLER = `${L}fabric/data-science/data-wrangler`
+const NOTEBOOK_CLEAN = `${L}training/modules/fabric-transform-data-notebooks/3-shape-clean-data`
+const PQ_LAKEHOUSE = `${L}power-query/connectors/lakehouse`
+const CREATE_FUNCTION = `${L}sql/t-sql/statements/create-function-sql-data-warehouse?view=fabric`
+const SCALAR_UDF = `${L}fabric/data-warehouse/how-to-inline-udf`
 const LAKEHOUSE = `${L}fabric/data-engineering/lakehouse-overview`
 const QUALIFY = `${L}sql/t-sql/queries/select-qualify-clause-transact-sql?view=fabric`
 const TRY_CAST = `${L}sql/t-sql/functions/try-cast-transact-sql?view=fabric`
@@ -404,6 +408,10 @@ export const prepareNotes: MachineNotes[] = [
         text: 'Every tenant gets a Real-Time hub automatically. There is nothing to provision.',
         sources: [RT_HUB],
       },
+      {
+        text: 'You may still meet the older name "OneLake data hub" on some current Learn pages, such as the Power Query Lakehouse connector page, which says to select the lakehouse "in the OneLake data hub". The catalog’s own pages say "OneLake catalog".',
+        sources: [PQ_LAKEHOUSE, CATALOG],
+      },
     ],
     dontConfuse: [
       {
@@ -433,12 +441,7 @@ export const prepareNotes: MachineNotes[] = [
         sources: [RT_HUB],
       },
     ],
-    needsVerification: [
-      {
-        claim: '"OneLake data hub" was renamed to "OneLake catalog".',
-        why: 'The old Learn URL (fabric/get-started/onelake-data-hub) now redirects to the OneLake catalog overview, but no current Learn page states the rename in words.',
-      },
-    ],
+    needsVerification: [],
   },
 
   // ── Vat Selector ─────────────────────────────────────────────────────
@@ -674,6 +677,10 @@ export const prepareNotes: MachineNotes[] = [
             text: 'In a notebook, Data Wrangler offers point-and-click operations that generate pandas or PySpark code: Drop duplicate rows, Drop missing values, Fill missing values, Change column type, and Filter.',
             sources: [DATA_WRANGLER],
           },
+          {
+            text: 'In PySpark, dropDuplicates() removes exact duplicate rows, and dropDuplicates(["order_id"]) keeps one row per business key. fillna() replaces nulls with defaults (for example a dictionary of column → value), and dropna(subset=[...]) drops rows where a required column is null.',
+            sources: [NOTEBOOK_CLEAN],
+          },
         ],
         howTo: [
           {
@@ -760,6 +767,30 @@ export const prepareNotes: MachineNotes[] = [
         ],
         sources: [QUALIFY, COALESCE, TRY_CAST, LOAD_TABLES],
       },
+      {
+        title: 'Remove duplicates and handle nulls in a notebook (PySpark)',
+        language: 'pyspark',
+        illustrative: true,
+        steps: [
+          {
+            code: 'df = spark.table("raw_sales")',
+            explain: 'Load the lakehouse table into a Spark DataFrame.',
+          },
+          {
+            code: 'deduped_df = df.dropDuplicates(["order_id"])',
+            explain: 'Keep one row per order_id. With no column list, dropDuplicates() removes only rows that are identical in every column.',
+          },
+          {
+            code: 'clean_df = deduped_df.fillna({"region": "Unknown", "discount": 0})',
+            explain: 'Replace nulls column by column: a missing region becomes "Unknown" and a missing discount becomes 0, so calculations don’t return null.',
+          },
+          {
+            code: 'clean_df = clean_df.dropna(subset=["customer_id"])',
+            explain: 'Drop rows that have no customer_id, because they can’t be joined to customer data.',
+          },
+        ],
+        sources: [NOTEBOOK_CLEAN],
+      },
     ],
     traps: [
       {
@@ -828,12 +859,7 @@ export const prepareNotes: MachineNotes[] = [
         sources: [LOAD_TABLES],
       },
     ],
-    needsVerification: [
-      {
-        claim: 'PySpark code for de-duplication and null handling (dropDuplicates, fillna).',
-        why: 'The Learn pages read for this machine show Data Wrangler’s operation names but not the PySpark calls it generates, so the notes use T-SQL for code. Find a Learn page with the PySpark methods in Step 8.',
-      },
-    ],
+    needsVerification: [],
   },
 
   // ── Twisting Frame ───────────────────────────────────────────────────
@@ -1544,8 +1570,8 @@ export const prepareNotes: MachineNotes[] = [
         sources: [ENDPOINT],
       },
       {
-        text: 'Learn pages conflict on materialized views. The warehouse overview mentions them, but the T-SQL surface area lists them as not supported. Don’t rely on them until confirmed.',
-        sources: [WAREHOUSE, TSQL_SURFACE],
+        text: 'Scalar UDFs are a preview feature in Fabric Data Warehouse. To be used in a SELECT … FROM query on user tables, a scalar UDF must be inlineable; you can still create one that isn’t, but it works only in a limited number of scenarios.',
+        sources: [CREATE_FUNCTION, SCALAR_UDF],
       },
     ],
     dontConfuse: [
@@ -1570,7 +1596,13 @@ export const prepareNotes: MachineNotes[] = [
       },
     ],
     renamed: [],
-    preview: [],
+    preview: [
+      {
+        feature: 'Scalar user-defined functions in Fabric Data Warehouse',
+        note: 'Scalar UDFs (and external UDFs that call a Fabric User Data Function) are preview features. Check whether a function is inlineable with is_inlineable in sys.sql_modules.',
+        sources: [CREATE_FUNCTION, SCALAR_UDF],
+      },
+    ],
     upcoming: [],
     glossary: [
       {
@@ -1584,21 +1616,33 @@ export const prepareNotes: MachineNotes[] = [
         sources: [CREATE_PROC, LOAD_TABLES],
       },
       {
+        term: 'Scalar user-defined function (UDF)',
+        definition: 'A T-SQL function that returns a single value. In Fabric Data Warehouse it is a preview feature, and Fabric inlines it into the calling query when the function and query meet the inlining requirements.',
+        sources: [CREATE_FUNCTION, SCALAR_UDF],
+      },
+      {
         term: 'Inline table-valued function (TVF)',
         definition: 'A function that returns a table from a single SELECT and can take parameters. Supported on the SQL analytics endpoint and the warehouse.',
         sources: [WAREHOUSE],
       },
     ],
-    needsVerification: [
+    contested: [
       {
-        claim: 'Are scalar user-defined functions supported in Fabric Data Warehouse?',
-        why: 'Learn confirms "functions" and specifically inline TVFs. The CREATE FUNCTION reference has no Fabric view, so scalar UDF support isn’t confirmed.',
-      },
-      {
-        claim: 'Materialized views in Fabric Data Warehouse.',
-        why: 'The warehouse overview lists them as supported, but the T-SQL surface area page lists them under unsupported commands.',
+        topic: 'Materialized views in Fabric Data Warehouse',
+        readings: [
+          {
+            text: 'What is Fabric Data Warehouse? describes the warehouse’s T-SQL surface area as having "full multi-table ACID transaction support, materialized views, functions, and stored procedures".',
+            sources: [WAREHOUSE],
+          },
+          {
+            text: 'The T-SQL surface area page lists "Materialized views" under commands that "aren’t supported", and warns not to use them even if they appear to succeed.',
+            sources: [TSQL_SURFACE],
+          },
+        ],
+        guidance: 'Learn doesn’t settle this, so no question or puzzle in the game depends on it.',
       },
     ],
+    needsVerification: [],
   },
 
   // ── Kusto Tension Meter ──────────────────────────────────────────────

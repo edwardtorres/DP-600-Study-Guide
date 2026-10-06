@@ -25,6 +25,7 @@ export function notesSources(n: MachineNotes): string[] {
   n.preview.forEach((p) => add(p.sources))
   n.upcoming.forEach((u) => add(u.sources))
   n.glossary.forEach((g) => add(g.sources))
+  n.contested?.forEach((c) => cited(c.readings))
   return urls
 }
 
@@ -43,7 +44,8 @@ export function notesWordCount(n: MachineNotes): number {
     n.renamed.reduce((s, r) => s + words(`${r.oldName} ${r.newName} ${r.examLikely} ${r.note}`), 0) +
     n.preview.reduce((s, p) => s + words(`${p.feature} ${p.note}`), 0) +
     n.upcoming.reduce((s, u) => s + words(u.change), 0) +
-    n.glossary.reduce((s, g) => s + words(`${g.term} ${g.definition}`), 0)
+    n.glossary.reduce((s, g) => s + words(`${g.term} ${g.definition}`), 0) +
+    (n.contested ?? []).reduce((s, c) => s + words(`${c.topic} ${c.guidance}`) + cited(c.readings), 0)
   )
 }
 
@@ -120,6 +122,11 @@ export function validateNotes(machines: Machine[], notes: MachineNotes[], option
     n.upcoming.forEach((u) => {
       if (!/^\d{4}-\d{2}-\d{2}$/.test(u.date)) errors.push(where(`dated change has a bad date: ${u.date}`))
       checkSources(`dated change ${u.date}`, u.sources)
+    })
+    n.contested?.forEach((c) => {
+      if (c.readings.length < 2) errors.push(where(`contested point "${c.topic}" needs at least two readings`))
+      if (!c.guidance.trim()) errors.push(where(`contested point "${c.topic}" has no guidance`))
+      checkCited(`contested "${c.topic}"`, c.readings)
     })
     n.glossary.forEach((g) => {
       const key = g.term.toLowerCase()

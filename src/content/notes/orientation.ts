@@ -15,6 +15,7 @@ const WAREHOUSE = `${L}fabric/data-warehouse/data-warehousing`
 const EVENTHOUSE = `${L}fabric/real-time-intelligence/eventhouse`
 const MEDALLION = `${L}fabric/onelake/onelake-medallion-lakehouse-architecture`
 const DESKTOP = `${L}power-bi/fundamentals/desktop-get-the-desktop`
+const RTI = `${L}fabric/real-time-intelligence/overview`
 
 export const orientationNotes: MachineNotes[] = [
   {
@@ -384,6 +385,9 @@ export const orientationNotes: MachineNotes[] = [
       {
         text: 'If you don’t see "Start trial" in the Account manager, trials may be disabled for your tenant. That is an admin setting, not a problem with your account.',
         sources: [TRIAL],
+      },      {
+        text: 'The trial page’s workload list still says "Real-Time Analytics", while the Fabric overview and the workload’s own pages say "Real-Time Intelligence". Expect the current name, Real-Time Intelligence, in Fabric pages.',
+        sources: [TRIAL, OVERVIEW, RTI],
       },
     ],
     dontConfuse: [
@@ -419,11 +423,6 @@ export const orientationNotes: MachineNotes[] = [
         sources: [LICENSES],
       },
     ],
-    needsVerification: [
-      {
-        claim: 'The trial page lists "Real-Time Analytics" as a workload, while the Fabric overview says "Real-Time Intelligence".',
-        why: 'No Learn page found that states the rename explicitly. Confirm in Step 8 before listing it as a renamed feature.',
-      },
-    ],
+    needsVerification: [],
   },
 ]

@@ -135,6 +135,25 @@ export function NotesView({ notes }: { notes: MachineNotes }) {
         </Block>
       )}
 
+      {notes.contested && notes.contested.length > 0 && (
+        <Block title="Learn pages disagree">
+          {notes.contested.map((c) => (
+            <div key={c.topic} className="rounded-lg border border-weld/40 bg-weld/5 p-3" data-testid="contested">
+              <p className="font-semibold text-mill-50">{c.topic}</p>
+              <ul className="mt-1 list-disc space-y-1 pl-5">
+                {c.readings.map((r, i) => (
+                  <li key={i}>
+                    {r.text}
+                    {ref(r.sources)}
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-1 text-weld">{c.guidance}</p>
+            </div>
+          ))}
+        </Block>
+      )}
+
       {notes.renamed.length > 0 && (
         <Block title="Renamed features">
           {notes.renamed.map((r) => (

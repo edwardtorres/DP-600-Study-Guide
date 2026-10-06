@@ -22,16 +22,16 @@ export const QUESTIONS_PENDING: FloorId[] = []
 export const CASES_PENDING = false
 
 /**
- * Phrases tied to open needs-verification items (Step 8 queue). Questions must
+ * Phrases tied to points Learn doesn’t settle (contested or unsupported after the Step 8 fact-check). Questions must
  * not depend on them, so they may not appear anywhere in a question.
  */
 export const BANNED_TERMS: RegExp[] = [
   /materialized view/i,
-  /scalar (user-defined )?function/i,
-  /scalar udf/i,
   /onelake data hub/i,
   /real-time analytics/i,
-  /dropDuplicates|fillna/,
+  // Step 8: contested points (Learn pages disagree; see each machine's "contested" notes).
+  /(object-level|column-level) security[^.]*(fall(s)? back|fallback)/i,
+  /contributor[^.]*deploy[^.]*(existing )?(semantic model|paginated report)/i,
   /onelake security[^.]*generally available/i,
   /all of the above|none of the above/i,
 ]

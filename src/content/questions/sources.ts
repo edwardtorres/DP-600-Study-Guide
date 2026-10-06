@@ -50,6 +50,8 @@ export const S = {
   concat: `${L}sql/t-sql/functions/concat-transact-sql?view=fabric`,
   groupBy: `${L}sql/t-sql/queries/select-group-by-transact-sql?view=fabric`,
   createFunction: `${L}sql/t-sql/statements/create-function-sql-data-warehouse?view=fabric`,
+  scalarUdf: `${L}fabric/data-warehouse/how-to-inline-udf`,
+  notebookClean: `${L}training/modules/fabric-transform-data-notebooks/3-shape-clean-data`,
   execute: `${L}sql/t-sql/language-elements/execute-transact-sql?view=fabric`,
   // Query
   visualQuery: `${L}fabric/data-warehouse/visual-query-editor`,

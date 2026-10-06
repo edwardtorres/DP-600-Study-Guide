@@ -1031,7 +1031,7 @@ export const semanticNotes: MachineNotes[] = [
             sources: [DL_HOW],
           },
           {
-            text: 'Fallback (Direct Lake on SQL only): a query switches to DirectQuery through the SQL analytics endpoint when it uses tables with SQL RLS, unmaterialized SQL views, or a table over a guardrail, or when the model wasn’t reframed after the tables changed. How Direct Lake works also lists dynamic data masking (only that page does). SQL OLS or CLS also keep a query out of Direct Lake, but Learn pages differ on the result: How Direct Lake works lists OLS as a fallback cause, while Integrate Direct Lake security says the query returns an error.',
+            text: 'Fallback (Direct Lake on SQL only): a query switches to DirectQuery through the SQL analytics endpoint when it uses tables with SQL RLS, unmaterialized SQL views, or a table over a guardrail, or when the model wasn’t reframed after the tables changed. How Direct Lake works also lists dynamic data masking (DDM) defined at the SQL analytics endpoint as a cause. SQL OLS or CLS also keep a query out of Direct Lake, but Learn pages differ on the result (see “Learn pages disagree”).',
             sources: [DL_HOW, DL_SECURITY],
           },
           {
@@ -1204,20 +1204,37 @@ export const semanticNotes: MachineNotes[] = [
         sources: [DIRECT_LAKE],
       },
     ],
-    needsVerification: [
+    contested: [
       {
-        claim: 'What a Direct Lake on SQL query returns when it touches a table or column restricted by SQL analytics endpoint OLS or CLS: DirectQuery fallback or an error.',
-        why: 'How Direct Lake works lists SQL OLS as a fallback cause; Integrate Direct Lake security says the query returns an error (Step 5 review). No question or puzzle depends on it.',
+        topic: 'Direct Lake on SQL: a query that touches a table or column restricted by SQL analytics endpoint OLS or CLS',
+        readings: [
+          {
+            text: 'How Direct Lake works lists "OLS defined at SQL analytics endpoint" as a fallback cause, with the fix "Move object-level security to the semantic model, or accept DirectQuery fallback."',
+            sources: [DL_HOW],
+          },
+          {
+            text: 'Integrate Direct Lake security says that if a query touches a table or column restricted by SQL analytics endpoint OLS or CLS, "the query returns an error".',
+            sources: [DL_SECURITY],
+          },
+        ],
+        guidance: 'Either way the query isn’t answered in Direct Lake mode; How Direct Lake works suggests moving object-level security to the semantic model. No question or puzzle depends on fallback vs error here.',
       },
       {
-        claim: 'What a Direct Lake on OneLake query returns when the SQL analytics endpoint enforces RLS on its table: success without the SQL RLS, or an error.',
-        why: 'The Direct Lake overview says queries succeed and SQL-based RLS isn’t applied; Integrate Direct Lake security says an error is returned (Step 5 review). No question or puzzle depends on it.',
-      },
-      {
-        claim: 'Dynamic data masking at the SQL analytics endpoint as a Direct Lake fallback cause.',
-        why: 'Only How Direct Lake works lists it; the overview and the security page don’t mention it. Puzzle SF-07 relies on it. Confirm in Step 8.',
+        topic: 'Direct Lake on OneLake when the SQL analytics endpoint enforces RLS on the table',
+        readings: [
+          {
+            text: 'The Direct Lake overview says that with Direct Lake on OneLake "queries will succeed, and SQL based RLS is not applied", because Direct Lake on OneLake reads the files in OneLake.',
+            sources: [DIRECT_LAKE],
+          },
+          {
+            text: 'Integrate Direct Lake security says Direct Lake on OneLake doesn’t fall back to DirectQuery, and if any table in the SQL analytics endpoint enforces RLS, "an error result is returned".',
+            sources: [DL_SECURITY],
+          },
+        ],
+        guidance: 'Under neither reading does Direct Lake on OneLake apply the SQL endpoint’s RLS to the rows it returns. Integrate Direct Lake security recommends enforcing data-access rules in OneLake security. No question or puzzle depends on success vs error here.',
       },
     ],
+    needsVerification: [],
   },
 
   // ── Batch Winder ─────────────────────────────────────────────────────
