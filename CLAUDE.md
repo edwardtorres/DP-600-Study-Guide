@@ -25,7 +25,8 @@ The learner has passed PL-300 study (Power BI basics, DAX fundamentals, star sch
 | `npm run check:content -- --live` | Also re-fetches the study guide and diffs every bullet |
 | `npm run check:secrets` | Fails on local paths, private links, or token-like strings in the repo |
 | `npm run check:links` | Fetches every URL cited in notes, verified edges, questions, puzzles, and labs; fails on non-200, or on a lab source whose #section is missing |
-| `npm run check` | All of the above except build, `--live`, and `check:links` |
+| `npm run check:freshness` | Fetches every cited page and lists those Learn updated after their `verifiedAt` date, with what cites them (network; not in `npm test`) |
+| `npm run check` | All of the above except build, `--live`, `check:links`, and `check:freshness` |
 | `npm run e2e` | Playwright flows (machine, placement, puzzle, lab, review, mock) at 1440 px and 390 px, tap-only, against the dev server. Needs a browser, so it's not in `npm test`. Set `PW_CHROMIUM` to a Chromium binary if Playwright's own isn't installed |
 
 `npm run build` also runs `scripts/check-bundle.ts`, which fails if a dev-only hook is in the production bundle: `?seed=` (`src/game/seed.ts`) or `?mock=short` (`src/game/mockShort.ts`), both reachable only behind `import.meta.env.DEV`.
@@ -93,7 +94,7 @@ The free practice assessment shows "the style, wording, and difficulty"; the rea
 ## Notes (Step 2)
 
 - Notes are typed data in `src/content/notes/<floor>.ts` (types in `src/content/types.ts`). Every statement is a `Cited` item with at least one `learn.microsoft.com` URL.
-- **Writing workflow:** fetch the Learn page, extract the exact sentences you rely on (kept outside the repo), then write the note in your own words and cite the page. Never fill gaps from memory. If Learn doesn't confirm a fact, put it in that machine's `needsVerification` list (the Step 8 queue) and don't state it as fact. If a needed Learn page is unreachable, stop and tell the user.
+- **Writing workflow:** fetch the Learn page, extract the exact sentences you rely on (kept outside the repo), then write the note in your own words and cite the page. Never fill gaps from memory. If Learn doesn't confirm a fact, put it in that machine's `needsVerification` list (empty after Step 8; new items wait for the next fact-check) and don't state it as fact. If a needed Learn page is unreachable, stop and tell the user.
 - Each machine has: overview; per-bullet tools, key concepts, and how-to; worked examples (marked illustrative, one explanation per step) where the skill involves code; exam traps; "don't confuse" pairs; renamed features (old → new, which name the exam likely uses, based on the current study guide's wording); Preview labels; dated upcoming changes; glossary terms (each term defined once across the app).
 - `check:content` enforces all of this (`src/content/validate.ts`, `src/content/requirements.ts`). `npm run check:links` fetches every cited URL (network needed).
 
@@ -139,8 +140,26 @@ The free practice assessment shows "the style, wording, and difficulty"; the rea
   - **Scoring:** full credit only, and unanswered questions count as wrong. Results show raw percentages overall, by domain, and by bullet, every question with its explanation and sources, the trap pairs fallen for, the history, and the scaled-score note.
   - **Logging:** answers log as `'m'`, count in readiness, earn XP, and never certify.
   - **Dev-only short mode:** `?mock=short` gives 6 main questions plus the case study and 10 minutes, for e2e.
-- **Ready to book:** shown only when the two most recent full (not short) mocks each score at least 80% overall with every domain at least 70% (`readyToBook`). It links to Microsoft's free practice assessment as an outside check. This is a raw-percentage signal; Microsoft's 700 is a scaled score.
+- **Freshness (Step 8):** each mock stores `freshness`, the share of its main-section questions not answered (any attempt code but `z`) in the 14 days before it started (`mockFreshness`). A full mock counts toward ready to book only if freshness is at least `FRESH_MIN = 50%`. A stale mock is skipped (it neither counts nor breaks the run), and the panel says why (`readyStatus`).
+- **Ready to book:** shown only when the two most recent full (not short) mocks that count each score at least 80% overall with every domain at least 70% (`readyToBook`). It links to Microsoft's free practice assessment as an outside check. This is a raw-percentage signal; Microsoft's 700 is a scaled score.
 - UI: header buttons Daily review (with the due count), Weak Spots, and Mock exam (`src/components/review/`, `weak/`, `mock/`).
+
+## Fact-checking and staying current (Step 8)
+
+- **Report:** `docs/reviews/step-8-fact-check.md` (queue verdicts, claim counts, key changes, sweeps). Per-claim ledgers: `docs/reviews/step-8-claims/`.
+- **Workflow for a re-check:**
+  1. `scripts/export-claims.ts <dir>` writes the claim units per checker group.
+  2. Checker agents that didn't write the content verify each atomic claim against the current page (`scripts/learn-page.ts` fetches a page's text and last-updated date).
+  3. Fix everything not confirmed.
+  4. Re-review any changed key blind.
+  5. Then run `scripts/stamp-verified.ts <date> [ids]`.
+- **verifiedAt:**
+  - `src/content/verified.ts` has `SOURCE_VERIFIED` (every cited page) and `NOTES_VERIFIED` (every machine). `check:content` fails if one is missing or in the future.
+  - The machine panel shows "Last checked on Learn: <date>".
+  - `npm run check:freshness` lists sources updated since.
+- **Contested points:** when current Learn pages disagree, the notes show both readings in a `contested` block ("Learn pages disagree"). The point stays out of questions and puzzles through `BANNED_TERMS`, and evaluators don't encode it.
+- **After Step 8, these remain contested:** materialized views in the warehouse; Contributor vs Member for deploying existing semantic models and paginated reports; Direct Lake on SQL with SQL OLS/CLS (fallback vs error); Direct Lake on OneLake with SQL RLS (success vs error); inline TVF release status.
+- **Unsupported, kept out of questions:** the OneLake data hub and Real-Time Analytics renames; OneLake security GA.
 
 ## Labs (Step 6)
 
@@ -160,7 +179,7 @@ The user works on both Windows and Mac. Fabric runs in the browser, but Power BI
 
 ## Save system
 
-- `src/save/schema.ts` (types + validator), `migrations.ts`, `storage.ts`. Current `SAVE_VERSION = 5`, key `fabric-mill:save`. v2 added a compact answer log (`answers: [id, 0|1, unixSeconds, code][]`, kept for Step 7 spaced repetition) and per-machine `notesOpenedAt`, `lastDraw`, and `placementDays`. v3 adds code `'z'` (one entry per puzzle play) next to `'s'|'i'|'p'` (start-up/inspection/placement), and per-machine `inspectionFails` (local days of failed inspections). v4 adds code `'l'` (lab debrief answers), `labs` (per-lab step checks, problem notes up to 2,000 characters, completion time) and an optional `trialStart` day. v5 adds codes `'r'` (daily review) and `'m'` (mock exam), `mocks` (finished mocks: ids in exam order, per-question correct, responses, timing) and an optional `activeMock` (start time, sections, responses, marks, seed, `caseLocked`). Migrations `{ from: 1 }` (adds an empty log), `{ from: 2 }` (no data change), `{ from: 3 }` (adds `labs: {}`), and `{ from: 4 }` (adds `mocks: []`) are tested on real saves: `src/save/fixtures/save-v1.json`, `save-v2.json` (captured from the Step 4 app), `save-v3.json` (Step 5 app), and `save-v4.json` (Step 6 app).
+- `src/save/schema.ts` (types + validator), `migrations.ts`, `storage.ts`. Current `SAVE_VERSION = 6`, key `fabric-mill:save`. v2 added a compact answer log (`answers: [id, 0|1, unixSeconds, code][]`, kept for Step 7 spaced repetition) and per-machine `notesOpenedAt`, `lastDraw`, and `placementDays`. v3 adds code `'z'` (one entry per puzzle play) next to `'s'|'i'|'p'` (start-up/inspection/placement), and per-machine `inspectionFails` (local days of failed inspections). v4 adds code `'l'` (lab debrief answers), `labs` (per-lab step checks, problem notes up to 2,000 characters, completion time) and an optional `trialStart` day. v5 adds codes `'r'` (daily review) and `'m'` (mock exam), `mocks` (finished mocks: ids in exam order, per-question correct, responses, timing) and an optional `activeMock` (start time, sections, responses, marks, seed, `caseLocked`). v6 adds `freshness` to each mock record and to `activeMock`; the migration computes it from the answer log. Migrations `{ from: 1 }` (adds an empty log), `{ from: 2 }` (no data change), `{ from: 3 }` (adds `labs: {}`), `{ from: 4 }` (adds `mocks: []`), and `{ from: 5 }` (computes each mock's freshness) are tested on real saves: `src/save/fixtures/save-v1.json`, `save-v2.json` (captured from the Step 4 app), `save-v3.json` (Step 5 app), `save-v4.json` (Step 6 app), and `save-v5.json` (Step 7 app).
 - Settings can export the save as JSON, import a save (same parse → migrate → validate path as loading; a bad file changes nothing), and reset progress (the old save is copied to the backup key first).
 - On load: parse → run migrations up to the current version → validate → drop unknown machine ids. If any step fails, the raw save is copied to `fabric-mill:save:corrupt-backup` and a fresh save starts. The UI shows a notice.
 - **To change the save shape:** bump `SAVE_VERSION`, add the new type and validator, append a migration `{ from: n }`, and add a test that loads a real version-n save.
@@ -171,7 +190,12 @@ The user works on both Windows and Mac. Fabric runs in the browser, but Power BI
 scripts/official-outline.json   verbatim outline
 scripts/check-content.ts        content check (+ --live)
 scripts/check-secrets.ts        secrets/paths check
-src/content/                    notes data, notes types, notes validator, requirements
+scripts/learn-page.ts           fetch a Learn page: status, last-updated date, article text
+scripts/citations.ts            every cited page and what cites it
+scripts/export-claims.ts        claim units for fact-check agents
+scripts/check-freshness.ts      sources updated since verifiedAt
+scripts/stamp-verified.ts       record verifiedAt dates
+src/content/                    notes data, notes types, notes validator, requirements, verified.ts (verifiedAt dates)
 src/content/questions/          question bank, case studies, question validator
 src/review/                     hidden /review page
 src/data/                       outline loader, machines, edges, floors, graph utils, shared validators
@@ -198,5 +222,5 @@ e2e/                            Playwright flows (npm run e2e)
 5. ✅ Puzzles: Query Oracle (T-SQL/KQL/DAX predict-the-result), Pattern Draft, Gearbox Picker, Shuttle Fallback, Gatehouse Access Matrix, Ripple & Conveyor.
 6. ✅ Hands-on Fabric trial labs (label Windows-only ones).
 7. ✅ Spaced repetition and a timed mock exam with a case study. Also raise the difficulty-3 share of the question bank to about 25% (17% after Step 3) with new scenario questions, concentrated in Prepare data and Semantic models.
-8. Fact-check all content against Microsoft Learn.
+8. ✅ Fact-check all content against Microsoft Learn.
 9. Deploy to dp600.edwardtorres.dev.
