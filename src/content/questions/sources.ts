@@ -128,6 +128,8 @@ export const S = {
   gitIntro: `${L}fabric/cicd/git-integration/intro-to-git-integration`,
   gitProcess: `${L}fabric/cicd/git-integration/git-integration-process`,
   pbip: `${L}power-bi/developer/projects/projects-overview`,
+  giveAccess: `${L}fabric/fundamentals/give-access-workspaces`,
+  createSecurityPolicy: `${L}sql/t-sql/statements/create-security-policy-transact-sql?view=fabric`,
   pipelinesIntro: `${L}fabric/cicd/deployment-pipelines/intro-to-deployment-pipelines`,
   pipelinesStart: `${L}fabric/cicd/deployment-pipelines/get-started-with-deployment-pipelines`,
   pipelinesProcess: `${L}fabric/cicd/deployment-pipelines/understand-the-deployment-process`,

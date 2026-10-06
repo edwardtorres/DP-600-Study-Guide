@@ -8,6 +8,7 @@
 /** Cited page (without #fragment) → day it was verified (YYYY-MM-DD). */
 export const SOURCE_VERIFIED: Record<string, string> = {
   "https://learn.microsoft.com/en-us/analysis-services/tmsl/refresh-command-tmsl?view=sql-analysis-services-2025": '2026-10-06',
+  "https://learn.microsoft.com/en-us/analysis-services/tmsl/tmsl-reference-commands": '2026-10-06',
   "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/dp-600": '2026-10-06',
   "https://learn.microsoft.com/en-us/dax/addcolumns-function-dax": '2026-10-06',
   "https://learn.microsoft.com/en-us/dax/all-function-dax": '2026-10-06',
@@ -101,6 +102,7 @@ export const SOURCE_VERIFIED: Record<string, string> = {
   "https://learn.microsoft.com/en-us/fabric/fundamentals/endorsement-promote-certify": '2026-10-06',
   "https://learn.microsoft.com/en-us/fabric/fundamentals/fabric-terminology": '2026-10-06',
   "https://learn.microsoft.com/en-us/fabric/fundamentals/fabric-trial": '2026-10-06',
+  "https://learn.microsoft.com/en-us/fabric/fundamentals/give-access-workspaces": '2026-10-06',
   "https://learn.microsoft.com/en-us/fabric/fundamentals/microsoft-fabric-overview": '2026-10-06',
   "https://learn.microsoft.com/en-us/fabric/fundamentals/roles-workspaces": '2026-10-06',
   "https://learn.microsoft.com/en-us/fabric/fundamentals/share-items": '2026-10-06',
@@ -206,6 +208,7 @@ export const SOURCE_VERIFIED: Record<string, string> = {
   "https://learn.microsoft.com/en-us/sql/t-sql/queries/where-transact-sql?view=fabric": '2026-10-06',
   "https://learn.microsoft.com/en-us/sql/t-sql/statements/create-function-sql-data-warehouse?view=fabric": '2026-10-06',
   "https://learn.microsoft.com/en-us/sql/t-sql/statements/create-procedure-transact-sql?view=fabric": '2026-10-06',
+  "https://learn.microsoft.com/en-us/sql/t-sql/statements/create-security-policy-transact-sql?view=fabric": '2026-10-06',
   "https://learn.microsoft.com/en-us/sql/t-sql/statements/create-table-as-select-azure-sql-data-warehouse?view=fabric": '2026-10-06',
   "https://learn.microsoft.com/en-us/sql/t-sql/statements/create-view-transact-sql?view=fabric": '2026-10-06',
   "https://learn.microsoft.com/en-us/sql/t-sql/statements/merge-transact-sql?view=fabric": '2026-10-06',

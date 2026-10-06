@@ -137,7 +137,7 @@ export const maintainHardQuestions: Question[] = [
     sources: [S.pbip],
     statements: [
       { id: 's1', text: 'The generated .gitignore keeps the local data cache (cache.abf) out of source control.', answer: true, explain: 'Yes. The .gitignore excludes cache.abf and localSettings.json, so data isn’t committed.' },
-      { id: 's2', text: 'Deploying through Git integration also deploys the model’s data, so no refresh is needed.', answer: false, explain: 'No. Paths other than Desktop Publish deploy metadata only, so the model must be refreshed in the service.' },
+      { id: 's2', text: 'Deploying through Git integration also deploys the model’s data, so no refresh is needed.', answer: false, explain: 'No. Paths other than Desktop Publish deploy metadata only, so the data isn’t deployed.' },
       { id: 's3', text: 'The project can’t be opened without its .pbip file.', answer: false, explain: 'No. The .pbip file is optional; you can open the report from its definition.pbir.' },
     ],
   },

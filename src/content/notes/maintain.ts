@@ -2,6 +2,8 @@ import type { MachineNotes } from '../types'
 
 const L = 'https://learn.microsoft.com/en-us/'
 const ROLES = `${L}fabric/fundamentals/roles-workspaces`
+const GIVE_ACCESS = `${L}fabric/fundamentals/give-access-workspaces`
+const TMSL_COMMANDS = `${L}analysis-services/tmsl/tmsl-reference-commands`
 const PERMISSION_MODEL = `${L}fabric/security/permission-model`
 const SHARE_ITEMS = `${L}fabric/fundamentals/share-items`
 const WORKSPACES = `${L}fabric/fundamentals/workspaces`
@@ -54,7 +56,7 @@ export const maintainNotes: MachineNotes[] = [
     ],
     overview: [
       {
-        text: 'Workspace-level access is the outermost gate. Anyone without a workspace role can’t open the workspace at all (unless an item is shared with them directly). Roles apply to every item in the workspace, so this is the coarsest and most powerful control.',
+        text: 'Workspace-level access is the outermost gate. Anyone without a workspace role can’t open the workspace at all (unless an item is shared with them directly). Roles apply to every item in the workspace, so this is the broadest control.',
         sources: [PERMISSION_MODEL],
       },
     ],
@@ -79,7 +81,7 @@ export const maintainNotes: MachineNotes[] = [
         howTo: [
           {
             text: 'Use the workspace’s Manage access option to add people or groups and pick a role. Learn recommends assigning roles to security groups and managing membership in the group.',
-            sources: [WORKSPACES, ROLES, ONELAKE_SECURITY],
+            sources: [GIVE_ACCESS, WORKSPACES, ROLES, ONELAKE_SECURITY],
           },
         ],
       },
@@ -106,7 +108,7 @@ export const maintainNotes: MachineNotes[] = [
         b: 'Contributor',
         difference: [
           {
-            text: 'Both can create and modify content. Member can also share items, let others reshare, and add people with Member or lower roles. Contributor can’t share or manage access.',
+            text: 'Both can create and modify content. Member can also share items, let others reshare, and add people with Member or lower roles. Contributor can’t manage workspace access, and can share items only if given Reshare permission.',
             sources: [PERMISSION_MODEL, ROLES],
           },
         ],
@@ -152,7 +154,7 @@ export const maintainNotes: MachineNotes[] = [
         concepts: [
           {
             text: 'Sharing always grants Read, which lets the recipient find and open the item. Optional extras: Edit, Share (reshare up to your own permissions), Read All with SQL analytics endpoint (ReadData via T-SQL), Read all with Apache Spark (ReadAll via OneLake and Spark), Build (create content on a semantic model), and Execute.',
-            sources: [SHARE_ITEMS],
+            sources: [SHARE_ITEMS, ROLES],
           },
           {
             text: 'Read permission alone shows metadata and reports but not the underlying data in SQL or OneLake. For example, a shared Direct Lake report also needs OneLake data permissions.',
@@ -197,7 +199,7 @@ export const maintainNotes: MachineNotes[] = [
             sources: [PERMISSION_MODEL, SHARE_ITEMS],
           },
           {
-            text: 'RLS/CLS/OLS: inside an engine, they narrow which rows, columns, or objects a user who already has access can see. They are set in the warehouse or SQL analytics endpoint (T-SQL), in the semantic model (DAX roles), or in OneLake security roles. They narrow access; they never grant it.',
+            text: 'RLS/CLS/OLS: inside an engine, they narrow which rows, columns, or objects a user who already has access can see. They are set in the warehouse or SQL analytics endpoint (T-SQL), in the semantic model (DAX roles), or in OneLake security roles. T-SQL and semantic model RLS/CLS/OLS only narrow access. OneLake security roles are different: they are Grant roles in a deny-by-default model that give Viewers (or users with item Read) access to the data in the role.',
             sources: [PERMISSION_MODEL, ONELAKE_SECURITY],
           },
           {
@@ -277,7 +279,7 @@ export const maintainNotes: MachineNotes[] = [
             sources: [WH_RLS],
           },
           {
-            text: 'Semantic model: Modeling > Manage roles > New role, write the DAX filter, check it with Test as role, publish, then add members on the model’s Security page in the service.',
+            text: 'Semantic model: Modeling > Manage roles > New role, write the DAX filter, publish, add members on the model’s Security page in the service, then validate with Test as role.',
             sources: [MODEL_RLS],
           },
           {
@@ -319,7 +321,7 @@ export const maintainNotes: MachineNotes[] = [
           },
           {
             code: 'DENY SELECT ON dbo.Payroll TO [Analysts];',
-            explain: 'Object-level: block a whole table for a group, even if their workspace role would otherwise allow reading it through SQL.',
+            explain: 'Object-level: block a whole table for a group (for example, Viewers who read through SQL).',
           },
         ],
         sources: [WH_CLS, WH_GRANULAR],
@@ -434,7 +436,7 @@ export const maintainNotes: MachineNotes[] = [
     machineId: 'seal-and-stamp',
     pl300Adds: [
       {
-        text: 'You applied sensitivity labels and promoted or certified content in PL-300. Fabric extends both to every item type. Labels propagate downstream through lineage, and there is a third endorsement badge, Master data, for authoritative data items.',
+        text: 'You applied sensitivity labels and promoted or certified content in PL-300. Fabric extends both to almost every item type (Power BI dashboards can’t be endorsed). Labels propagate downstream through lineage, and there is a third endorsement badge, Master data, for authoritative data items.',
         sources: [INFO_PROTECTION, ENDORSEMENT],
       },
     ],
@@ -497,7 +499,7 @@ export const maintainNotes: MachineNotes[] = [
     examples: [],
     traps: [
       {
-        text: 'Endorsed items get a badge and are listed first in some lists. Endorsement doesn’t change who can access the item.',
+        text: 'Endorsed items get a badge and are listed first in some lists, to help people find trusted content.',
         sources: [ENDORSEMENT],
       },
       {
@@ -516,7 +518,7 @@ export const maintainNotes: MachineNotes[] = [
         b: 'Sensitivity label',
         difference: [
           {
-            text: 'Endorsement says how trustworthy or authoritative an item is, to help discovery. It is set in Fabric and has no access effect. A sensitivity label says how sensitive the data is. It comes from Microsoft Purview, can enforce encryption and access through protection policies, propagates downstream, and follows supported exports.',
+            text: 'Endorsement says how trustworthy or authoritative an item is, to help discovery. It is set in Fabric to help people find trusted content. A sensitivity label says how sensitive the data is. It comes from Microsoft Purview, can enforce encryption and access through protection policies, propagates downstream, and follows supported exports.',
             sources: [ENDORSEMENT, INFO_PROTECTION],
           },
           {
@@ -640,7 +642,7 @@ export const maintainNotes: MachineNotes[] = [
     upcoming: [
       {
         date: '2026-12-01',
-        change: 'Users without read-write permissions on workspace items can’t use Git integration. Sensitivity labels and protection policies on items may cause loss of access to those items through Git.',
+        change: 'Users without read-write permissions on workspace items can’t use Git integration. Sensitivity labels and protection policies on items can result in loss of access to certain items.',
         sources: [GIT_PROCESS],
       },
     ],
@@ -715,7 +717,7 @@ export const maintainNotes: MachineNotes[] = [
         sources: [PBIP],
       },
       {
-        text: 'Other deployment paths deploy metadata only, so the model must be refreshed in the service to get data. Desktop Publish also sends the local data cache.',
+        text: 'Other deployment paths deploy metadata only. Desktop Publish also sends the local data cache.',
         sources: [PBIP],
       },
     ],
@@ -757,7 +759,7 @@ export const maintainNotes: MachineNotes[] = [
             sources: [PIPELINES_START],
           },
           {
-            text: 'Deploying copies item definitions (metadata) from one stage to the next, keeps links between items, and overwrites the paired items in the target. Data isn’t copied, so refresh semantic models after deploying.',
+            text: 'Deploying copies item definitions (metadata) from one stage to the next, keeps links between items, and overwrites the paired items in the target. Data isn’t copied between stages: after a first deployment, refresh semantic models; on later deployments, data in the target is kept when possible.',
             sources: [PIPELINES_PROCESS],
           },
           {
@@ -765,7 +767,7 @@ export const maintainNotes: MachineNotes[] = [
             sources: [PIPELINES_RULES],
           },
           {
-            text: 'An optional deployment plan adds ordering and pre- or post-deployment actions.',
+            text: 'An optional deployment plan (preview) adds ordering and pre- or post-deployment actions.',
             sources: [PIPELINES_INTRO],
           },
           {
@@ -812,7 +814,7 @@ export const maintainNotes: MachineNotes[] = [
         sources: [PIPELINES_INTRO],
       },
       {
-        text: 'A data pipeline (Data Factory) is unrelated to a deployment pipeline (lifecycle).',
+        text: 'A Data Factory pipeline (data movement) is unrelated to a deployment pipeline (lifecycle).',
         sources: [`${L}fabric/fundamentals/fabric-terminology`],
       },
     ],
@@ -827,7 +829,7 @@ export const maintainNotes: MachineNotes[] = [
             sources: [GIT_INTRO, PIPELINES_INTRO],
           },
           {
-            text: 'They’re independent. Deployment pipelines don’t require Git (Learn’s pipeline docs point to Git separately for version control), and many teams use both: Git on the development workspace, pipelines to promote.',
+            text: 'They’re independent. Deployment pipelines don’t require Git (Learn’s pipeline docs point to Git separately for version control).',
             sources: [PIPELINES_INTRO],
           },
           {
@@ -848,7 +850,7 @@ export const maintainNotes: MachineNotes[] = [
     upcoming: [
       {
         date: '2026-12-01',
-        change: 'Users without read-write permissions on all workspace items can’t deploy to, or assign, workspaces that contain items protected by sensitivity labels with protection policies.',
+        change: 'Users without read-write permissions on all workspace items can’t deploy to a workspace, or assign it to certain stages, when it contains items protected by sensitivity labels with protection policies.',
         sources: [PIPELINES_PROCESS],
       },
     ],
@@ -1069,8 +1071,8 @@ export const maintainNotes: MachineNotes[] = [
       },
       {
         term: 'TMSL',
-        definition: 'Tabular Model Scripting Language: JSON commands (such as refresh, createOrReplace, export) sent over XMLA to manage tabular models.',
-        sources: [TMSL_REFRESH, XMLA],
+        definition: 'Tabular Model Scripting Language: JSON commands (such as refresh, createOrReplace, alter, delete) sent over XMLA to manage tabular models.',
+        sources: [TMSL_REFRESH, TMSL_COMMANDS, XMLA],
       },
       {
         term: 'Workspace connection URL',

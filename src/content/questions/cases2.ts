@@ -294,7 +294,7 @@ export const moreCaseQuestions: Question[] = [
     sources: [S.impact, S.lineage],
     options: [
       { id: 'a', text: 'Lineage view in the fares workspace', explain: 'Lineage view doesn’t show downstream items in other workspaces.' },
-      { id: 'b', text: 'The OneLake catalog’s Explore tab', explain: 'Explore finds items; it doesn’t list dependencies or notify owners.' },
+      { id: 'b', text: 'The OneLake catalog’s Explore tab', explain: 'Listing downstream items across workspaces and notifying their contacts is what impact analysis does.' },
       { id: 'c', text: 'Impact analysis on the warehouse with All downstream items, then Notify contacts', explain: 'Correct. Impact analysis lists downstream items across workspaces, and Notify contacts emails their workspaces’ contacts.' },
       { id: 'd', text: 'A sensitivity label on the warehouse', explain: 'Labels classify sensitivity; they don’t warn report owners.' },
     ],

@@ -453,7 +453,7 @@ const firstCaseQuestions: Question[] = [
     stem: 'Saltmarsh wants to review model and report changes as text diffs in pull requests. How should developers save their Power BI Desktop work?',
     sources: [S.pbip],
     options: [
-      { id: 'a', text: 'As a .pbix file in a shared folder', explain: 'A .pbix is binary and doesn’t diff as text.' },
+      { id: 'a', text: 'As a .pbix file in a shared folder', explain: 'A .pbix is a single file, not the plain-text project files built for source control.' },
       { id: 'b', text: 'As a .pbit template', explain: 'A template is a starting point, not a source-control format.' },
       { id: 'c', text: 'As a .pbids file', explain: 'A .pbids holds only a connection.' },
       { id: 'd', text: 'As a Power BI project (.pbip)', explain: 'Correct. Projects store definitions as plain text built for source control.' },
