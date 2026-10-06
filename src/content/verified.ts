@@ -8,6 +8,7 @@
 /** Cited page (without #fragment) → day it was verified (YYYY-MM-DD). */
 export const SOURCE_VERIFIED: Record<string, string> = {
   "https://learn.microsoft.com/en-us/analysis-services/tmsl/refresh-command-tmsl?view=sql-analysis-services-2025": '2026-10-06',
+  "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/dp-600": '2026-10-06',
   "https://learn.microsoft.com/en-us/dax/addcolumns-function-dax": '2026-10-06',
   "https://learn.microsoft.com/en-us/dax/all-function-dax": '2026-10-06',
   "https://learn.microsoft.com/en-us/dax/average-function-dax": '2026-10-06',

@@ -15,6 +15,8 @@ const DECIDE_LH_WH = `${L}fabric/fundamentals/decision-guide-lakehouse-warehouse
 const WORKSPACES = `${L}fabric/fundamentals/workspaces`
 const DATA_FACTORY = `${L}fabric/data-factory/data-factory-overview`
 const MEDALLION = `${L}fabric/onelake/onelake-medallion-lakehouse-architecture`
+const PIPELINES_INTRO = `${L}fabric/cicd/deployment-pipelines/intro-to-deployment-pipelines`
+const DAX_QUERY_VIEW = `${L}power-bi/transform-model/dax-query-view`
 
 export const orientationQuestions: Question[] = [
   // ── Founding Charter ─────────────────────────────────────────────────
@@ -69,7 +71,7 @@ export const orientationQuestions: Question[] = [
     format: 'yesno',
     difficulty: 2,
     stem: 'You are reviewing statements in a Fabric onboarding document. For each statement, select Yes if it is true. Otherwise, select No.',
-    sources: [OVERVIEW, ONELAKE, TERMS],
+    sources: [OVERVIEW, ONELAKE, TERMS, PIPELINES_INTRO],
     statements: [
       { id: 's1', text: 'Each user needs their own Azure subscription before they can use Fabric.', answer: false, explain: 'No. Fabric is SaaS and OneLake hides Azure details; Learn states you don’t need an Azure account to use Fabric.' },
       { id: 's2', text: 'A table created with T-SQL in a warehouse can be read by a Spark notebook without exporting or copying it.', answer: true, explain: 'Yes. All engines store tables in OneLake in Delta format, so Spark reads the warehouse’s tables directly.' },
@@ -291,10 +293,10 @@ export const orientationQuestions: Question[] = [
     format: 'yesno',
     difficulty: 2,
     stem: 'You are checking a slide about Fabric workloads. For each statement, select Yes if it is true. Otherwise, select No.',
-    sources: [OVERVIEW],
+    sources: [OVERVIEW, DATA_FACTORY],
     statements: [
       { id: 's1', text: 'Fabric Data Engineering provides Apache Spark with notebooks for processing large datasets.', answer: true, explain: 'Yes. Learn describes Data Engineering as providing Apache Spark with notebooks and job tools.' },
-      { id: 's2', text: 'Data Factory offers more than 200 native connectors to on-premises and cloud sources.', answer: true, explain: 'Yes. Learn says you can use more than 200 native connectors.' },
+      { id: 's2', text: 'Data Factory provides connectors for on-premises and cloud data sources.', answer: true, explain: 'Yes. Learn describes Data Factory connecting to a wide range of on-premises and cloud data sources through its connectors.' },
       { id: 's3', text: 'Fabric Data Warehouse stores its data in a proprietary format that only T-SQL can read.', answer: false, explain: 'No. It natively stores data in the open Delta Lake format.' },
     ],
   },
@@ -400,12 +402,12 @@ export const orientationQuestions: Question[] = [
     format: 'single',
     difficulty: 1,
     stem: 'You need a Fabric data store built for time-based streaming events, including semi-structured JSON and free-text analysis, that can query billions of events in seconds. What should you choose?',
-    sources: [EVENTHOUSE, WAREHOUSE],
+    sources: [EVENTHOUSE, WAREHOUSE, DECISION, TERMS],
     options: [
       { id: 'a', text: 'A warehouse', explain: 'A warehouse targets T-SQL analytics with multi-table transactions, not streaming events.' },
       { id: 'b', text: 'An eventhouse', explain: 'Correct. Eventhouses are designed for streaming data and are the preferred engine for semi-structured and free-text analysis.' },
-      { id: 'c', text: 'A SQL database in Fabric', explain: 'SQL database is an operational transactional database.' },
-      { id: 'd', text: 'A semantic model', explain: 'A semantic model is a reporting layer, not a store for raw events.' },
+      { id: 'c', text: 'A SQL database in Fabric', explain: 'Learn points operational, transactional (OLTP) workloads to SQL database in Fabric, not event analytics.' },
+      { id: 'd', text: 'A semantic model', explain: 'A semantic model is a metadata layer (tables, relationships, measures) for reporting, not a store for raw events.' },
     ],
     answer: 'b',
   },
@@ -454,7 +456,7 @@ export const orientationQuestions: Question[] = [
     format: 'single',
     difficulty: 2,
     stem: 'Data engineers in a lakehouse want to write transformations in Python, Scala, Spark SQL, or R. Where do they write and run that code?',
-    sources: [LAKEHOUSE],
+    sources: [LAKEHOUSE, TERMS, DAX_QUERY_VIEW],
     options: [
       { id: 'a', text: 'In the SQL analytics endpoint editor', explain: 'The endpoint runs read-only T-SQL, not Spark code.' },
       { id: 'b', text: 'In a KQL queryset', explain: 'KQL querysets run KQL against KQL databases.' },
@@ -490,7 +492,7 @@ export const orientationQuestions: Question[] = [
     sources: [TRIAL],
     options: [
       { id: 'a', text: 'Capacity administrator', explain: 'Correct. Learn: signing up for a trial capacity makes you its Capacity administrator.' },
-      { id: 'b', text: 'Fabric administrator for the tenant', explain: 'A trial doesn’t grant tenant-wide admin rights.' },
+      { id: 'b', text: 'Fabric administrator for the tenant', explain: 'Starting a trial makes you its Capacity administrator, which is a different role from Fabric administrator.' },
       { id: 'c', text: 'Viewer only', explain: 'You manage the trial, so you’re more than a viewer.' },
       { id: 'd', text: 'No role; the tenant admin owns it', explain: 'The person who signs up becomes the trial’s Capacity administrator.' },
     ],

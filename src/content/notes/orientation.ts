@@ -15,6 +15,8 @@ const WAREHOUSE = `${L}fabric/data-warehouse/data-warehousing`
 const EVENTHOUSE = `${L}fabric/real-time-intelligence/eventhouse`
 const MEDALLION = `${L}fabric/onelake/onelake-medallion-lakehouse-architecture`
 const DESKTOP = `${L}power-bi/fundamentals/desktop-get-the-desktop`
+const STUDY_GUIDE = `${L}credentials/certifications/resources/study-guides/dp-600`
+const PIPELINES_INTRO = `${L}fabric/cicd/deployment-pipelines/intro-to-deployment-pipelines`
 const RTI = `${L}fabric/real-time-intelligence/overview`
 
 export const orientationNotes: MachineNotes[] = [
@@ -34,11 +36,11 @@ export const orientationNotes: MachineNotes[] = [
         sources: [OVERVIEW, ONELAKE],
       },
       {
-        text: 'Why it matters for an analytics engineer: DP-600 assumes you can move between these workloads. You prepare data with Data Factory, Spark, or T-SQL, store it in a lakehouse, warehouse, or eventhouse, and serve it to Power BI through a semantic model. Knowing which workload owns which item is the first step.',
-        sources: [OVERVIEW],
+        text: 'Why it matters for an analytics engineer: the DP-600 skills outline spans these workloads. You prepare data with Data Factory, Spark, or T-SQL, store it in a lakehouse, warehouse, or eventhouse, and serve it to Power BI through a semantic model. Knowing which workload owns which item is the first step.',
+        sources: [OVERVIEW, TERMS, STUDY_GUIDE],
       },
       {
-        text: 'Everything you create in Fabric is an item: a lakehouse, notebook, warehouse, eventhouse, report, or semantic model. Items live in workspaces, and each workload provides its own item types.',
+        text: 'The objects you create inside a workspace, such as a lakehouse, notebook, warehouse, eventhouse, report, or semantic model, are called items. Items live in workspaces, and each workload provides its own item types.',
         sources: [TERMS],
       },
     ],
@@ -47,15 +49,15 @@ export const orientationNotes: MachineNotes[] = [
     traps: [
       {
         text: 'Fabric IQ is labelled Preview on Learn and is not part of the DP-600 skills outline. Know it exists, but don’t expect it to be the focus of questions.',
-        sources: [OVERVIEW],
+        sources: [OVERVIEW, STUDY_GUIDE],
       },
       {
-        text: 'You don’t need an Azure subscription or account to use Fabric. OneLake hides storage details like resource groups and regions.',
+        text: 'Learn says you don’t need an Azure account to use Fabric. OneLake hides storage details like resource groups and regions.',
         sources: [OVERVIEW],
       },
       {
         text: 'A data pipeline (a Data Factory item that orchestrates data movement) is not the same thing as a deployment pipeline (the lifecycle tool that promotes content between stages). Learn calls this out directly.',
-        sources: [TERMS],
+        sources: [TERMS, PIPELINES_INTRO],
       },
     ],
     dontConfuse: [
@@ -129,7 +131,7 @@ export const orientationNotes: MachineNotes[] = [
         sources: [WORKSPACES, ROLES, LICENSES],
       },
       {
-        text: 'Why it matters: storage location, compute cost, and access all depend on these three. Many DP-600 security, lifecycle, and Direct Lake questions assume you know which workspace and capacity an item sits in.',
+        text: 'Why it matters: storage location, compute cost, and access all depend on these three, so know which workspace and capacity an item sits in.',
         sources: [LICENSES],
       },
     ],
@@ -145,7 +147,7 @@ export const orientationNotes: MachineNotes[] = [
         sources: [LICENSES],
       },
       {
-        text: 'Creating Power BI items in a workspace other than My workspace needs a Pro license, even on a capacity.',
+        text: 'Creating Power BI items in a workspace other than My workspace needs a Power BI Pro or Premium Per-User (PPU) license, or a Power BI individual trial, even on a capacity.',
         sources: [LICENSES],
       },
       {
@@ -177,7 +179,7 @@ export const orientationNotes: MachineNotes[] = [
         examLikely:
           'Unclear. The DP-600 study guide uses neither term, so recognize both. Current Learn pages say "workspace type".',
         note: 'Learn states this is a terminology change only; functionality is the same.',
-        sources: [LICENSES],
+        sources: [LICENSES, STUDY_GUIDE],
       },
     ],
     preview: [],
@@ -236,7 +238,7 @@ export const orientationNotes: MachineNotes[] = [
     machineId: 'three-vats',
     overview: [
       {
-        text: 'Fabric has several places to store analytical data. DP-600 focuses on three: the lakehouse, the warehouse, and the eventhouse. All three keep their data in OneLake. They differ in how you write to them, how you query them, and what kind of data they suit.',
+        text: 'Fabric has several places to store analytical data. The DP-600 outline names three: the lakehouse, the warehouse, and the eventhouse. All three keep their data in OneLake. They differ in how you write to them, how you query them, and what kind of data they suit.',
         sources: [DECISION],
       },
       {
@@ -253,7 +255,7 @@ export const orientationNotes: MachineNotes[] = [
       },
       {
         text: 'Why it matters: the outline asks you to choose between data stores (Vat Selector) and to implement star schemas, views, and procedures in the right one. Most of these questions come down to what each store can write and query.',
-        sources: [DECISION],
+        sources: [DECISION, STUDY_GUIDE],
       },
     ],
     bullets: [],
@@ -287,7 +289,7 @@ export const orientationNotes: MachineNotes[] = [
         b: 'Eventhouse',
         difference: [
           {
-            text: 'Write: a lakehouse is written by Spark notebooks, pipelines, Dataflow Gen2, and shortcuts. A warehouse is written by T-SQL (COPY INTO, INSERT, CREATE TABLE AS SELECT), pipelines, and dataflows. An eventhouse ingests streams from Eventstream, Kafka, SDKs, pipelines, and dataflows.',
+            text: 'Write: a lakehouse is written by Spark notebooks, pipelines, Dataflow Gen2, and shortcuts. A warehouse is written by T-SQL (COPY INTO, INSERT, CREATE TABLE AS SELECT), pipelines, and dataflows. An eventhouse ingests from sources such as Eventstream, Kafka, Logstash, SDKs, and dataflows.',
             sources: [LAKEHOUSE, WAREHOUSE, EVENTHOUSE],
           },
           {
@@ -363,8 +365,8 @@ export const orientationNotes: MachineNotes[] = [
         sources: [TRIAL],
       },
       {
-        text: 'Platform note: the trial is used through the Fabric portal in a browser. Power BI Desktop, which you need for some later labs (for example .pbip projects), lists Windows 10 or later in its system requirements, so those labs need a Windows machine.',
-        sources: [TRIAL, DESKTOP],
+        text: 'Platform note: Power BI Desktop, which some later labs use (for example for .pbip projects), lists Windows 10 or Windows Server 2016 or later in its system requirements. Each lab shows the platform it needs.',
+        sources: [DESKTOP],
       },
     ],
     bullets: [],
@@ -383,7 +385,7 @@ export const orientationNotes: MachineNotes[] = [
         sources: [TRIAL],
       },
       {
-        text: 'If you don’t see "Start trial" in the Account manager, trials may be disabled for your tenant. That is an admin setting, not a problem with your account.',
+        text: 'If you don’t see "Start trial" in the Account manager, trials may be disabled for your tenant, or you may already have a Power BI individual trial. In that case, try to create a Fabric item to get the trial prompt.',
         sources: [TRIAL],
       },      {
         text: 'The trial page’s workload list still says "Real-Time Analytics", while the Fabric overview and the workload’s own pages say "Real-Time Intelligence". Expect the current name, Real-Time Intelligence, in Fabric pages.',
