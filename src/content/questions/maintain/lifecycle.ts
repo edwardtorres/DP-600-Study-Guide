@@ -102,7 +102,7 @@ export const lifecycleQuestions: Question[] = [
       { id: 'a', text: 'Make the Contributor a pipeline admin', explain: 'Pipeline admin has nothing to do with Git branches.' },
       { id: 'b', text: 'Disconnect Git so anyone can reconnect', explain: 'Only Admins can connect, so this wouldn’t help.' },
       { id: 'c', text: 'Grant the Contributor Build permission on every item', explain: 'Build permission is for semantic models.' },
-      { id: 'd', text: 'Enable the workspace setting that lets Contributors change branch', explain: 'Correct. This workspace setting lets Members and Contributors switch the connected branch.' },
+      { id: 'd', text: 'Enable the workspace setting that lets Contributors change branch', explain: 'Correct. This workspace setting lets Members and Contributors with write access to all items switch the connected branch.' },
     ],
     answer: 'd',
   },

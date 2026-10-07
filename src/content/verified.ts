@@ -93,7 +93,7 @@ export const SOURCE_VERIFIED: Record<string, string> = {
   "https://learn.microsoft.com/en-us/fabric/enterprise/powerbi/service-premium-large-models": '2026-10-06',
   "https://learn.microsoft.com/en-us/fabric/enterprise/throttling": '2026-10-06',
   "https://learn.microsoft.com/en-us/fabric/fundamentals/apply-sensitivity-labels": '2026-10-06',
-  "https://learn.microsoft.com/en-us/fabric/fundamentals/create-workspaces": '2026-10-06',
+  "https://learn.microsoft.com/en-us/fabric/fundamentals/create-workspaces": '2026-10-07',
   "https://learn.microsoft.com/en-us/fabric/fundamentals/decision-guide-data-store": '2026-10-06',
   "https://learn.microsoft.com/en-us/fabric/fundamentals/decision-guide-lakehouse-warehouse": '2026-10-06',
   "https://learn.microsoft.com/en-us/fabric/fundamentals/direct-lake-analyze-query-processing": '2026-10-06',

@@ -209,3 +209,31 @@ CM-V1–V3 (PySpark), RB-V1–V2 (scalar UDFs, preview), and DS-V1–V2 (DDM fal
   - The 20 microsoftlearning.github.io exercise pages publish no date, so they're listed as not comparable.
 - `npm run check:content -- --live`: "Live page matches the recorded outline (41 bullets)."
   - The October 19, 2026 outline takes effect after this step; re-run it after that date.
+
+## 8. Spot-check of the checkers (Step 9)
+
+A fresh agent re-verified a seeded random sample of Step 8 "confirmed" claims against the live Learn pages on 2026-10-06/07. It had no access to the Step 8 ledgers, verdicts, or snapshot.
+
+- **Sample:** 131 claims, 71 of them key-dependent (question keys, accepted puzzle answers, evaluator rules), at least 15 from each group.
+- **Excluded:** units already changed in Step 8.
+
+| | Sample | Confirmed | Overturned |
+|---|---|---|---|
+| All | 131 | 129 | 2 (1.5%) |
+| Key-dependent | 71 | 70 | 1 |
+| Front Office | 15 | 14 | 1 |
+| Prepare data | 38 | 38 | 0 |
+| Semantic models | 27 | 27 | 0 |
+| Maintain | 27 | 27 | 0 |
+| Puzzles and labs | 24 | 23 | 1 |
+
+**Agreement: 98.5%** (98.6% on key-dependent claims). This is under the 3% threshold that would have called for a wider re-check. Both overturned claims were *unsupported*, not wrong, and neither changes a key:
+
+1. **FO-08, option c's explanation:** it said "OneLake availability and sync don't convert files". Learn describes OneLake availability as an eventhouse/KQL database setting ("You can create a logical copy of KQL database data in an eventhouse by turning on OneLake availability"). The explanation now says so. The key is unchanged (Learn: "Only Delta tables appear in the SQL analytics endpoint").
+2. **Lab 1 cleanup (L01 c1):** it cited the CI/CD exercise's clean-up section, which deletes the workspaces. Keeping them for later labs is this course's plan, so the step now cites Create a workspace instead.
+
+**Wording tightened (claims still confirmed):**
+- FO-25 s3 now quotes only "storage and compute are separated".
+- PL-06 adds "with write access to all items".
+
+**Not changed:** the reviewer noted Learn's 1 GB default model-size limit for the Brindlecombe case. Changing the case text would conflict with CS6's key (enable large format), so it stays as written.

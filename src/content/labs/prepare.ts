@@ -69,7 +69,7 @@ export const prepareLabs: Lab[] = [
       {
         id: 'c1',
         text: 'Nothing to delete yet. Keep DP600-Dev and DP600-Test for the later labs; Lab 15’s cleanup removes them.',
-        sources: [ex('21-implement-cicd', 'clean-up')],
+        sources: [learn(P.workspaces, 'workspace-type')],
       },
     ],
   },

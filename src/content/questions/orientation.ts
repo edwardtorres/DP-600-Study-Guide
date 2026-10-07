@@ -157,7 +157,7 @@ export const orientationQuestions: Question[] = [
     options: [
       { id: 'a', text: 'Load the CSV data into a Delta table in the Tables area', explain: 'Correct. Only Delta tables appear in the SQL analytics endpoint; CSV and Parquet files in Files can’t be queried there until converted.' },
       { id: 'b', text: 'Give the analysts the Contributor workspace role', explain: 'This is about format and location, not permissions. Even workspace admins can’t query CSV files through the endpoint.' },
-      { id: 'c', text: 'Turn on OneLake availability for the lakehouse', explain: 'OneLake availability and sync don’t convert files: the SQL analytics endpoint shows only Delta tables, so CSV files in Files stay invisible until loaded into a Delta table.' },
+      { id: 'c', text: 'Turn on OneLake availability for the lakehouse', explain: 'OneLake availability is an eventhouse (KQL database) setting, not a lakehouse one. The SQL analytics endpoint shows only Delta tables, so the CSV files must be loaded into a Delta table.' },
       { id: 'd', text: 'Create a shortcut to the CSV folder in the Files area', explain: 'Files-area shortcuts aren’t discovered as tables, and the data still isn’t in Delta format.' },
     ],
     answer: 'a',
@@ -446,7 +446,7 @@ export const orientationQuestions: Question[] = [
     statements: [
       { id: 's1', text: 'A lakehouse can store both structured and unstructured data.', answer: true, explain: 'Yes. A lakehouse stores structured and unstructured data in one location.' },
       { id: 's2', text: 'Lakehouses and warehouses store their tables in different, incompatible formats.', answer: false, explain: 'No. Both store data in Delta format on OneLake and share the same SQL engine.' },
-      { id: 's3', text: 'The warehouse separates compute from storage so each can scale independently.', answer: true, explain: 'Yes. Learn: Fabric Data Warehouse separates compute from storage, enabling independent scaling of both.' },
+      { id: 's3', text: 'The warehouse separates compute from storage so each can scale independently.', answer: true, explain: 'Yes. Learn says storage and compute are separated in Fabric Data Warehouse.' },
     ],
   },
   {
