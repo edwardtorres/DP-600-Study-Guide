@@ -79,8 +79,9 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(req.url)
   if (url.origin !== self.location.origin) return
   if (req.mode === 'navigate') {
-    // A single-page app: every navigation gets the cached index.html of THIS version (offline too).
-    event.respondWith(caches.match('./index.html', { cacheName: CACHE }).then((hit) => hit || fetch(req)))
+    // Cache the directory entry: Cloudflare redirects index.html, and a redirected response
+    // cannot satisfy a navigation whose redirect mode is manual (especially while offline).
+    event.respondWith(caches.match('./', { cacheName: CACHE }).then((hit) => hit || fetch(req)))
     return
   }
   event.respondWith(caches.match(req, { cacheName: CACHE }).then((hit) => hit || fetch(req)))
