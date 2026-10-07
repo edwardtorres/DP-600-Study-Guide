@@ -2,7 +2,7 @@
 
 **A study game for Microsoft exam DP-600: Implementing Analytics Solutions Using Microsoft Fabric.**
 
-Live at **https://dp600.edwardtorres.dev**. It installs as an app and works offline after the first visit.
+Live at **https://edwardtorres.dev/apps/fabric-mill/**. It installs as an app and works offline after the first visit.
 
 > **Unofficial study aid.** Fabric Mill is not affiliated with, endorsed by, or sponsored by Microsoft. Microsoft,
 > Microsoft Fabric, and Power BI are trademarks of the Microsoft group of companies. The notes and questions are
@@ -102,7 +102,10 @@ before any code was written. Every audit ([`docs/audits/`](docs/audits)) was rev
   - A small service worker, generated at build time, precaches every built file.
   - It has an update prompt.
   - Fonts are self-hosted, so the app works offline and the CSP needs no outside origins.
-- **Hosting:** Azure Static Web Apps (Free), declared in Bicep ([`infra/main.bicep`](infra/main.bicep)) and deployed
+- **Hosting:** Cloudflare Pages under the portfolio's `/apps/fabric-mill/` path. Run `npm run build:site`, then
+  `npm run copy:site -- <portfolio checkout>` and push the portfolio's `main` branch to publish. Its `_headers`
+  scopes the app's CSP and service worker cache rules to that path. The Work card links to a project description
+  and the running study app. Azure Static Web Apps (Free) is also supported, declared in Bicep ([`infra/main.bicep`](infra/main.bicep)) and deployed
   by GitHub Actions. [`public/staticwebapp.config.json`](public/staticwebapp.config.json) sets a strict Content
   Security Policy (`default-src 'self'`, no external origins), the other security headers, the SPA fallback, and a
   404 page. See [`DEPLOY.md`](DEPLOY.md).

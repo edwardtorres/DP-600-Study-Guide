@@ -1,4 +1,47 @@
-# Deploying Fabric Mill to Azure Static Web Apps
+# Deploying Fabric Mill
+
+## Production: Cloudflare Pages on the portfolio
+
+The app runs at **https://edwardtorres.dev/apps/fabric-mill/**, alongside the
+existing study apps. Its Work card and description are at
+**https://edwardtorres.dev/projects/dp600-study**.
+
+From this source repository:
+
+```bash
+npm ci
+npm run check
+npm run build
+npm run e2e
+npm run e2e:prod
+npm run build:site
+npm run copy:site -- <portfolio-checkout>
+```
+
+`build:site` sets Vite's base to `/apps/fabric-mill/`; the service worker uses that
+base for its script URL and scope. The manifest, icons, fonts, and lazy chunks
+are served under the same path. `copy:site` validates the build, replaces only
+the portfolio's `apps/fabric-mill/` directory, and excludes Azure configuration.
+
+In `edwardtorres/edwardtorres.dev`, commit the app build and push `main` to publish
+through the existing Cloudflare Pages Git integration. The portfolio's `_headers`
+replaces the script-blocking portfolio CSP for `/apps/fabric-mill/*`, allows the
+app's self-hosted scripts and offline worker, keeps entry HTML and the worker
+fresh, and caches hashed assets immutably. Preserve these rules when updating.
+
+After the Cloudflare deployment is live, run:
+
+```bash
+npm run check:site
+# Or against a local preview applying the portfolio header rules:
+SITE_ORIGIN=http://127.0.0.1:4180 npm run check:site
+```
+
+This checks the Work card, project screenshots, app panels, subpath asset URLs,
+manifest icons, service worker scope, offline reload, and console/CSP errors at
+1440 and 390 px. Playwright's Chromium must be installed.
+
+## Optional: Azure Static Web Apps
 
 This is the runbook for putting the app online at **https://dp600.edwardtorres.dev** on the Static Web Apps **Free** plan,
 the same way as the AZ-900 study app. You run every account step yourself. The only secret is a deployment token, and it

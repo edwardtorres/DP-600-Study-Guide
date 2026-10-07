@@ -1,5 +1,6 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { StrictMode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import App from './App'
 import { ErrorBoundary } from './components/ErrorBoundary'
@@ -71,19 +72,33 @@ describe('error boundary (Step 9)', () => {
 })
 
 describe('effects never return a value (Step 9 CI)', () => {
-  it('opens Labs when scrollTo returns a Promise, as newer Chromium does', async () => {
+  it('opens, switches, closes, and unmounts Labs when scrollTo returns a Promise', async () => {
     const original = Element.prototype.scrollTo
-    Element.prototype.scrollTo = function () {
-      return Promise.resolve()
-    } as unknown as typeof Element.prototype.scrollTo
+    const scrollTo = vi.fn(() => Promise.resolve())
+    Element.prototype.scrollTo = scrollTo
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => {})
     try {
       const user = userEvent.setup()
-      render(<App />)
+      const { unmount } = render(<StrictMode><App /></StrictMode>)
       await user.click(screen.getByRole('button', { name: 'Labs' }))
       expect(await screen.findByTestId('before-you-start', {}, { timeout: 5000 })).toBeInTheDocument()
+      expect(scrollTo).toHaveBeenCalledWith({ top: 0 })
+      const initialCalls = scrollTo.mock.calls.length
+      await user.click(screen.getByRole('button', { name: /Open the mill: start the trial/ }))
+      expect(screen.getByRole('button', { name: '← All labs' })).toBeInTheDocument()
+      expect(scrollTo.mock.calls.length).toBeGreaterThan(initialCalls)
+      await user.click(screen.getByRole('button', { name: '← All labs' }))
+      expect(screen.getByTestId('before-you-start')).toBeInTheDocument()
+      await user.click(screen.getByRole('button', { name: 'Close labs' }))
+      expect(screen.queryByRole('dialog', { name: 'Workshop labs' })).toBeNull()
       expect(screen.queryByText('Something went wrong')).toBeNull()
+      await user.click(screen.getByRole('button', { name: 'Labs' }))
+      await screen.findByTestId('before-you-start')
+      unmount()
+      expect(errors).not.toHaveBeenCalled()
     } finally {
       Element.prototype.scrollTo = original
+      errors.mockRestore()
     }
   })
 })

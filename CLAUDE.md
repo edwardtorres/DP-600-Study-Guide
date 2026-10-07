@@ -29,7 +29,7 @@ The learner has passed PL-300 study (Power BI basics, DAX fundamentals, star sch
 | `npm run check` | All of the above except build, `--live`, `check:links`, and `check:freshness` |
 | `npm run e2e` | Playwright flows (machine, placement, puzzle, lab, review, mock) at 1440 px and 390 px, tap-only, against the dev server, with axe on each screen (fails on serious or critical). Needs a browser, so it's not in `npm test`. Set `PW_CHROMIUM` to a Chromium binary if Playwright's own isn't installed |
 | `npm run e2e:prod` | `e2e/prod/` against the built `dist/` (run `npm run build` first), served by `scripts/serve-dist.ts` with the real `staticwebapp.config.json` headers: CSP violations and console errors fail it; also offline, fallback, 404, manifest, axe |
-| `npm run e2e:live` | The same specs against the live site: `E2E_BASE_URL=https://dp600.edwardtorres.dev npm run e2e:live` |
+| `npm run e2e:live` | The same specs against an Azure origin (the portfolio uses `npm run check:site`): `E2E_BASE_URL=https://dp600.edwardtorres.dev npm run e2e:live` |
 | `npx tsx scripts/screenshots.ts` | README screenshots (`docs/screenshots/`) from the built app, with a fixture save |
 
 `npm run build` also runs `scripts/check-bundle.ts`, which fails if a dev-only hook is in the production bundle: `?seed=` (`src/game/seed.ts`) or `?mock=short` (`src/game/mockShort.ts`), both reachable only behind `import.meta.env.DEV`.
@@ -188,7 +188,8 @@ The free practice assessment shows "the style, wording, and difficulty"; the rea
 - **Crash recovery:** `src/components/ErrorBoundary.tsx` offers an export of the raw save and a reload.
 - **Effects use block bodies.** Never `useEffect(() => el.scrollTo(...))`: newer Chromium returns a Promise from scroll methods, and React crashes on an effect that returns one (found by CI in Step 9; regression test in `src/production.test.tsx`).
 - **e2e waits for the game, not the shell:** use `gameReady(page)` (`e2e/helpers.ts`) after every `goto` or `reload`. The inert loading shell already shows the map.
-- **Hosting (`public/staticwebapp.config.json`):**
+- **Production hosting:** Cloudflare Pages at `https://edwardtorres.dev/apps/fabric-mill/`. Use `npm run build:site`, then `npm run copy:site -- <portfolio checkout>`, commit/push the portfolio `main`, and verify with `npm run check:site`. The portfolio scopes CSP and cache headers to this path.
+- **Optional Azure hosting (`public/staticwebapp.config.json`):**
   - CSP: `default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'` (React style attributes); `img-src`, `font-src`, `connect-src`, `manifest-src`, and `worker-src` all `'self'`; `object-src 'none'`; `base-uri 'self'`; `form-action 'self'`; `frame-ancestors 'none'`; `upgrade-insecure-requests`.
   - Also nosniff, `X-Frame-Options: DENY`, Referrer-Policy, Permissions-Policy, HSTS, and COOP.
   - `no-cache` for `/`, `index.html`, `sw.js`, and the manifest; `/assets/*` immutable.

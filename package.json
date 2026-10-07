@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build && tsx scripts/check-bundle.ts",
+    "build:site": "tsc -b && vite build --base=/apps/fabric-mill/ && tsx scripts/check-bundle.ts",
+    "copy:site": "node scripts/copy-to-site.mjs",
     "preview": "vite preview",
     "lint": "oxlint",
     "typecheck": "tsc -b",
@@ -16,6 +18,7 @@
     "e2e:live": "playwright test -c playwright.prod.config.ts",
     "check:content": "tsx scripts/check-content.ts",
     "check:secrets": "tsx scripts/check-secrets.ts",
+    "check:site": "node scripts/check-site.mjs",
     "check": "npm run typecheck && npm run lint && npm test && npm run check:content && npm run check:secrets",
     "check:links": "tsx scripts/check-links.ts",
     "check:freshness": "tsx scripts/check-freshness.ts",
