@@ -27,7 +27,10 @@ The learner has passed PL-300 study (Power BI basics, DAX fundamentals, star sch
 | `npm run check:links` | Fetches every URL cited in notes, verified edges, questions, puzzles, and labs; fails on non-200, or on a lab source whose #section is missing |
 | `npm run check:freshness` | Fetches every cited page and lists those Learn updated after their `verifiedAt` date, with what cites them (network; not in `npm test`) |
 | `npm run check` | All of the above except build, `--live`, `check:links`, and `check:freshness` |
-| `npm run e2e` | Playwright flows (machine, placement, puzzle, lab, review, mock) at 1440 px and 390 px, tap-only, against the dev server. Needs a browser, so it's not in `npm test`. Set `PW_CHROMIUM` to a Chromium binary if Playwright's own isn't installed |
+| `npm run e2e` | Playwright flows (machine, placement, puzzle, lab, review, mock) at 1440 px and 390 px, tap-only, against the dev server, with axe on each screen (fails on serious or critical). Needs a browser, so it's not in `npm test`. Set `PW_CHROMIUM` to a Chromium binary if Playwright's own isn't installed |
+| `npm run e2e:prod` | `e2e/prod/` against the built `dist/` (run `npm run build` first), served by `scripts/serve-dist.ts` with the real `staticwebapp.config.json` headers: CSP violations and console errors fail it; also offline, fallback, 404, manifest, axe |
+| `npm run e2e:live` | The same specs against the live site: `E2E_BASE_URL=https://dp600.edwardtorres.dev npm run e2e:live` |
+| `npx tsx scripts/screenshots.ts` | README screenshots (`docs/screenshots/`) from the built app, with a fixture save |
 
 `npm run build` also runs `scripts/check-bundle.ts`, which fails if a dev-only hook is in the production bundle: `?seed=` (`src/game/seed.ts`) or `?mock=short` (`src/game/mockShort.ts`), both reachable only behind `import.meta.env.DEV`.
 
@@ -106,7 +109,7 @@ The free practice assessment shows "the style, wording, and difficulty"; the rea
 - Answer order is controlled twice. In the bank, `arrange()` rotates single-choice answers, multi-select sources are balanced (no position correct in more than 60% of questions with that option count), and Yes/No statements are 40–60% "Yes"; `check:content` enforces and prints all three. At render time, `src/game/shuffle.ts` shuffles every format with a seeded PRNG: stable within one attempt, new per attempt, and ordering items start with at least half of them (rounded up) out of place.
 - **Never write a question whose answer depends on a needs-verification item** or anything not confirmed on Learn.
 - Each floor's questions are checked by an **independent reviewer agent** that answers blind (`npm run export:questions -- <floor|cases|all> <dir> [idPattern]` writes blind and keyed JSON outside the repo; `scripts/compare-review.ts` diffs answers), then checks each key against its sources. Disagreements are fixed or dropped and logged in `docs/reviews/step-3-question-review.md` (Step 7: `step-7-question-review.md`).
-- Hidden review page: `/review` (or `#/review`). Not linked from the game. **Step 9 must add an SPA fallback** so `/review` serves `index.html` in production.
+- Answer-key browser (`src/review/ReviewPage.tsx`): no URL route since Step 9. It opens only from Settings → "Open the question bank…", after a warning that browsing the answer key makes mocks less meaningful.
 
 ## Puzzles (Step 5)
 
@@ -160,6 +163,40 @@ The free practice assessment shows "the style, wording, and difficulty"; the rea
 - **Contested points:** when current Learn pages disagree, the notes show both readings in a `contested` block ("Learn pages disagree"). The point stays out of questions and puzzles through `BANNED_TERMS`, and evaluators don't encode it.
 - **After Step 8, these remain contested:** materialized views in the warehouse; Contributor vs Member for deploying existing semantic models and paginated reports; Direct Lake on SQL with SQL OLS/CLS (fallback vs error); Direct Lake on OneLake with SQL RLS (success vs error); inline TVF release status.
 - **Unsupported, kept out of questions:** the OneLake data hub and Real-Time Analytics renames; OneLake security GA.
+- **Step 9 spot-check:** a fresh agent re-verified 131 random confirmed claims (71 key-dependent): 98.5% agreement (section 8 of the report).
+- **Weekly freshness workflow** (`.github/workflows/freshness.yml`, Mondays and on demand, built-in `GITHUB_TOKEN` only): runs `check:freshness --report` and `check:content -- --live --report`. Each writes a markdown report only when something changed (a page updated or gone, or the outline differs; network errors don't count), listing the affected machines, questions, puzzles, and labs. The workflow opens an issue labelled `content-freshness`, or, while one is open, comments only when the report's hash differs from the last one posted.
+- **The DP-600 outline changes on October 19, 2026.** The first freshness run after that date matters: expect `--live` to report the new outline. Re-sync `scripts/official-outline.json` from the page, update the machine mapping, and re-check the affected content.
+
+## Production (Step 9)
+
+- **First load:**
+  - `src/Boot.tsx` is the entry. It loads the save and shows an inert shell (header placeholders and the map from the save) while `React.lazy` loads the game.
+  - The content chunks (`questions`, `questions-prepare`, `notes`, `puzzles`, `labs`; groups in `vite.config.ts`) are imported in parallel first, so each evaluates in its own task.
+  - The `puzzles` group sets `includeDependenciesRecursively: false`. Without it, shared modules land in that chunk and the first load needs it. Don't turn that off globally: it broke execution order between the two question chunks.
+  - `index.html`'s `#root` gets `src/shell.html`, the loading header rendered from `Header` as a Vitest file snapshot (`src/shell.test.tsx`; `npx vitest run -u src/shell.test.tsx` after changing the header), injected by the `shellHtml` plugin.
+  - Lighthouse mobile on the production build: Performance 93–95; Accessibility, Best Practices, and SEO 100.
+- **PWA:**
+  - `scripts/sw-plugin.ts` generates `dist/sw.js` at build. It precaches every built file under a cache name versioned by content hash.
+  - `src/pwa.ts` registers it and handles the update prompt and the install prompt.
+  - `public/manifest.webmanifest` and `public/icons/` (made by `scripts/make-icons.ts`).
+  - Fonts are self-hosted (`@fontsource-variable`, Latin only).
+- **Save protection (`src/save/backup.ts`):**
+  - Calls `navigator.storage.persist()`; Settings shows the result.
+  - A backup banner appears when there's progress and no export in 7 days. "Later" snoozes it for 24 hours.
+  - The export and snooze times live in a separate key, `fabric-mill:backup`, so the save shape is unchanged.
+  - Settings explains Safari's storage eviction and has an "Install the app" section (iPhone: Share → Add to Home Screen).
+- **Crash recovery:** `src/components/ErrorBoundary.tsx` offers an export of the raw save and a reload.
+- **Hosting (`public/staticwebapp.config.json`):**
+  - CSP: `default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'` (React style attributes); `img-src`, `font-src`, `connect-src`, `manifest-src`, and `worker-src` all `'self'`; `object-src 'none'`; `base-uri 'self'`; `form-action 'self'`; `frame-ancestors 'none'`; `upgrade-insecure-requests`.
+  - Also nosniff, `X-Frame-Options: DENY`, Referrer-Policy, Permissions-Policy, HSTS, and COOP.
+  - `no-cache` for `/`, `index.html`, `sw.js`, and the manifest; `/assets/*` immutable.
+  - SPA fallback; `404.html` for missing files.
+  - Any new external origin needs a CSP change, and `e2e:prod` will catch it if you forget.
+- **Deploy:**
+  - `infra/main.bicep`: a Free Static Web App.
+  - `.github/workflows/deploy.yml`: the `verify` job runs check, build, e2e, and e2e:prod. Then the `deploy` job (main only) uploads `dist` with the `AZURE_STATIC_WEB_APPS_API_TOKEN` secret, and skips with a notice while that secret is missing.
+  - `DEPLOY.md` has the account steps (Azure, the GitHub secret, the Cloudflare CNAME `dp600` set to DNS only, the custom domain).
+  - The token is never committed or printed.
 
 ## Labs (Step 6)
 
@@ -197,7 +234,14 @@ scripts/check-freshness.ts      sources updated since verifiedAt
 scripts/stamp-verified.ts       record verifiedAt dates
 src/content/                    notes data, notes types, notes validator, requirements, verified.ts (verifiedAt dates)
 src/content/questions/          question bank, case studies, question validator
-src/review/                     hidden /review page
+src/review/                     answer-key browser (opened from Settings)
+src/Boot.tsx, src/shell.html    entry: save load, inert shell, lazy game; static first paint
+src/pwa.ts, src/save/backup.ts  service worker registration and install; persistence and backup reminders
+scripts/sw-plugin.ts            service worker generator (Vite plugin)
+scripts/serve-dist.ts           serves dist/ with staticwebapp.config.json (e2e:prod, Lighthouse)
+scripts/screenshots.ts          README screenshots
+infra/main.bicep, DEPLOY.md     Azure Static Web App and the deploy runbook
+.github/workflows/              deploy (verify, then deploy) and weekly content freshness
 src/data/                       outline loader, machines, edges, floors, graph utils, shared validators
 src/game/                       state derivation, map layout, draws, scoring, progress, labs, review, weak spots, mock
 src/save/                       versioned save
@@ -210,7 +254,7 @@ src/components/labs/            Workshop tab, Labs page, lab view
 src/components/review/          Daily review page
 src/components/weak/            Weak Spots page
 src/components/mock/            Mock exam, results, history
-e2e/                            Playwright flows (npm run e2e)
+e2e/                            Playwright flows (npm run e2e); e2e/prod/ production checks (e2e:prod, e2e:live)
 ```
 
 ## Roadmap
@@ -223,4 +267,4 @@ e2e/                            Playwright flows (npm run e2e)
 6. ✅ Hands-on Fabric trial labs (label Windows-only ones).
 7. ✅ Spaced repetition and a timed mock exam with a case study. Also raise the difficulty-3 share of the question bank to about 25% (17% after Step 3) with new scenario questions, concentrated in Prepare data and Semantic models.
 8. ✅ Fact-check all content against Microsoft Learn.
-9. Deploy to dp600.edwardtorres.dev.
+9. ✅ Spot-check, production polish (code-splitting, PWA, save protection, CSP, axe, Lighthouse), deploy pipeline to dp600.edwardtorres.dev, weekly freshness workflow, README.
