@@ -71,7 +71,9 @@ export function MockExam({ active, questions, caseStudy, onResponse, onMark, onL
       onSubmit(true)
     }
   }, [left, onSubmit])
-  useEffect(() => top.current?.focus(), [index, view, active.caseLocked])
+  useEffect(() => {
+    top.current?.focus()
+  }, [index, view, active.caseLocked])
 
   const section: 'case' | 'main' = active.caseLocked ? 'main' : 'case'
   const ids = section === 'case' ? active.caseIds : active.mainIds

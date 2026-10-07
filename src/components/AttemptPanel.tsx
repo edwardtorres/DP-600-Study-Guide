@@ -48,7 +48,11 @@ export function AttemptPanel({ machine, kind, heading, questions, onSubmit, onRe
   const [result, setResult] = useState<{ correct: boolean[]; outcome: AttemptOutcome; blocked: string | null } | null>(null)
   const top = useRef<HTMLDivElement>(null)
 
-  useEffect(() => top.current?.focus(), [index, result])
+  useEffect(() => {
+
+    top.current?.focus()
+
+  }, [index, result])
 
   const q = questions[index]
   const allDone = questions.every((qq, i) => isComplete(qq, responses[i]!))

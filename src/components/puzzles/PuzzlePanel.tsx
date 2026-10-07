@@ -64,7 +64,9 @@ export function PuzzlePanel({ instance, onSubmit, onReplay, onClose, onOpenPair 
   const [response, setResponse] = useState<PuzzleResponse>(() => initialResponse(instance))
   const [score, setScore] = useState<PuzzleScore | null>(null)
   const top = useRef<HTMLDivElement>(null)
-  useEffect(() => top.current?.focus(), [score])
+  useEffect(() => {
+    top.current?.focus()
+  }, [score])
 
   const { meta } = instance
   const nullStyle: NullStyle = instance.context.kind === 'oracle' ? instance.context.language : 'plain'

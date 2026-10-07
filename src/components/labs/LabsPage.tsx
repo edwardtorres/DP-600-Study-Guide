@@ -115,7 +115,10 @@ export function LabsPage(props: Props) {
   const byId = new Map(labs.map((l) => [l.id, l]))
   const totalMinutes = labs.reduce((t, l) => t + l.minutes, 0)
   const body = useRef<HTMLDivElement>(null)
-  useEffect(() => body.current?.scrollTo?.({ top: 0 }), [labId])
+  // Block body on purpose: newer browsers return a Promise from scrollTo(), and an effect must not return one.
+  useEffect(() => {
+    body.current?.scrollTo?.({ top: 0 })
+  }, [labId])
 
   return (
     <div role="dialog" aria-modal="true" aria-labelledby="labs-title" className="fixed inset-0 z-30 flex justify-center bg-mill-950/85 backdrop-blur-sm sm:p-4">

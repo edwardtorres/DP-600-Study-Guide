@@ -22,6 +22,7 @@ import { puzzleTypeName } from '../src/puzzles/types.ts'
 import { allLabs, LABS_PARTIAL, LABS_UNCOVERED, labMinutes } from '../src/content/labs/index.ts'
 import { validateLabs } from '../src/content/labs/validate.ts'
 import { citations } from './citations.ts'
+import { fetchPolitely } from './learn-page.ts'
 import { NOTES_VERIFIED, SOURCE_VERIFIED } from '../src/content/verified.ts'
 import { allNotes as notesForDates } from '../src/content/notes/index.ts'
 
@@ -180,7 +181,7 @@ async function main() {
   ]
 
   if (process.argv.includes('--live')) {
-    const res = await fetch(outline.source).catch((e: unknown) => e instanceof Error ? e : new Error(String(e)))
+    const res = await fetchPolitely(outline.source).catch((e: unknown) => e instanceof Error ? e : new Error(String(e)))
     if (res instanceof Error || !res.ok) {
       const msg = `Could not fetch ${outline.source}: ${res instanceof Error ? res.message : `HTTP ${res.status}`}`
       // A failed fetch is not a change, so no report.

@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 import { allQuestions } from '../src/content/questions/index'
 import { DAILY_CAP } from '../src/game/review'
 import { SAVE_KEY, newSave, type AnswerEntry, type Save } from '../src/save/schema'
-import { SEED, answerShown, expectNoSideScroll, machineNode, expectAccessible } from './helpers'
+import { SEED, answerShown, expectNoSideScroll, gameReady, machineNode, expectAccessible } from './helpers'
 
 const fo = allQuestions.filter((q) => q.machineId === 'founding-charter')
 const others = allQuestions.filter((q) => !q.caseStudyId && q.bulletIds.length > 0)
@@ -35,7 +35,7 @@ test('daily review: due questions under the daily cap, logged as r; a certified 
     }
   }, [SAVE_KEY, JSON.stringify(fixtureSave())] as const)
   await page.goto(`/?seed=${SEED}`)
-  await expect(machineNode(page, 'Founding Charter')).toBeVisible()
+  await gameReady(page)
 
   await test.step('the certified machine shows the maintenance mark and stays certified', async () => {
     const node = machineNode(page, 'Founding Charter')

@@ -128,7 +128,9 @@ export function LabView(props: Props) {
   const { lab, progress, labsById, machinesById, openPrereqs, onComplete, onDebrief, onOpenLab, onOpenMachine } = props
   const st = labStatus(lab, progress)
   const heading = useRef<HTMLHeadingElement>(null)
-  useEffect(() => heading.current?.focus(), [lab.id])
+  useEffect(() => {
+    heading.current?.focus()
+  }, [lab.id])
   const missing = st.required - st.requiredDone
 
   return (

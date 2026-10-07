@@ -12,8 +12,17 @@ export async function openMill(page: Page): Promise<string[]> {
   const errors: string[] = []
   page.on('pageerror', (e) => errors.push(String(e)))
   await page.goto(`/?seed=${SEED}`)
-  await expect(page.getByRole('button', { name: /^Founding Charter:/ })).toBeVisible()
+  await gameReady(page)
   return errors
+}
+
+/**
+ * Waits until the game itself has loaded. The inert loading shell already shows the map (and the
+ * header buttons), so waiting for a machine node isn't enough: taps on the shell do nothing.
+ * Only the loaded game renders the progress stats.
+ */
+export async function gameReady(page: Page) {
+  await expect(page.getByTestId('progress-stats')).toBeVisible()
 }
 
 export const machineNode = (page: Page, name: string) => page.getByRole('button', { name: new RegExp(`^${name}:`) }).first()

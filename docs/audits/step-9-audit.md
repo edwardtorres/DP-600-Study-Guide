@@ -167,9 +167,23 @@ Cross-Origin-Opener-Policy: same-origin
   - The only email-like strings are Microsoft's fictional `@contoso.com` examples, quoted from Learn pages and used in sample data.
   - All 52 earlier commits are authored and committed by the noreply address.
 
+## Found by the first CI runs (fixed)
+
+- **Labs page crash on current Chrome.**
+  - **What happened:** the deploy workflow's first `verify` run failed in the lab flow. The page snapshot showed the error boundary: "destroy is not a function".
+  - **Cause:** `LabsPage` ran `useEffect(() => body.current?.scrollTo?.({ top: 0 }), …)`. The newer Chromium that Playwright installs on the runner returns a Promise from `scrollTo()`, and React treats an effect's return value as its cleanup.
+  - **Real-user impact:** this bug dates from Step 6 and would have crashed the Labs page for real users on current Chrome. This environment's older Chromium didn't show it.
+  - **Fix:** every expression-bodied effect (6) now has a block body.
+  - **Regression test:** stubs `scrollTo` to return a Promise and opens Labs. I confirmed it fails on the old code and passes now.
+  - **Also:** the e2e specs now wait for the loaded game (`gameReady`, which waits for the progress stats), not the map, which the inert loading shell also shows.
+- **Learn rate-limits GitHub runners.**
+  - **What happened:** the first manual freshness run got HTTP 429 on 20 of 243 pages and on the study guide.
+  - **What the workflow did:** it treated these correctly as network errors (a warning, no issue), but it couldn't vouch for those pages.
+  - **Fix:** `fetchPolitely` retries 429/503 with `Retry-After` or exponential backoff, and `check:freshness` now fetches three pages at a time instead of six.
+
 ## Test and check results
 
-- **`npm run check`:** typecheck, lint (0 warnings), **275/275** unit tests, the content check, and the secrets check (238 files) all pass.
+- **`npm run check`:** typecheck, lint (0 warnings), **276/276** unit tests, the content check, and the secrets check (238 files) all pass.
 - **`npm run build`:** passes; check-bundle reports no `?seed=` or `?mock=short` hook in the 29 JS files.
 - **`npm run e2e`:** **12/12** (6 flows × 2 widths) with axe.
 - **`npm run e2e:prod`:** **10/10** (5 tests × 2 widths).

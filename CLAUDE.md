@@ -164,7 +164,7 @@ The free practice assessment shows "the style, wording, and difficulty"; the rea
 - **After Step 8, these remain contested:** materialized views in the warehouse; Contributor vs Member for deploying existing semantic models and paginated reports; Direct Lake on SQL with SQL OLS/CLS (fallback vs error); Direct Lake on OneLake with SQL RLS (success vs error); inline TVF release status.
 - **Unsupported, kept out of questions:** the OneLake data hub and Real-Time Analytics renames; OneLake security GA.
 - **Step 9 spot-check:** a fresh agent re-verified 131 random confirmed claims (71 key-dependent): 98.5% agreement (section 8 of the report).
-- **Weekly freshness workflow** (`.github/workflows/freshness.yml`, Mondays and on demand, built-in `GITHUB_TOKEN` only): runs `check:freshness --report` and `check:content -- --live --report`. Each writes a markdown report only when something changed (a page updated or gone, or the outline differs; network errors don't count), listing the affected machines, questions, puzzles, and labs. The workflow opens an issue labelled `content-freshness`, or, while one is open, comments only when the report's hash differs from the last one posted.
+- **Weekly freshness workflow** (`.github/workflows/freshness.yml`, Mondays and on demand, built-in `GITHUB_TOKEN` only): runs `check:freshness --report` and `check:content -- --live --report`. Each writes a markdown report only when something changed (a page updated or gone, or the outline differs; network errors don't count), listing the affected machines, questions, puzzles, and labs. Learn rate-limits bursts from GitHub's runners, so `scripts/learn-page.ts` `fetchPolitely` retries 429/503 with backoff and `check:freshness` fetches three at a time. The workflow opens an issue labelled `content-freshness`, or, while one is open, comments only when the report's hash differs from the last one posted.
 - **The DP-600 outline changes on October 19, 2026.** The first freshness run after that date matters: expect `--live` to report the new outline. Re-sync `scripts/official-outline.json` from the page, update the machine mapping, and re-check the affected content.
 
 ## Production (Step 9)
@@ -186,6 +186,8 @@ The free practice assessment shows "the style, wording, and difficulty"; the rea
   - The export and snooze times live in a separate key, `fabric-mill:backup`, so the save shape is unchanged.
   - Settings explains Safari's storage eviction and has an "Install the app" section (iPhone: Share → Add to Home Screen).
 - **Crash recovery:** `src/components/ErrorBoundary.tsx` offers an export of the raw save and a reload.
+- **Effects use block bodies.** Never `useEffect(() => el.scrollTo(...))`: newer Chromium returns a Promise from scroll methods, and React crashes on an effect that returns one (found by CI in Step 9; regression test in `src/production.test.tsx`).
+- **e2e waits for the game, not the shell:** use `gameReady(page)` (`e2e/helpers.ts`) after every `goto` or `reload`. The inert loading shell already shows the map.
 - **Hosting (`public/staticwebapp.config.json`):**
   - CSP: `default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'` (React style attributes); `img-src`, `font-src`, `connect-src`, `manifest-src`, and `worker-src` all `'self'`; `object-src 'none'`; `base-uri 'self'`; `form-action 'self'`; `frame-ancestors 'none'`; `upgrade-insecure-requests`.
   - Also nosniff, `X-Frame-Options: DENY`, Referrer-Policy, Permissions-Policy, HSTS, and COOP.

@@ -6,7 +6,9 @@ import { CloseIcon } from './icons'
 export function Glossary({ onClose, onSelect }: { onClose: () => void; onSelect: (machineId: string) => void }) {
   const [query, setQuery] = useState('')
   const input = useRef<HTMLInputElement>(null)
-  useEffect(() => input.current?.focus(), [])
+  useEffect(() => {
+    input.current?.focus()
+  }, [])
 
   const entries = useMemo(
     () =>

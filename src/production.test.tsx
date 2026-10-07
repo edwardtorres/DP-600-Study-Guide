@@ -69,3 +69,21 @@ describe('error boundary (Step 9)', () => {
     spy.mockRestore()
   })
 })
+
+describe('effects never return a value (Step 9 CI)', () => {
+  it('opens Labs when scrollTo returns a Promise, as newer Chromium does', async () => {
+    const original = Element.prototype.scrollTo
+    Element.prototype.scrollTo = function () {
+      return Promise.resolve()
+    } as unknown as typeof Element.prototype.scrollTo
+    try {
+      const user = userEvent.setup()
+      render(<App />)
+      await user.click(screen.getByRole('button', { name: 'Labs' }))
+      expect(await screen.findByTestId('before-you-start', {}, { timeout: 5000 })).toBeInTheDocument()
+      expect(screen.queryByText('Something went wrong')).toBeNull()
+    } finally {
+      Element.prototype.scrollTo = original
+    }
+  })
+})

@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 import { machines } from '../../src/data/machines'
 import { SAVE_KEY, newSave } from '../../src/save/schema'
-import { answerShown, expectAccessible, expectNoSideScroll, openMachine, runAttempt } from '../helpers'
+import { answerShown, expectAccessible, expectNoSideScroll, gameReady, openMachine, runAttempt } from '../helpers'
 
 /**
  * Production checks, run against the built app under the real hosting config (npm run e2e:prod)
@@ -46,13 +46,13 @@ test('hosting: security headers, SPA fallback, and the 404 page', async ({ page,
   expect(missing.status()).toBe(404)
   expect(await missing.text()).toContain('No such thread')
   await page.goto('/some/deep/link')
-  await expect(map(page)).toBeVisible()
+  await gameReady(page)
 })
 
 test('the app runs under the CSP: map, notes, start-up check, review, Weak Spots, labs, settings, mock, with axe on each screen', async ({ page }) => {
   const w = await watch(page)
   await page.goto('/')
-  await expect(map(page)).toBeVisible()
+  await gameReady(page)
   await expectAccessible(page, 'map')
   await expectNoSideScroll(page)
 
@@ -142,7 +142,7 @@ test('puzzles and a lab load and run under the CSP (every lazy chunk)', async ({
   }, [SAVE_KEY, JSON.stringify(save)] as const)
   const w = await watch(page)
   await page.goto('/')
-  await expect(map(page)).toBeVisible()
+  await gameReady(page)
   for (const [machine, puzzleId] of plays) {
     await openMachine(page, machine)
     await page.getByTestId('puzzle-bench').locator(`[data-puzzle="${puzzleId}"]`).tap()
@@ -163,7 +163,7 @@ test('puzzles and a lab load and run under the CSP (every lazy chunk)', async ({
 
 test('works offline after the first visit (service worker)', async ({ page, context }) => {
   await page.goto('/')
-  await expect(map(page)).toBeVisible()
+  await gameReady(page)
   // Wait until the service worker controls the page and has precached the app.
   await page.evaluate(async () => {
     await navigator.serviceWorker.ready
@@ -172,7 +172,7 @@ test('works offline after the first visit (service worker)', async ({ page, cont
   await expect.poll(() => page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true)
   await context.setOffline(true)
   await page.reload()
-  await expect(map(page)).toBeVisible()
+  await gameReady(page)
   await map(page).tap()
   await expect(page.getByTestId('machine-notes')).toBeVisible()
   await context.setOffline(false)

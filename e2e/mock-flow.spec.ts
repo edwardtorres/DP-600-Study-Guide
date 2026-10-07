@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 import { SAVE_KEY, type Save } from '../src/save/schema'
-import { SEED, answerShown, expectNoSideScroll, openMill, expectAccessible } from './helpers'
+import { SEED, answerShown, expectNoSideScroll, gameReady, openMill, expectAccessible } from './helpers'
 
 const stored = async (page: Page) => page.evaluate((k) => JSON.parse(localStorage.getItem(k)!) as Save, SAVE_KEY)
 const seconds = (t: string) => t.split(':').map(Number).reduce((a, b) => a * 60 + b, 0)
@@ -11,6 +11,7 @@ const shot = async (page: Page, name: string) => {
 test('mock exam (short dev mode): case study section and lock, mark for review, reload, review screen, and results', async ({ page }) => {
   const errors = await openMill(page)
   await page.goto(`/?seed=${SEED}&mock=short`)
+  await gameReady(page)
   const exam = page.getByRole('dialog', { name: /Question \d+ of \d+|Review your answers/ })
 
   await test.step('start a mock: the case study comes first', async () => {

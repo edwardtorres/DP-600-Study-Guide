@@ -39,7 +39,8 @@ async function worker() {
     }
   }
 }
-await Promise.all(Array.from({ length: 6 }, worker))
+// Three at a time: Learn rate-limits bursts (fetchPolitely backs off on 429).
+await Promise.all(Array.from({ length: 3 }, worker))
 rows.sort((a, b) => a.url.localeCompare(b.url))
 
 const citedBy = (c: Citers) =>

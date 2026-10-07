@@ -111,7 +111,7 @@ before any code was written. Every audit ([`docs/audits/`](docs/audits)) was rev
 
 | Command | What it checks |
 |---|---|
-| `npm test` | 275 Vitest unit and component tests: game rules, draws, scoring, review schedule, mock allocation, save migrations, evaluators, the Query Oracle engine, and the UI |
+| `npm test` | 276 Vitest unit and component tests: game rules, draws, scoring, review schedule, mock allocation, save migrations, evaluators, the Query Oracle engine, and the UI |
 | `npm run check:content` | Content rules. Every outline bullet maps to exactly one machine. Every statement and question cites Learn. Per-bullet question counts and domain shares match the official percentages. Answer-position balance, near-duplicate stems, Preview share, banned terms, puzzle generation across 50 seeds each, and lab schema and coverage |
 | `npm run check:secrets` | No local paths, private links, or token-like strings in the repo |
 | `npm run check` | Typecheck, lint (oxlint), the unit tests, the content check, and the secrets check |

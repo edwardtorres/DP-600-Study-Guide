@@ -61,17 +61,34 @@ export function articleText(html: string): string {
     .join('\n')
 }
 
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+
+/**
+ * fetch() that backs off when Learn rate-limits (429) or is briefly unavailable (503): it waits for
+ * Retry-After when given, otherwise 2, 4, 8, 16, 32 s, then returns the last response. Learn
+ * rate-limits bursts from shared runners such as GitHub Actions.
+ */
+export async function fetchPolitely(url: string, retries = 5): Promise<Response> {
+  for (let i = 0; ; i++) {
+    const res = await fetch(url, { redirect: 'follow' })
+    if ((res.status !== 429 && res.status !== 503) || i >= retries) return res
+    const after = Number(res.headers.get('retry-after'))
+    await res.body?.cancel()
+    await sleep(Number.isFinite(after) && after > 0 ? Math.min(after, 120) * 1000 : 2000 * 2 ** i)
+  }
+}
+
 export async function fetchLearnPage(url: string, attempts = 3): Promise<LearnPage> {
   let lastErr: unknown
   for (let i = 0; i < attempts; i++) {
     try {
-      const res = await fetch(url, { redirect: 'follow' })
+      const res = await fetchPolitely(url)
       const html = res.status === 200 ? await res.text() : ''
       const title = decodeEntities(/<title>([^<]*)<\/title>/i.exec(html)?.[1]?.trim() ?? '')
       return { url, status: res.status, finalUrl: res.url || url, updated: html ? lastUpdated(html) : null, title, text: html ? articleText(html) : '' }
     } catch (err) {
       lastErr = err
-      await new Promise((r) => setTimeout(r, 1000 * 2 ** i))
+      await sleep(1000 * 2 ** i)
     }
   }
   throw lastErr instanceof Error ? lastErr : new Error(String(lastErr))

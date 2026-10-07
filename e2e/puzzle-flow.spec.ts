@@ -4,7 +4,7 @@ import { machines } from '../src/data/machines'
 import { mulberry32 } from '../src/game/shuffle'
 import { shuffleForPlay } from '../src/puzzles/play'
 import { SAVE_KEY, newSave, type Save } from '../src/save/schema'
-import { SEED, closeMachine, expectNoSideScroll, machineNode, nodeState, openMachine, expectAccessible } from './helpers'
+import { SEED, closeMachine, expectNoSideScroll, gameReady, nodeState, openMachine, expectAccessible } from './helpers'
 
 /** One puzzle of each type, on machines whose prerequisites the fixture certifies. */
 const plays: [machine: string, puzzle: string][] = [
@@ -38,7 +38,7 @@ test('puzzle flow: one puzzle of each type, solved by tap; XP rises and no machi
     }
   }, [SAVE_KEY, JSON.stringify(fixtureSave())] as const)
   await page.goto(`/?seed=${SEED}`)
-  await expect(machineNode(page, 'Founding Charter')).toBeVisible()
+  await gameReady(page)
 
   // The app's seeded random source: each puzzle play takes the next value as its seed.
   const rand = mulberry32(SEED)
@@ -83,6 +83,7 @@ test('puzzle flow: one puzzle of each type, solved by tap; XP rises and no machi
   await test.step('a locked machine’s bench is closed', async () => {
     await page.evaluate((key) => localStorage.removeItem(key), SAVE_KEY)
     await page.reload()
+    await gameReady(page)
     await openMachine(page, 'Kusto Tension Meter')
     expect(await nodeState(page, 'Kusto Tension Meter')).toBe('locked')
     await expect(page.getByTestId('puzzle-bench').locator('[data-puzzle="QO-K01"]')).toBeDisabled()
