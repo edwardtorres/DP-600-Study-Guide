@@ -1,0 +1,97 @@
+# Verify, then deploy to Azure Static Web Apps.
+# The deploy job needs the verify job, so any failing check (npm run check, the build with its bundle check,
+# the dev e2e flows, or the production e2e under the real headers and CSP) blocks the deploy.
+# The deployment token lives in the repository secret AZURE_STATIC_WEB_APPS_API_TOKEN (see DEPLOY.md), never in
+# the repo. Until that secret exists, the deploy job skips with a notice instead of failing.
+name: Deploy to Azure Static Web Apps
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Checks (typecheck, lint, unit tests, content, secrets)
+        run: npm run check
+
+      - name: Build (with the bundle check)
+        run: npm run build
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: E2E flows (dev server, 1440 and 390 px, axe)
+        run: npm run e2e
+
+      - name: Production E2E (built app under the real headers and CSP, offline, axe)
+        run: npm run e2e:prod
+
+      - name: Upload the build
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+          retention-days: 7
+
+      - name: Upload Playwright results on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results
+          path: test-results
+          retention-days: 7
+
+  deploy:
+    needs: verify
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      HAS_TOKEN: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN != '' }}
+    steps:
+      - name: No deployment token yet
+        if: env.HAS_TOKEN != 'true'
+        run: echo "::notice title=Deploy skipped::The AZURE_STATIC_WEB_APPS_API_TOKEN secret isn't set. See DEPLOY.md step 3."
+
+      - name: Download the verified build
+        if: env.HAS_TOKEN == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: Deploy to Azure Static Web Apps
+        if: env.HAS_TOKEN == 'true'
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          action: upload
+          app_location: dist
+          skip_app_build: true
+          output_location: ''
+          skip_api_build: true

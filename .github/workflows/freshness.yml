@@ -1,0 +1,93 @@
+# Weekly content freshness check (and on demand from the Actions tab).
+# Runs npm run check:freshness (cited Learn pages updated since we verified them) and
+# npm run check:content -- --live (the study guide's outline vs scripts/official-outline.json).
+# If either finds a change, it opens an issue labelled content-freshness listing what changed and the
+# machines, questions, puzzles, and labs it affects. While such an issue is open it doesn't open another:
+# it comments only when the report differs from the last one posted. Uses only the built-in GITHUB_TOKEN.
+name: Content freshness
+
+on:
+  schedule:
+    - cron: '17 6 * * 1' # Mondays 06:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: content-freshness
+  cancel-in-progress: false
+
+jobs:
+  freshness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cited Learn pages updated since verified
+        id: fresh
+        continue-on-error: true
+        run: npm run check:freshness -- --report "$RUNNER_TEMP/freshness.md" 2>&1 | tee "$RUNNER_TEMP/freshness.log"; exit "${PIPESTATUS[0]}"
+
+      - name: Study guide outline (live)
+        id: outline
+        continue-on-error: true
+        run: npm run check:content -- --live --report "$RUNNER_TEMP/outline.md" 2>&1 | tee "$RUNNER_TEMP/outline.log"; exit "${PIPESTATUS[0]}"
+
+      - name: Open or update the content-freshness issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          body="$RUNNER_TEMP/issue.md"
+          : > "$body"
+          # The scripts write a report only when something changed (not for network errors).
+          for f in outline freshness; do
+            if [ -s "$RUNNER_TEMP/$f.md" ]; then cat "$RUNNER_TEMP/$f.md" >> "$body"; echo >> "$body"; fi
+          done
+          if [ ! -s "$body" ]; then
+            echo "No content changes found."
+            if [ "${{ steps.fresh.outcome }}" != "success" ] || [ "${{ steps.outline.outcome }}" != "success" ]; then
+              echo "::warning title=Freshness check incomplete::A check failed without finding a change (likely a network error). See the logs: $RUN_URL"
+            fi
+            exit 0
+          fi
+          # A hash of the report identifies it, so an unchanged report isn't posted twice.
+          hash=$(sha256sum "$body" | cut -c1-16)
+          {
+            echo
+            echo "To fix: re-check each affected item on Learn (CLAUDE.md, Fact-checking and staying current), then run scripts/stamp-verified.ts. For outline changes, re-sync scripts/official-outline.json and the machine mapping."
+            echo
+            echo "Found by the [Content freshness run]($RUN_URL)."
+            echo "<!-- freshness-report: $hash -->"
+          } >> "$body"
+
+          gh label create content-freshness --color FBCA04 --description "Learn pages or the DP-600 outline changed" --repo "$GITHUB_REPOSITORY" 2>/dev/null || true
+          issue=$(gh issue list --repo "$GITHUB_REPOSITORY" --label content-freshness --state open --json number --jq '.[0].number // empty')
+          if [ -z "$issue" ]; then
+            gh issue create --repo "$GITHUB_REPOSITORY" --label content-freshness \
+              --title "Content freshness: Learn or the DP-600 outline changed ($(date -u +%Y-%m-%d))" --body-file "$body"
+            exit 0
+          fi
+          # Skip if the issue or its latest comment already carries this report.
+          last=$(gh issue view "$issue" --repo "$GITHUB_REPOSITORY" --json body,comments \
+            --jq '([.body] + [.comments[].body]) | map(select(test("freshness-report:"))) | last // ""' \
+            | grep -o 'freshness-report: [0-9a-f]*' | tail -1 || true)
+          if [ "$last" = "freshness-report: $hash" ]; then
+            echo "Issue #$issue already has this report."
+          else
+            gh issue comment "$issue" --repo "$GITHUB_REPOSITORY" --body-file "$body"
+          fi

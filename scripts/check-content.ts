@@ -1,7 +1,10 @@
 /**
  * npm run check:content           → app structure vs scripts/official-outline.json
  * npm run check:content -- --live → also re-fetch the study guide and diff the bullets
+ *   --report <file>  with --live, when the outline differs, also writes a markdown report of the
+ *                    differences and what they affect (used by the weekly freshness workflow)
  */
+import { writeFileSync } from 'node:fs'
 import { edges } from '../src/data/edges.ts'
 import { machines } from '../src/data/machines.ts'
 import { outline } from '../src/data/outline.ts'
@@ -59,9 +62,51 @@ export function parseLive(html: string, version: string): string[] {
 }
 
 function recordedLines(): string[] {
+  return recordedBullets().map((r) => r.line)
+}
+
+function recordedBullets(): { line: string; bulletId: string; section: string }[] {
   return outline.domains.flatMap((d) =>
-    d.sections.flatMap((s) => s.bullets.map((b) => `${d.title} (${d.weightText}) › ${s.title} › ${b.text}`)),
+    d.sections.flatMap((s) => s.bullets.map((b) => ({ line: `${d.title} (${d.weightText}) › ${s.title} › ${b.text}`, bulletId: b.id, section: s.title }))),
   )
+}
+
+/**
+ * Markdown for the outline differences: each line with the machines, questions, puzzles, and labs
+ * on its bullet. A new line maps to whatever sits on the recorded bullets of the same section.
+ */
+function liveReport(added: string[], removed: string[], note?: string): string {
+  const rec = recordedBullets()
+  const code = (xs: Iterable<string>) => [...new Set(xs)].sort().map((x) => `\`${x}\``).join(', ') || 'none'
+  const affected = (bulletIds: string[]) => [
+    `  - bullets: ${code(bulletIds)}`,
+    `  - machines: ${code(machines.filter((m) => m.bulletIds.some((b) => bulletIds.includes(b))).map((m) => m.id))}`,
+    `  - questions: ${allQuestions.filter((q) => q.bulletIds.some((b) => bulletIds.includes(b))).length} (${code(allQuestions.filter((q) => q.bulletIds.some((b) => bulletIds.includes(b))).map((q) => q.id))})`,
+    `  - puzzles: ${code(allPuzzles.filter((p) => p.meta.bulletIds.some((b) => bulletIds.includes(b))).map((p) => p.meta.id))}`,
+    `  - labs: ${code(allLabs.filter((l) => l.bulletIds.some((b) => bulletIds.includes(b))).map((l) => l.id))}`,
+  ]
+  const md = [`### Study guide outline differences (${outline.version})`, '', `Source: ${outline.source}`, '']
+  if (note) md.push(`- ${note}`, '')
+  if (removed.length) {
+    md.push(`**Recorded but no longer on the live page (${removed.length})**`, '')
+    for (const l of removed) md.push(`- ${l}`, ...affected(rec.filter((r) => r.line === l).map((r) => r.bulletId)))
+    md.push('')
+  }
+  if (added.length) {
+    md.push(`**On the live page but not recorded (${added.length})**`, '')
+    for (const l of added) {
+      const section = l.split(' › ')[1] ?? ''
+      const same = rec.filter((r) => r.section === section).map((r) => r.bulletId)
+      md.push(`- ${l}`, same.length ? '  - same section as these recorded bullets:' : '  - a new section', ...(same.length ? affected(same).map((x) => `  ${x}`) : []))
+    }
+    md.push('')
+  }
+  return md.join('\n')
+}
+
+function writeReport(text: string) {
+  const at = process.argv.indexOf('--report')
+  if (at > 0 && process.argv[at + 1]) writeFileSync(process.argv[at + 1]!, text)
 }
 
 function printNotesSummary() {
@@ -135,17 +180,32 @@ async function main() {
   ]
 
   if (process.argv.includes('--live')) {
-    const res = await fetch(outline.source)
-    if (!res.ok) {
-      errors.push(`Could not fetch ${outline.source}: HTTP ${res.status}`)
+    const res = await fetch(outline.source).catch((e: unknown) => e instanceof Error ? e : new Error(String(e)))
+    if (res instanceof Error || !res.ok) {
+      const msg = `Could not fetch ${outline.source}: ${res instanceof Error ? res.message : `HTTP ${res.status}`}`
+      // A failed fetch is not a change, so no report.
+      errors.push(msg)
     } else {
-      const live = parseLive(await res.text(), outline.version)
-      const recorded = recordedLines()
-      const liveSet = new Set(live)
-      const recSet = new Set(recorded)
-      for (const l of live) if (!recSet.has(l)) errors.push(`On live page but not recorded: ${l}`)
-      for (const l of recorded) if (!liveSet.has(l)) errors.push(`Recorded but not on live page: ${l}`)
-      if (errors.length === 0) console.log(`Live page matches the recorded outline (${live.length} bullets).`)
+      let live: string[] = []
+      try {
+        live = parseLive(await res.text(), outline.version)
+      } catch (e) {
+        // The recorded version's section is gone: the page moved on to a new outline.
+        const msg = e instanceof Error ? e.message : String(e)
+        errors.push(msg)
+        writeReport(liveReport([], [], `${msg}. Re-sync scripts/official-outline.json from the page.`))
+      }
+      if (live.length > 0) {
+        const recorded = recordedLines()
+        const liveSet = new Set(live)
+        const recSet = new Set(recorded)
+        const added = live.filter((l) => !recSet.has(l))
+        const removed = recorded.filter((l) => !liveSet.has(l))
+        for (const l of added) errors.push(`On live page but not recorded: ${l}`)
+        for (const l of removed) errors.push(`Recorded but not on live page: ${l}`)
+        if (added.length + removed.length > 0) writeReport(liveReport(added, removed))
+        else console.log(`Live page matches the recorded outline (${live.length} bullets).`)
+      }
     }
   }
 
