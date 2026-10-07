@@ -4,7 +4,7 @@ import { machines } from '../src/data/machines'
 import { mulberry32 } from '../src/game/shuffle'
 import { shuffleForPlay } from '../src/puzzles/play'
 import { SAVE_KEY, newSave, type Save } from '../src/save/schema'
-import { SEED, closeMachine, expectNoSideScroll, machineNode, nodeState, openMachine } from './helpers'
+import { SEED, closeMachine, expectNoSideScroll, machineNode, nodeState, openMachine, expectAccessible } from './helpers'
 
 /** One puzzle of each type, on machines whose prerequisites the fixture certifies. */
 const plays: [machine: string, puzzle: string][] = [
@@ -62,10 +62,12 @@ test('puzzle flow: one puzzle of each type, solved by tap; XP rises and no machi
         else await box.locator(`[data-choice="${want}"]`).tap()
       }
       await expectNoSideScroll(page)
+      await expectAccessible(page, 'puzzle-flow.spec.ts:64')
       if (process.env.PW_SHOTS) await page.screenshot({ path: `${process.env.PW_SHOTS}/${test.info().project.name}-${puzzleId}-answered.png`, fullPage: true })
       await dialog.getByRole('button', { name: 'Check' }).tap()
       await expect(dialog.getByRole('status')).toContainText(`${instance.decisions.length} of ${instance.decisions.length} right`)
       await expectNoSideScroll(page)
+      await expectAccessible(page, 'puzzle-flow.spec.ts:68')
       if (process.env.PW_SHOTS) await page.screenshot({ path: `${process.env.PW_SHOTS}/${test.info().project.name}-${puzzleId}-result.png` })
       await dialog.getByRole('button', { name: 'Back to the mill' }).tap()
       const after = await xp(page)

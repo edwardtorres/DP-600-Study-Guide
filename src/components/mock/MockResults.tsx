@@ -31,7 +31,7 @@ export function MockResults({ record, questions, onOpenPair }: { record: MockRec
         </p>
         <p className="mt-2 text-xs text-mill-400" data-testid="scaled-note">
           Microsoft reports exam scores on a scale of 1 to 1,000, and 700 passes. Learn says that because it’s a scaled score, it may not equal 70% of the points, so this raw percentage can’t predict your exam score exactly.{' '}
-          <a href={SCORING_URL} target="_blank" rel="noreferrer" className="text-brass-300 hover:underline">
+          <a href={SCORING_URL} target="_blank" rel="noreferrer" className="text-brass-300 underline">
             Exam scoring on Learn ↗
           </a>
         </p>

@@ -79,7 +79,7 @@ function Body({ q }: { q: Question }) {
     case 'dropdown':
       return (
         <div className="space-y-2">
-          <pre className="overflow-x-auto rounded-md bg-mill-950 p-2 font-mono text-xs text-mill-50">
+          <pre tabIndex={0} aria-label="Code" className="overflow-x-auto rounded-md bg-mill-950 p-2 font-mono text-xs text-mill-50">
             <code>{q.code}</code>
           </pre>
           {q.slots.map((s) => (
@@ -194,7 +194,7 @@ export function ReviewPage() {
             <p className="mt-3 text-xs text-mill-400">
               Sources:{' '}
               {q.sources.map((s, i) => (
-                <a key={s} href={s} target="_blank" rel="noreferrer" className="mr-2 break-all text-brass-300 hover:underline">
+                <a key={s} href={s} target="_blank" rel="noreferrer" className="mr-2 inline-block break-all py-1 text-brass-300 hover:underline">
                   [{i + 1}] {s.replace('https://learn.microsoft.com/en-us/', '')}
                 </a>
               ))}

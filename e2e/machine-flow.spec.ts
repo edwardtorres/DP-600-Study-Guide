@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { answerShown, backToMill, closeMachine, expectNoSideScroll, nodeState, openMachine, openMill, runAttempt } from './helpers'
+import { answerShown, backToMill, closeMachine, expectNoSideScroll, nodeState, openMachine, openMill, runAttempt, expectAccessible } from './helpers'
 
 test('machine flow: notes → start-up → inspection → certified, then the same-day inspection lock', async ({ page }) => {
   const errors = await openMill(page)
@@ -15,6 +15,7 @@ test('machine flow: notes → start-up → inspection → certified, then the sa
     const inspection = await runAttempt(page, /Take the inspection/)
     expect(inspection.status).toMatch(/5 of 5 correct/)
     await expectNoSideScroll(page)
+    await expectAccessible(page, 'machine-flow.spec.ts:17')
     await backToMill(inspection.dialog)
     expect(await nodeState(page, 'Founding Charter')).toBe('certified')
     expect(await nodeState(page, 'Water Wheel')).toBe('idle')
@@ -46,5 +47,6 @@ test('machine flow: notes → start-up → inspection → certified, then the sa
   })
 
   await expectNoSideScroll(page)
+  await expectAccessible(page, 'machine-flow.spec.ts:48')
   expect(errors).toEqual([])
 })

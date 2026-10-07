@@ -3,11 +3,15 @@
  * To change the save shape: bump SAVE_VERSION, add the new type and validator
  * in schema.ts, append a migration here, and add a test with a real old save.
  */
-import { caseQuestions } from '../content/questions/cases'
 import { mockFreshness } from '../game/mock'
 import type { AnswerEntry } from './schema'
 
-const caseIds = new Set(caseQuestions.map((q) => q.id))
+/**
+ * Case-study question ids (CS1-01 … CS6-08). A pattern instead of importing the
+ * case studies keeps the question bank out of the first-load chunk; a test checks
+ * that it matches every case question and no other question.
+ */
+export const CASE_QUESTION_ID = /^CS\d+-\d+$/
 
 export interface Migration {
   from: number
@@ -48,7 +52,7 @@ export const migrations: Migration[] = [
       const answers = (Array.isArray(old.answers) ? old.answers : []) as AnswerEntry[]
       const mocks = (Array.isArray(old.mocks) ? old.mocks : []) as { questionIds?: unknown; startedAt?: unknown }[]
       const withFreshness = (ids: unknown, startedAt: unknown) =>
-        Array.isArray(ids) && typeof startedAt === 'string' ? mockFreshness(ids.filter((id: unknown): id is string => typeof id === 'string' && !caseIds.has(id)), answers, startedAt) : 0
+        Array.isArray(ids) && typeof startedAt === 'string' ? mockFreshness(ids.filter((id: unknown): id is string => typeof id === 'string' && !CASE_QUESTION_ID.test(id)), answers, startedAt) : 0
       const active = old.activeMock as { mainIds?: unknown; startedAt?: unknown } | undefined
       return {
         ...old,

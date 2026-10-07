@@ -3,7 +3,7 @@ import { expect, test, type Page } from '@playwright/test'
 import { labById } from '../src/content/labs/index'
 import { LAB_XP, requiredStepIds } from '../src/game/labs'
 import { SAVE_KEY, type Save } from '../src/save/schema'
-import { answerShown, expectNoSideScroll, machineNode, nodeState, openMill } from './helpers'
+import { answerShown, expectNoSideScroll, machineNode, nodeState, openMill, expectAccessible } from './helpers'
 
 const LAB = labById.get('L05')!
 const NOTE = 'The Save as view button is under a different menu on my screen'
@@ -31,6 +31,7 @@ test('lab flow: trial clock, steps, a problem note, export, completion, and the 
     await expect(labs.getByTestId('days-left')).toHaveText('56 of 60 days left')
     await expect(labs.getByTestId('schedule').locator('li')).toHaveCount(15)
     await expectNoSideScroll(page)
+    await expectAccessible(page, 'lab-flow.spec.ts:33')
     await shot(page, 'list')
   })
 
@@ -52,6 +53,7 @@ test('lab flow: trial clock, steps, a problem note, export, completion, and the 
     await expect(noted.getByText('Saved on this device')).toBeVisible()
     await expect(noted.getByTestId('trap-callout')).toContainText('Trap you’ll see')
     await expectNoSideScroll(page)
+    await expectAccessible(page, 'lab-flow.spec.ts:54')
     await shot(page, 'steps')
   })
 
@@ -94,6 +96,7 @@ test('lab flow: trial clock, steps, a problem note, export, completion, and the 
     await expect(dialog.getByRole('status')).toContainText('3 of 3 correct')
     await expect(dialog.getByRole('status')).toContainText('never certifies')
     await expectNoSideScroll(page)
+    await expectAccessible(page, 'lab-flow.spec.ts:96')
     await shot(page, 'debrief')
     await dialog.getByRole('button', { name: 'Back to the mill' }).tap()
     expect(await xp(page)).toBeGreaterThan(xpBefore + LAB_XP)
@@ -112,6 +115,7 @@ test('lab flow: trial clock, steps, a problem note, export, completion, and the 
     const item = page.getByTestId('workshop').locator(`button[data-lab="${LAB.id}"]`)
     await expect(item).toContainText('Complete')
     await expectNoSideScroll(page)
+    await expectAccessible(page, 'lab-flow.spec.ts:114')
     await shot(page, 'workshop')
     await item.tap()
     await expect(labs.getByTestId('lab-view')).toHaveAttribute('data-lab', LAB.id)

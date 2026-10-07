@@ -25,7 +25,7 @@ export function CodeBlock({ code, language, children }: { code?: string; languag
   return (
     <div className="max-w-full overflow-hidden rounded-md border border-mill-700 bg-mill-950">
       <div className="border-b border-mill-800 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-mill-400">{languageName[language]}</div>
-      <pre className="overflow-x-auto p-2 font-mono text-xs leading-relaxed text-mill-50" data-testid="code-block">
+      <pre tabIndex={0} aria-label="Code" className="overflow-x-auto p-2 font-mono text-xs leading-relaxed text-mill-50 focus-visible:outline-2 focus-visible:outline-brass-300" data-testid="code-block">
         <code>{children ?? <Highlighted code={code ?? ''} language={language} />}</code>
       </pre>
     </div>

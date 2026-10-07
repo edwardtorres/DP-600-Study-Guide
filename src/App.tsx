@@ -1,25 +1,17 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AttemptPanel } from './components/AttemptPanel'
-import { Badges } from './components/Badges'
-import { Glossary } from './components/Glossary'
 import { Header } from './components/Header'
 import { Legend } from './components/Legend'
 import { MachineDetail } from './components/MachineDetail'
 import { MillMap } from './components/MillMap'
-import { PuzzlePanel } from './components/puzzles/PuzzlePanel'
-import { LabsPage } from './components/labs/LabsPage'
 import { allLabs, labById, labsForMachine } from './content/labs'
 import { completeLab, drawDebrief, exportLabNotes, labXp, recordDebrief, setProblem, setStepDone, setTrialStart } from './game/labs'
 import { dayKey } from './game/time'
-import { ReviewPage } from './components/review/ReviewPage'
-import { WeakSpots, type WeakLinks } from './components/weak/WeakSpots'
-import { MockCenter } from './components/mock/MockCenter'
-import { MockExam } from './components/mock/MockExam'
+import type { WeakLinks } from './components/weak/WeakSpots'
 import { dailyQueue, maintenance, maintenanceSet, recordReview } from './game/review'
 import { bulletScores, trapMisses, weakSpots } from './game/weak'
 import { chooseCase, drawMock, finishMock, leaveCase, remainingMs, setMockResponse, startMock, toggleMark } from './game/mock'
 import { caseStudies } from './content/questions'
-import { Settings } from './components/Settings'
 import { allPuzzles, puzzleById, puzzlesFor } from './content/puzzles'
 import { allQuestions } from './content/questions'
 import type { Question } from './content/questions/types'
@@ -37,6 +29,21 @@ import { shuffleForPlay } from './puzzles/play'
 import type { PuzzleInstance } from './puzzles/types'
 import { newSave, type AttemptKind, type Save } from './save/schema'
 import { backupSave, loadSave, writeSave, type LoadResult } from './save/storage'
+import { requestPersistence, type PersistStatus } from './save/backup'
+import { BackupBanner, UpdateBanner } from './components/Banners'
+import { CloseIcon } from './components/icons'
+
+// Dialogs and panels load on first use, so the first screen stays small.
+const Badges = lazy(() => import('./components/Badges').then((m) => ({ default: m.Badges })))
+const Glossary = lazy(() => import('./components/Glossary').then((m) => ({ default: m.Glossary })))
+const PuzzlePanel = lazy(() => import('./components/puzzles/PuzzlePanel').then((m) => ({ default: m.PuzzlePanel })))
+const LabsPage = lazy(() => import('./components/labs/LabsPage').then((m) => ({ default: m.LabsPage })))
+const ReviewPage = lazy(() => import('./components/review/ReviewPage').then((m) => ({ default: m.ReviewPage })))
+const WeakSpots = lazy(() => import('./components/weak/WeakSpots').then((m) => ({ default: m.WeakSpots })))
+const MockCenter = lazy(() => import('./components/mock/MockCenter').then((m) => ({ default: m.MockCenter })))
+const MockExam = lazy(() => import('./components/mock/MockExam').then((m) => ({ default: m.MockExam })))
+const AnswerKey = lazy(() => import('./review/ReviewPage').then((m) => ({ default: m.ReviewPage })))
+const Settings = lazy(() => import('./components/Settings').then((m) => ({ default: m.Settings })))
 
 const questionsById = new Map(allQuestions.map((q) => [q.id, q]))
 /** Everything the answer log can refer to: questions and puzzles (both carry difficulty and bullets). */
@@ -66,8 +73,8 @@ interface Attempt {
   questions: Question[]
 }
 
-export default function App() {
-  const [initial] = useState<LoadResult>(() => loadSave({ knownMachineIds: machineById.keys() }))
+export default function App({ loaded }: { loaded?: LoadResult } = {}) {
+  const [initial] = useState<LoadResult>(() => loaded ?? loadSave({ knownMachineIds: machineById.keys() }))
   const [save, setSave] = useState(initial.save)
   const saveRef = useRef(save)
   const [rand] = useState(() => makeRandom())
@@ -83,6 +90,9 @@ export default function App() {
   const [debrief, setDebrief] = useState<Debrief | null>(null)
   const [attempt, setAttempt] = useState<Attempt | null>(null)
   const [play, setPlay] = useState<Play | null>(null)
+  const [persist, setPersist] = useState<PersistStatus | null>(null)
+  const [exportTick, setExportTick] = useState(0)
+  const [answerKey, setAnswerKey] = useState(false)
   const [notice, setNotice] = useState(
     initial.status === 'recovered' ? 'Your saved progress could not be read, so a new mill was opened. The old save was kept as a backup.' : null,
   )
@@ -91,6 +101,15 @@ export default function App() {
     saveRef.current = save
     writeSave(save)
   }, [save])
+
+  // Ask the browser to keep this site's storage (shown in Settings).
+  useEffect(() => {
+    let live = true
+    void requestPersistence().then((p) => live && setPersist(p))
+    return () => {
+      live = false
+    }
+  }, [])
 
   /** Opening a machine's panel shows its notes; the first time is recorded (needed before its start-up check). */
   const select = useCallback((id: string | null, pairId: string | null = null) => {
@@ -102,12 +121,13 @@ export default function App() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape' || attempt || play || debrief || reviewSession || examOpen) return
-      if (dialog) setDialog(null)
+      if (answerKey) setAnswerKey(false)
+      else if (dialog) setDialog(null)
       else select(null)
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [dialog, attempt, play, debrief, reviewSession, examOpen, select])
+  }, [dialog, attempt, play, debrief, reviewSession, examOpen, answerKey, select])
 
   const states = useMemo(() => allStates(millGraph, save), [save])
   const placedIds = useMemo(() => new Set(machines.filter((m) => isPlaced(save, m.id)).map((m) => m.id)), [save])
@@ -299,6 +319,8 @@ export default function App() {
           </button>
         </div>
       )}
+      <UpdateBanner />
+      <BackupBanner save={save} exportTick={exportTick} />
       <Header
         machines={machines}
         states={states}
@@ -316,17 +338,19 @@ export default function App() {
         onOpenBadges={() => setDialog('badges')}
         onOpenSettings={() => setDialog('settings')}
       />
-      <MillMap
-        machines={machines}
-        edges={edges}
-        graph={millGraph}
-        states={states}
-        selectedId={selectedId}
-        placedIds={placedIds}
-        maintenanceIds={maintenanceIds}
-        onSelect={(id) => select(id)}
-      />
-      <Legend />
+      <main>
+        <MillMap
+          machines={machines}
+          edges={edges}
+          graph={millGraph}
+          states={states}
+          selectedId={selectedId}
+          placedIds={placedIds}
+          maintenanceIds={maintenanceIds}
+          onSelect={(id) => select(id)}
+        />
+        <Legend />
+      </main>
       {selected && (
         <MachineDetail
           machine={selected}
@@ -361,6 +385,7 @@ export default function App() {
           onClose={() => select(null)}
         />
       )}
+      <Suspense fallback={null}>
       {attempt && attemptMachine && (
         <AttemptPanel
           key={attempt.key}
@@ -556,9 +581,26 @@ export default function App() {
             backupSave()
             setSave(newSave())
           }}
+          persist={persist}
+          onExported={() => setExportTick((t) => t + 1)}
+          onOpenAnswerKey={() => {
+            setDialog(null)
+            setAnswerKey(true)
+          }}
           onClose={() => setDialog(null)}
         />
       )}
+      {answerKey && (
+        <div role="dialog" aria-modal="true" aria-label="Question bank and answer key" className="fixed inset-0 z-40 overflow-y-auto bg-mill-950">
+          <div className="sticky top-0 z-10 flex justify-end border-b border-mill-700 bg-mill-950/95 p-3">
+            <button type="button" onClick={() => setAnswerKey(false)} className="flex items-center gap-1 rounded-lg border border-mill-600 px-3 py-1.5 text-sm text-mill-200 hover:border-brass-400">
+              <CloseIcon className="size-4" /> Back to the mill
+            </button>
+          </div>
+          <AnswerKey />
+        </div>
+      )}
+      </Suspense>
     </div>
   )
 }

@@ -15,7 +15,7 @@ export const stateCard: Record<MachineState, string> = {
 }
 
 export const stateBadge: Record<MachineState, string> = {
-  locked: 'bg-mill-700 text-mill-400',
+  locked: 'bg-mill-700 text-mill-200',
   idle: 'bg-brass-500/20 text-brass-300',
   running: 'bg-indigo-thread/25 text-indigo-200',
   certified: 'bg-brass-400 text-mill-950',

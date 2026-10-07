@@ -1,0 +1,15 @@
+{
+  "name": "Fabric Mill · DP-600",
+  "short_name": "Fabric Mill",
+  "description": "A study game for Microsoft exam DP-600: Implementing Analytics Solutions Using Microsoft Fabric. Unofficial; not affiliated with Microsoft.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#17120e",
+  "theme_color": "#17120e",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

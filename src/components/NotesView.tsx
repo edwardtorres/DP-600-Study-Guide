@@ -95,7 +95,7 @@ export function NotesView({ notes }: { notes: MachineNotes }) {
               <ol className="space-y-2">
                 {e.steps.map((s, i) => (
                   <li key={i}>
-                    <pre className="overflow-x-auto rounded-md bg-mill-950 p-2 font-mono text-xs text-mill-50">
+                    <pre tabIndex={0} aria-label="Code" className="overflow-x-auto rounded-md bg-mill-950 p-2 font-mono text-xs text-mill-50 focus-visible:outline-2 focus-visible:outline-brass-300">
                       <code>{e.language === 'tsql' || e.language === 'kql' || e.language === 'dax' ? <Highlighted code={s.code} language={e.language as CodeLanguage} /> : s.code}</code>
                     </pre>
                     <p className="mt-1 text-xs text-mill-400">
@@ -210,7 +210,7 @@ export function NotesView({ notes }: { notes: MachineNotes }) {
         <ol className="list-decimal space-y-1 pl-5 text-xs">
           {sources.map((u) => (
             <li key={u}>
-              <a href={u} target="_blank" rel="noreferrer" className="break-all text-brass-300 hover:underline">
+              <a href={u} target="_blank" rel="noreferrer" className="inline-block break-all py-1 text-brass-300 hover:underline">
                 {u.replace('https://learn.microsoft.com/en-us/', 'learn: ')}
               </a>
             </li>

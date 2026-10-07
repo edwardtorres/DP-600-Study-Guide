@@ -47,7 +47,7 @@ export function PuzzleContextView({ context }: { context: PuzzleContext }) {
                 .map((n) => (
                   <li key={n.id} className={`rounded px-2 py-1 text-sm ${n.id === context.changed ? 'bg-madder/20 font-semibold text-mill-50' : 'text-mill-200'}`}>
                     {n.label} <span className="text-xs text-mill-400">· {n.itemType}</span>
-                    {n.id === context.changed && <span className="ml-1 text-xs text-madder">(changing)</span>}
+                    {n.id === context.changed && <span className="ml-1 text-xs font-semibold text-mill-50">(changing)</span>}
                   </li>
                 ))}
             </ul>

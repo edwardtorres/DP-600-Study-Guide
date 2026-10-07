@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 import { SAVE_KEY, type Save } from '../src/save/schema'
-import { SEED, answerShown, expectNoSideScroll, openMill } from './helpers'
+import { SEED, answerShown, expectNoSideScroll, openMill, expectAccessible } from './helpers'
 
 const stored = async (page: Page) => page.evaluate((k) => JSON.parse(localStorage.getItem(k)!) as Save, SAVE_KEY)
 const seconds = (t: string) => t.split(':').map(Number).reduce((a, b) => a * 60 + b, 0)
@@ -22,6 +22,7 @@ test('mock exam (short dev mode): case study section and lock, mark for review, 
     await expect(exam).toContainText('Section 1 of 2: case study')
     await expect(exam.getByTestId('mock-timer')).toHaveText(/^(10:00|9:5\d)$/)
     await expectNoSideScroll(page)
+    await expectAccessible(page, 'mock-flow.spec.ts:24')
     await shot(page, 'case')
   })
 
@@ -82,6 +83,7 @@ test('mock exam (short dev mode): case study section and lock, mark for review, 
     await expect(review).toContainText('Section 1 (case study')
     await expect(review.getByText('Marked', { exact: true })).toHaveCount(1)
     await expectNoSideScroll(page)
+    await expectAccessible(page, 'mock-flow.spec.ts:84')
     await shot(page, 'review')
     await exam.getByRole('button', { name: 'Submit exam' }).tap()
     const confirm = page.getByRole('alertdialog')
@@ -101,6 +103,7 @@ test('mock exam (short dev mode): case study section and lock, mark for review, 
     await expect(results.locator('article[data-question-id]')).toHaveCount(caseCount + mainCount)
     await expect(results.locator('article[data-correct="false"]').first()).toBeVisible()
     await expectNoSideScroll(page)
+    await expectAccessible(page, 'mock-flow.spec.ts:103')
     await shot(page, 'results')
     const s = await stored(page)
     expect(s.activeMock).toBeUndefined()

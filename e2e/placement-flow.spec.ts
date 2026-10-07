@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { backToMill, closeMachine, expectNoSideScroll, nodeState, openMachine, openMill, runAttempt } from './helpers'
+import { backToMill, closeMachine, expectNoSideScroll, nodeState, openMachine, openMill, runAttempt, expectAccessible } from './helpers'
 
 test('placement flow: a failed placement blocks a same-day retry; a perfect one places the machine', async ({ page }) => {
   const errors = await openMill(page)
@@ -32,6 +32,7 @@ test('placement flow: a failed placement blocks a same-day retry; a perfect one 
     const pass = await runAttempt(page, /placement check/)
     expect(pass.status).toMatch(/5 of 5 correct/)
     await expectNoSideScroll(page)
+    await expectAccessible(page, 'placement-flow.spec.ts:34')
     await backToMill(pass.dialog)
     expect(await nodeState(page, 'DAX Scale')).toBe('certified')
     await expect(page.getByText('Placed out with a perfect placement check.')).toBeVisible()
@@ -40,5 +41,6 @@ test('placement flow: a failed placement blocks a same-day retry; a perfect one 
   })
 
   await expectNoSideScroll(page)
+  await expectAccessible(page, 'placement-flow.spec.ts:42')
   expect(errors).toEqual([])
 })

@@ -102,7 +102,7 @@ describe('mill map', () => {
     const user = userEvent.setup()
     render(<App />)
     await user.click(screen.getByRole('button', { name: 'Settings' }))
-    const input = screen.getByLabelText('Import save file')
+    const input = await screen.findByLabelText('Import save file')
     await user.upload(input, new File(['{"version":2}'], 'bad.json', { type: 'application/json' }))
     expect(await screen.findByText(/Import failed: Save failed validation/)).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Replace progress' })).toBeNull()

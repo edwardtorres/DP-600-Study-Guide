@@ -142,7 +142,7 @@ export function QuestionResult({ index, question, response, correct, onOpenPair 
       <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
         <span className="text-mill-400">Learn:</span>
         {question.sources.map((u) => (
-          <a key={u} href={u} target="_blank" rel="noreferrer" className="break-all text-brass-300 hover:underline">
+          <a key={u} href={u} target="_blank" rel="noreferrer" className="inline-block break-all py-1 text-brass-300 hover:underline">
             {u.replace('https://learn.microsoft.com/en-us/', '')}
           </a>
         ))}

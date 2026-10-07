@@ -20,11 +20,26 @@ interface Props {
   mockActive: boolean
   onOpenBadges: () => void
   onOpenSettings: () => void
+  /** First paint before the content has loaded: same layout, placeholder numbers. */
+  loading?: boolean
 }
 
 const domainShort: Record<DomainId, string> = { PREPARE: 'Prepare', SEMANTIC: 'Models', MAINTAIN: 'Maintain' }
 
-function Stats({ level, streak, readiness, badgesEarned, onOpenBadges }: Pick<Props, 'level' | 'streak' | 'readiness' | 'badgesEarned' | 'onOpenBadges'>) {
+function Stats({ level, streak, readiness, badgesEarned, onOpenBadges, loading }: Pick<Props, 'level' | 'streak' | 'readiness' | 'badgesEarned' | 'onOpenBadges' | 'loading'>) {
+  if (loading) {
+    return (
+      <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3" aria-hidden="true">
+        {['Level', 'Streak', 'Readiness'].map((label) => (
+          <div key={label} className="rounded-lg border border-mill-700 bg-mill-900 p-3">
+            <p className="text-sm font-semibold text-mill-50">{label} …</p>
+            <div className="mt-2 h-1.5 rounded-full bg-mill-700" />
+            <p className="mt-1 text-xs text-mill-400">Loading the mill…</p>
+          </div>
+        ))}
+      </div>
+    )
+  }
   const span = level.nextLevelXp - level.levelStartXp
   const into = level.xp - level.levelStartXp
   return (
@@ -71,7 +86,7 @@ function Stats({ level, streak, readiness, badgesEarned, onOpenBadges }: Pick<Pr
   )
 }
 
-export function Header({ machines, states, level, streak, readiness, badgesEarned, onOpenGlossary, onOpenLabs, onOpenReview, onOpenWeak, onOpenMock, dueCount, mockActive, onOpenBadges, onOpenSettings }: Props) {
+export function Header({ machines, states, level, streak, readiness, badgesEarned, onOpenGlossary, onOpenLabs, onOpenReview, onOpenWeak, onOpenMock, dueCount, mockActive, onOpenBadges, onOpenSettings, loading }: Props) {
   return (
     <header className="mb-5">
       <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brass-400">DP-600 · Fabric Analytics Engineer</p>
@@ -122,7 +137,7 @@ export function Header({ machines, states, level, streak, readiness, badgesEarne
         Weave raw data threads into finished analytics fabric. Each machine is an exam skill. Open a machine's notes, pass its
         start-up check, then pass its inspection to certify it and unlock the machines it feeds. PL-300 carryover machines can be placed out with a 5/5 placement check.
       </p>
-      <Stats level={level} streak={streak} readiness={readiness} badgesEarned={badgesEarned} onOpenBadges={onOpenBadges} />
+      <Stats level={level} streak={streak} readiness={readiness} badgesEarned={badgesEarned} onOpenBadges={onOpenBadges} loading={loading} />
       <ul className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
         {floors.map((floor) => {
           const onFloor = machines.filter((m) => m.floor === floor.id)

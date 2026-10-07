@@ -41,12 +41,12 @@ export function MachineNode({ machine, state, x, y, selected, placed = false, ma
         <StateIcon state={state} />
         <span className="min-w-0">
           <span className="block truncate font-display text-[15px] font-semibold leading-tight">{machine.themedName}</span>
-          <span className="line-clamp-2 text-[11px] leading-snug opacity-80">{machine.skillName}</span>
+          <span className="line-clamp-2 text-[11px] leading-snug">{machine.skillName}</span>
         </span>
       </span>
       <span className="mt-auto flex flex-wrap gap-1">
         {placed && <span className="rounded bg-weld px-1.5 py-px text-[10px] font-semibold uppercase text-mill-950">Placed</span>}
-        {maintenance && <span className="rounded bg-madder px-1.5 py-px text-[10px] font-semibold uppercase text-mill-50">Needs maintenance</span>}
+        {maintenance && <span className="rounded bg-madder-deep px-1.5 py-px text-[10px] font-semibold uppercase text-mill-50">Needs maintenance</span>}
         <Tags machine={machine} />
       </span>
     </button>

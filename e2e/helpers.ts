@@ -1,3 +1,4 @@
+import AxeBuilder from '@axe-core/playwright'
 import { expect, type Locator, type Page } from '@playwright/test'
 import { allQuestions } from '../src/content/questions/index'
 
@@ -106,4 +107,15 @@ export async function backToMill(dialog: Locator) {
 export async function expectNoSideScroll(page: Page) {
   const { scroll, width } = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, width: window.innerWidth }))
   expect(scroll).toBeLessThanOrEqual(width)
+}
+
+/**
+ * Runs axe on the current screen and fails on any serious or critical issue
+ * (WCAG 2.x A and AA rules). `label` names the screen in the failure message.
+ */
+export async function expectAccessible(page: Page, label: string) {
+  const { violations } = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze()
+  const serious = violations.filter((v) => v.impact === 'serious' || v.impact === 'critical')
+  const summary = serious.map((v) => `${v.impact} ${v.id}: ${v.help} (${v.nodes.length} node(s): ${v.nodes.slice(0, 3).map((n) => n.target.join(' ')).join(' | ')})`)
+  expect(summary, `axe on ${label}`).toEqual([])
 }

@@ -1,5 +1,21 @@
 @import 'tailwindcss';
 
+/* Self-hosted fonts (Latin subset; SIL Open Font License, via @fontsource-variable), so the app works offline and the CSP needs no font host. */
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('../node_modules/@fontsource-variable/fraunces/files/fraunces-latin-opsz-normal.woff2') format('woff2-variations');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2') format('woff2-variations');
+}
+
 @theme {
   --font-display: 'Fraunces', ui-serif, Georgia, serif;
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
@@ -9,7 +25,7 @@
   --color-mill-800: #2d241c;
   --color-mill-700: #3d3127;
   --color-mill-600: #574738;
-  --color-mill-400: #9c8a76;
+  --color-mill-400: #ae9b86;
   --color-mill-200: #e2d6c6;
   --color-mill-50: #faf5ee;
 
@@ -17,7 +33,9 @@
   --color-brass-400: #dcaa52;
   --color-brass-300: #ecc77e;
   --color-indigo-thread: #6f86d6;
-  --color-madder: #c4573f;
+  --color-madder: #e2735a;
+  /* Darker madder for filled badges and buttons with light text (meets WCAG AA contrast). */
+  --color-madder-deep: #9a3c29;
   --color-weld: #e7c54d;
 
   --animate-spin-slow: spin 6s linear infinite;

@@ -10,6 +10,8 @@ const port = 5179
 
 export default defineConfig({
   testDir: './e2e',
+  // Production and live checks have their own config (playwright.prod.config.ts).
+  testIgnore: ['prod/**'],
   fullyParallel: false,
   workers: 1,
   reporter: [['list']],

@@ -229,3 +229,11 @@ describe('save system', () => {
     expect(writeSave(newSave(now), null)).toBe(false)
   })
 })
+
+describe('case question id pattern', () => {
+  it('matches every case-study question and no other question', async () => {
+    const { allQuestions } = await import('../content/questions')
+    const { CASE_QUESTION_ID } = await import('./migrations')
+    for (const q of allQuestions) expect(CASE_QUESTION_ID.test(q.id)).toBe(!!q.caseStudyId)
+  })
+})

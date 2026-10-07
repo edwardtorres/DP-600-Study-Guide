@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 import { allQuestions } from '../src/content/questions/index'
 import { DAILY_CAP } from '../src/game/review'
 import { SAVE_KEY, newSave, type AnswerEntry, type Save } from '../src/save/schema'
-import { SEED, answerShown, expectNoSideScroll, machineNode } from './helpers'
+import { SEED, answerShown, expectNoSideScroll, machineNode, expectAccessible } from './helpers'
 
 const fo = allQuestions.filter((q) => q.machineId === 'founding-charter')
 const others = allQuestions.filter((q) => !q.caseStudyId && q.bulletIds.length > 0)
@@ -53,6 +53,7 @@ test('daily review: due questions under the daily cap, logged as r; a certified 
     await expect(dlg.getByTestId('review-summary')).toContainText(`Reviewed today: 15 of ${DAILY_CAP}`)
     await expect(dlg.getByTestId('maintenance-list')).toContainText('Founding Charter')
     await expectNoSideScroll(page)
+    await expectAccessible(page, 'review-flow.spec.ts:55')
     if (process.env.PW_SHOTS) await page.screenshot({ path: `${process.env.PW_SHOTS}/${test.info().project.name}-review-page.png` })
     await dlg.getByRole('button', { name: 'Start review (5 questions)' }).tap()
   })
@@ -68,6 +69,7 @@ test('daily review: due questions under the daily cap, logged as r; a certified 
     await expect(dialog.getByRole('status')).toContainText('4 of 5 correct')
     await expect(dialog.getByRole('status')).toContainText('never certify')
     await expectNoSideScroll(page)
+    await expectAccessible(page, 'review-flow.spec.ts:70')
     if (process.env.PW_SHOTS) await page.screenshot({ path: `${process.env.PW_SHOTS}/${test.info().project.name}-review-result.png` })
     await dialog.getByRole('button', { name: 'Back to the mill' }).tap()
     const s = await stored(page)
