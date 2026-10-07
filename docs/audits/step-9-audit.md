@@ -189,6 +189,15 @@ Cross-Origin-Opener-Policy: same-origin
 - **`npm run e2e:prod`:** **10/10** (5 tests × 2 widths).
 - **`check:freshness`** (2026-10-07): passed, no cited page changed. **`check:content -- --live`:** matches (41 bullets).
 
+## CI runs (GitHub Actions, 2026-10-07)
+
+- **Deploy to Azure Static Web Apps:**
+  - **Run 1** (push of Part E): `verify` failed in the lab flow. This was the Chrome crash described above, and the failure blocked the deploy as intended.
+  - **Run 2** (push of the fix): `verify` passed every step (check, build, e2e, e2e:prod). The `deploy` job ran its "No deployment token yet" notice and skipped the upload, as designed until the secret exists.
+- **Content freshness (manual):**
+  - **Run 1:** hit 429 from Learn, warned, and opened no issue.
+  - **Run 2** (after the backoff fix): "Checked 243 cited pages … Freshness check passed: no cited page changed since it was verified." Also "Live page matches the recorded outline (41 bullets)." No issue was opened, which is correct.
+
 ## Not done yet / needs your accounts
 
 - **Account steps:** Azure resource, GitHub secret, Cloudflare CNAME, custom domain (checklist in the chat audit and in `DEPLOY.md`).
